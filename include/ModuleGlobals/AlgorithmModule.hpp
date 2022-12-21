@@ -1,5 +1,15 @@
 #include "main.h"
 
+
+class MotionAlgorithms{
+    private:
+        bool init_MotionAlg;
+    public:
+        void TurnToPoint(int targetX, int targetY);
+        void MTRP(double tx, double ty, double targetHeading, double GlobalHeading);
+        void overRideCoordinatePos(double new_gx, double new_gy);
+};
+
 class AngleWrap_C{
     private:
         bool init;

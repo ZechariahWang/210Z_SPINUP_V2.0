@@ -1,15 +1,6 @@
 #include "main.h"
 // Classes for the main autonomous functions, as well as some algorithms. Designated algorithms are found in the algorithm framework
 
-class MotionAlgorithms{
-    private:
-        bool init_MotionAlg;
-    public:
-        void TurnToPoint(int targetX, int targetY);
-        void MTRP(double tx, double ty, double targetHeading, double GlobalHeading);
-        void overRideCoordinatePos(double new_gx, double new_gy);
-};
-
 namespace utility
 {
     int sgn(double num);

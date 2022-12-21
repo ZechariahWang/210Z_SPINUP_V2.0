@@ -1,6 +1,9 @@
 #include "main.h"
 
+//////////////////////
 // MAIN ROBOT GLOBALS
+//////////////////////
+
 pros::Motor DriveFrontLeft(17, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_COUNTS);
 pros::Motor DriveFrontRight(16, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS);
 pros::Motor DriveBackLeft(12, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_COUNTS);
@@ -34,8 +37,10 @@ pros::Vision vision_sensor(3);
 pros::ADIDigitalIn AutonSwitchForward('t');
 pros::ADIDigitalIn AutonSwitchBackward('z');
 
-
+////////////////////////////
 // PROGRAMMING ROBOT GLOBALS
+////////////////////////////
+
 // pros::Motor DriveFrontLeft(11, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_COUNTS);
 // pros::Motor DriveFrontRight(20, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_COUNTS);
 // pros::Motor DriveBackLeft(3, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_COUNTS);
@@ -68,5 +73,3 @@ pros::ADIDigitalIn AutonSwitchBackward('z');
 // // Switches
 // pros::ADIDigitalIn AutonSwitchForward('a');
 // pros::ADIDigitalIn AutonSwitchBackward('b');
-
-//sdsd
