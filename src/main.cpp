@@ -174,10 +174,29 @@ void autonomous(){  // Autonomous function control
 	FinalizeAuton Init_Process; // Init framework class
 	odom odometry;
 	TranslationPID mov;
+	RotationPID rot;
+	CurvePID cur;
 	odometry.Odometry();
 	Auton_Framework.overRideCoordinatePos(0, 0);
-	mov.set_dt_constants(3, 2.3, 600); // Parameters are : Wheel diameter, gear ratio, motor cartridge type
+	mov.set_dt_constants(2, 1, 300); // Parameters are : Wheel diameter, gear ratio, motor cartridge type
 	imu_sensor.set_rotation(0);
+
+	// mov.set_t_constants(0.45, 0, 5, 1.5);
+	// mov.set_translation_pid(24, 90);
+
+	// mov.set_t_constants(0.45, 0, 5, 1.5);
+	// mov.set_translation_pid(-24, 90);
+
+	// mov.set_t_constants(0.45, 0, 5, 1.5);
+	// mov.set_translation_pid(24, 90);
+
+
+	// cur.set_c_constants(3, 0.003, 35);
+	// cur.set_curve_pid(90, 90, 0.7);
+
+	// cur.set_c_constants(3, 0.003, 35);
+	// cur.set_curve_pid(0, 90, 0.7);
+
 
 }
 
@@ -196,6 +215,8 @@ void opcontrol(){ // Driver control function
 		mov.power_shooter(); // Shooter control OVERRIDE 
 		mov.set_motor_type();
 		mov.init_expansion();
+
+		odometry.Odometry();
 
 		data.DisplayData(); // Display robot stats and info
 		pros::delay(delayAmount); // Dont hog CPU ;)

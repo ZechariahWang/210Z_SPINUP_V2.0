@@ -6,6 +6,22 @@
 // Class init
 TranslationPID mov_t;
 RotationPID rot_r;
+CurvePID cur_c;
+
+TranslationPID::TranslationPID(){
+  mov_t.t_tol = 10;
+  mov_t.t_error_thresh = 100;
+}
+
+RotationPID::RotationPID(){
+  rot_r.r_tol = 20;
+  rot_r.r_error_thresh = 3;
+}
+
+CurvePID::CurvePID(){
+  cur_c.c_tol = 20;
+  cur_c.c_error_thresh = 3;
+}
 
 void TranslationPID::set_dt_constants(double n_wheelDiameter, double n_gearRatio, double n_motorCartridge){
   mov_t.wheelDiameter = n_wheelDiameter;
@@ -19,7 +35,6 @@ void TranslationPID::reset_t_alterables(){
   mov_t.t_error = 0;
   mov_t.t_prev_error = 0;
   mov_t.t_iterator = 0;
-  mov_t.t_error_thresh = 0;
   mov_t.t_failsafe = 0;
 }
 
@@ -29,8 +44,17 @@ void RotationPID::reset_r_alterables(){
   rot_r.r_error = 0;
   rot_r.r_prev_error = 0;
   rot_r.r_iterator = 0;
-  rot_r.r_error_thresh = 0;
   rot_r.r_failsafe = 0;
+}
+
+void CurvePID::reset_c_alterables(){
+  cur_c.c_derivative = 0;
+  cur_c.c_integral = 0;
+  cur_c.c_error = 0;
+  cur_c.c_prev_error = 0;
+  cur_c.c_iterator = 0;
+  cur_c.c_failsafe = 0;
+  cur_c.c_rightTurn = false;
 }
 
 void TranslationPID::set_t_constants(double kp, double ki, double kd, double r_kp){
@@ -44,6 +68,12 @@ void RotationPID::set_r_constants(double kp, double ki, double kd){
   rot_r.r_kp = kp;
   rot_r.r_ki = ki;
   rot_r.r_kd = kd;
+}
+
+void CurvePID::set_c_constants(double kp, double ki, double kd){
+  cur_c.c_kp = kp;
+  cur_c.c_ki = ki;
+  cur_c.c_kd = kd;
 }
 
 double TranslationPID::find_min_angle(int targetHeading, int currentrobotHeading){
@@ -66,6 +96,7 @@ double TranslationPID::compute_t(double current, double target){
 
   double output = (mov_t.t_kp * mov_t.t_error) + (mov_t.t_ki * mov_t.t_ki) + (mov_t.t_kd * mov_t.t_kd);
   if (output * (12000.0 / 127) > mov_t.t_maxSpeed * (12000.0 / 127)) output = mov_t.t_maxSpeed;
+  if (output * (12000.0 / 127) < -mov_t.t_maxSpeed * (12000.0 / 127)) output = -mov_t.t_maxSpeed;
   mov_t.t_prev_error = mov_t.t_error;
   return output;
 }
@@ -80,9 +111,27 @@ double RotationPID::compute_r(double current, double target){
     rot_r.r_integral = 0;
   }
 
-  double output = (rot_r.r_kp * rot_r.r_error) + (rot_r.r_ki * rot_r.r_ki) + (rot_r.r_kd * rot_r.r_kd);
-  if (output * (12000.0 / 127) > rot_r.r_maxSpeed * (12000.0 / 127)) output = rot_r.r_maxSpeed;
+  double output = (rot_r.r_kp * rot_r.r_error) + (rot_r.r_integral * rot_r.r_ki) + (rot_r.r_derivative * rot_r.r_kd);
+  if (output * (12000.0 / 127) >= rot_r.r_maxSpeed * (12000.0 / 127)) { output = rot_r.r_maxSpeed; }
+  if (output * (12000.0 / 127) <= -rot_r.r_maxSpeed * (12000.0 / 127)) { output = -rot_r.r_maxSpeed; }
   rot_r.r_prev_error = rot_r.r_error;
+  return output;
+}
+
+double CurvePID::compute_c(double current, double target){
+  cur_c.c_error = target - current;
+  cur_c.c_derivative = cur_c.c_error - cur_c.c_prev_error;
+  if (cur_c.c_ki != 0){
+    cur_c.c_integral += cur_c.c_error;
+  }
+  if (utility::sgn(cur_c.c_error) !=  utility::sgn(cur_c.c_prev_error)){
+    cur_c.c_integral = 0;
+  }
+  double output = (cur_c.c_kp * cur_c.c_error) + (cur_c.c_integral * cur_c.c_ki) + (cur_c.c_derivative * cur_c.c_kd);
+
+  if (output * (12000.0 / 127) >= cur_c.c_maxSpeed * (12000.0 / 127)) { output = cur_c.c_maxSpeed; }
+  if (output * (12000.0 / 127) <= -cur_c.c_maxSpeed * (12000.0 / 127)) { output = -cur_c.c_maxSpeed; }
+  cur_c.c_prev_error = cur_c.c_error;
   return output;
 }
 
@@ -96,15 +145,17 @@ void TranslationPID::set_translation_pid(double target, double maxSpeed){
   mov_t.circumfrance = mov_t.wheelDiameter * M_PI;
   mov_t.ticks_per_rev = (50.0 * (3600.0 / mov_t.cartridge) * mov_t.ratio);
   mov_t.ticks_per_inches = (mov_t.ticks_per_rev / mov_t.circumfrance);
+  target *= mov_t.ticks_per_inches;
   while (true){
     double currentPos = (DriveFrontLeft.get_position() + DriveFrontRight.get_position()) / 2;
     double vol = mov_t.compute_t(currentPos, target);
     double headingAssist = mov_t.find_min_angle(TARGET_THETA, ImuMon()) * mov_t.t_h_kp;
-    cd++; if (cd <= 10){ utility::leftvreq(0); utility::rightvreq(0); continue;}
+    cd++; if (cd <= 10){ utility::leftvoltagereq(0); utility::rightvoltagereq(0); continue;}
+    std::cout << mov_t.t_error << std::endl;
 
-    utility::leftvreq(vol * (12000.0 / 127) + headingAssist);
-    utility::rightvreq(vol * (12000.0 / 127) - headingAssist);
-    if (fabs(mov_t.t_error) < mov_t.t_error_thresh) mov_t.t_iterator++;
+    utility::leftvoltagereq(vol * (12000.0 / 127) + headingAssist);
+    utility::rightvoltagereq(vol * (12000.0 / 127) - headingAssist);
+    if (fabs(mov_t.t_error) < mov_t.t_error_thresh){ mov_t.t_iterator++; } else { mov_t.t_iterator = 0;}
     if (fabs(mov_t.t_iterator) > mov_t.t_tol){
       utility::stop();
       break;
@@ -118,27 +169,61 @@ void TranslationPID::set_translation_pid(double target, double maxSpeed){
   }
 }
 
+int time = 0;
 void RotationPID::set_rotation_pid(double t_theta, double maxSpeed){
   utility::fullreset(0, false);
   rot_r.reset_r_alterables();
+  rot_r.r_maxSpeed = maxSpeed;
   while (true){
     double currentPos = imu_sensor.get_rotation();
     double vol = rot_r.compute_r(currentPos, t_theta);
 
-    utility::leftvreq(vol);
-    utility::rightvreq(-vol);
-    if (fabs(rot_r.r_error) < rot_r.r_error_thresh) rot_r.r_iterator++;
-    if (fabs(rot_r.r_iterator) > rot_r.r_tol){
+    utility::leftvoltagereq(vol * (12000.0 / 127));
+    utility::rightvoltagereq(-vol * (12000.0 / 127));
+    if (fabs(rot_r.r_error) < rot_r.r_error_thresh) { rot_r.r_iterator++; } else { rot_r.r_iterator = 0;}
+    if (fabs(rot_r.r_iterator) >= rot_r.r_tol){
       utility::stop();
       break;
     }
-    if (fabs(rot_r.r_error - rot_r.r_prev_error) < 0.3) rot_r.r_failsafe++;
-    if (rot_r.r_failsafe > 1000){
+    if (fabs(rot_r.r_error - rot_r.r_prev_error) < 0.3) {rot_r.r_failsafe++;}
+    if (rot_r.r_failsafe > 100000){
       utility::stop();
       break;
     }
+    pros::delay(10);
   }
-  pros::delay(10);
+}
+
+void CurvePID::set_curve_pid(double t_theta, double maxSpeed, double curveDamper){
+  utility::fullreset(0, false);
+  cur_c.reset_c_alterables();
+  cur_c.c_maxSpeed = maxSpeed;
+  cur_c.c_rightTurn = false;
+  while (true){
+    double currentPos = imu_sensor.get_rotation();
+    double vol = cur_c.compute_c(currentPos, t_theta);
+
+    if (cur_c.c_error >= 0){ c_rightTurn = true; } else { c_rightTurn = false;}
+    if (c_rightTurn){
+      utility::leftvoltagereq(vol * (12000.0 / 127));
+      utility::rightvoltagereq(vol * (12000.0 / 127) * curveDamper);
+    }
+    else if (c_rightTurn == false){
+      utility::leftvoltagereq(fabs(vol) * (12000.0 / 127) * curveDamper);
+      utility::rightvoltagereq(fabs(vol) * (12000.0 / 127));
+    }
+    if (fabs(cur_c.c_error) < cur_c.c_error_thresh) { cur_c.c_iterator++; } else { cur_c.c_iterator = 0;}
+    if (fabs(cur_c.c_iterator) >= cur_c.c_tol){
+      utility::stop();
+      break;
+    }
+    if (fabs(cur_c.c_error - cur_c.c_prev_error) < 0.3) {cur_c.c_failsafe++;}
+    if (cur_c.c_failsafe > 100000){
+      utility::stop();
+      break;
+    }
+    pros::delay(10);
+  }
 }
 
 
