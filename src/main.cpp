@@ -176,6 +176,7 @@ void autonomous(){  // Autonomous function control
 	TranslationPID mov;
 	RotationPID rot;
 	CurvePID cur;
+	ArcPID arc;
 	odometry.Odometry();
 	Auton_Framework.overRideCoordinatePos(0, 0);
 	mov.set_dt_constants(2, 1, 300); // Parameters are : Wheel diameter, gear ratio, motor cartridge type
@@ -193,6 +194,11 @@ void autonomous(){  // Autonomous function control
 
 	// cur.set_c_constants(3, 0.003, 35);
 	// cur.set_curve_pid(90, 90, 0.7);
+
+	// arc.set_a_constants(3, 0.003, 35);
+	// arc.set_arc_pid(20, 20, 90, 0.5);
+
+	Auton_Framework.move_to_reference_pose(20, 20, 45);
 
 	// cur.set_c_constants(3, 0.003, 35);
 	// cur.set_curve_pid(0, 90, 0.7);

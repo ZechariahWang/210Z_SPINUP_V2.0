@@ -104,6 +104,6 @@ class ArcPID{
         ArcPID();
         void reset_a_alterables();
         void set_a_constants(double kp, double ki, double kd);
-        double compute_a(double current, double target);
+        double compute_a(double tx, double ty);
         void set_arc_pid(double t_x, double t_y, double maxSpeed, double arcDamper);
 };

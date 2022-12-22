@@ -4,6 +4,8 @@
 #include "iostream"
 #include "algorithm"
 
+MotionAlgorithms mtp;
+
 // Find min angle between target heading and current heading
 int find_min_angle(int targetHeading, int currentrobotHeading){
   double turnAngle = targetHeading - currentrobotHeading;
@@ -16,81 +18,50 @@ int find_min_angle(int targetHeading, int currentrobotHeading){
 int radian_to_degrees(double angle) { return angle * 180 / M_PI; }
 int degrees_to_radians(double angle){ return angle * M_PI / 180; }
 
-double targetTolerance = 5;
-double finalLocTolerance = 5;
-double kp_lin = 13;
-double kp_turn = 3.2;
-
 // Move to reference pose algorithm
-void MotionAlgorithms::MTRP(double tx, double ty, double targetHeading, double GlobalHeading){
+void MotionAlgorithms::move_to_reference_pose(double targetX, double targetY, double targetHeading){
   MotionAlgorithms Auton_Framework;
   FinalizeAuton data;
   odom odometry;
   while (true){
     odometry.Odometry();
     data.DisplayData();
-
-    double currentX = gx;
-    double currentY = gy;
-    double targetX = tx;
-    double targetY = ty;
-
     double abstargetAngle = atan2f(targetX - gx, targetY - gy) * 180 / M_PI;
+    if (abstargetAngle < 0){ abstargetAngle += 360; }
 
-    if (abstargetAngle < 0){
-      abstargetAngle += 360;
-    }
+    mtp.distance = sqrt(pow(targetX - gx, 2) + pow(targetY - gy, 2));
+    mtp.alpha = find_min_angle(abstargetAngle, targetHeading);
+    mtp.t_error = find_min_angle(abstargetAngle, ImuMon());
+    mtp.beta = atan(1/ mtp.distance) * 180 / M_PI;
 
-    double D = sqrt(pow(targetX - currentX, 2) + pow(targetY - currentY, 2));
-    double alpha = find_min_angle(abstargetAngle, targetHeading);
-    double errorTerm1 = find_min_angle(abstargetAngle, ImuMon());
+    if (alpha < 0){ beta = -beta;}
+    if (fabs(alpha) < fabs(beta)){ mtp.r_error = mtp.t_error + alpha; }
+    else{ mtp.r_error = mtp.t_error + beta; }
 
-    double beta = atan(1/ D) * 180 / M_PI;
-    double turn_Error;
+    if (mtp.r_error > 180 || mtp.r_error < -180){ mtp.r_error = mtp.r_error - (utility::sgn(mtp.r_error) * 360); }
 
-    if (alpha < 0){
-      beta = -beta;
-    }
-
-    if (fabs(alpha) < fabs(beta)){
-      turn_Error = errorTerm1 + alpha;
-    }
-    else{
-      turn_Error = errorTerm1 + beta;
-    }
-
-    if (turn_Error > 180 || turn_Error < -180){
-      turn_Error = turn_Error - (utility::sgn(turn_Error) * 360);
-    }
-
-    int linearVel = kp_lin * D;
-    int turnVel = kp_turn * turn_Error;
-
+    double linearVel = mtp.t_kp * mtp.distance;
+    double turnVel = mtp.r_kp * mtp.r_error;
     double closetoTarget = false;
 
-    if (D < targetTolerance){
-      closetoTarget = true;
-    }
+    if (mtp.distance < mtp.target_tol){ closetoTarget = true;}
     if (closetoTarget){
-      linearVel = kp_lin * D * utility::sgn(cos(turn_Error * M_PI / 180));
-      turn_Error = find_min_angle(targetHeading, ImuMon());
-      turnVel = kp_turn * atan(tan(turn_Error * M_PI / 180)) * 180 / M_PI;
+      linearVel = mtp.t_kp * mtp.distance * utility::sgn(cos(mtp.r_error * M_PI / 180));
+      mtp.r_error = find_min_angle(targetHeading, ImuMon());
+      turnVel = mtp.r_kp * atan(tan(mtp.r_error * M_PI / 180)) * 180 / M_PI;
     }
+    if (fabs(linearVel) > (350 - fabs(turnVel))){ linearVel = 350 - fabs(turnVel); }
 
-    if (abs(linearVel) > (350 - abs(turnVel))){
-      linearVel = 350 - abs(turnVel);
-    }
+    int left_volage = linearVel + turnVel;
+    int right_voltage = linearVel - turnVel;
+    int linError_f = sqrt(pow(targetX - gx, 2) + pow(targetY - gy, 2));
 
-    int leftVel_f = linearVel + turnVel;
-    int rightVel_f = linearVel - turnVel;
-    int linError_f = sqrt(pow(tx - gx, 2) + pow(ty - gy, 2));
+    utility::leftvoltagereq(left_volage * (12000.0) / 127);
+    utility::rightvoltagereq(left_volage * (12000.0 / 127));
 
-    utility::leftvelreq(leftVel_f);
-    utility::rightvelreq(rightVel_f);
-
-    if ((fabs(targetX - gx) < finalLocTolerance) && (fabs(targetY - gy) < finalLocTolerance)){
-      utility::leftvelreq(0);
-      utility::rightvelreq(0);
+    if ((fabs(targetX - gx) < mtp.target_final_tol) && (fabs(targetY - gy) < mtp.target_final_tol)){
+      utility::leftvoltagereq(0);
+      utility::rightvoltagereq(0);
       break;
     }
     pros::delay(10);

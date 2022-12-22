@@ -20,7 +20,7 @@ void PurePursuitTestPath(){
     while (true){
       data.DisplayData();
       if (sqrt(pow(finalX - gx, 2) + pow(finalY - gy, 2)) <= 20){
-        curveHandler.MTRP(finalX, finalY, 0, 0);
+        curveHandler.move_to_reference_pose(finalX, finalY, 0);
         break;
       }
       FollowCurve(Path, 0);

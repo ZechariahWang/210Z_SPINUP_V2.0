@@ -5,8 +5,19 @@ class MotionAlgorithms{
     private:
         bool init_MotionAlg;
     public:
+        double target_tol = 10;
+        double target_final_tol = 5;
+        double t_kp = 13;
+        double r_kp = 3;
+
+        double distance;
+        double alpha;
+        double beta;
+        double t_error;
+        double r_error;
+
         void TurnToPoint(int targetX, int targetY);
-        void MTRP(double tx, double ty, double targetHeading, double GlobalHeading);
+        void move_to_reference_pose(double tx, double ty, double targetHeading);
         void overRideCoordinatePos(double new_gx, double new_gy);
 };
 

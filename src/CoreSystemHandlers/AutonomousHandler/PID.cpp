@@ -7,28 +7,36 @@
 TranslationPID mov_t;
 RotationPID rot_r;
 CurvePID cur_c;
+ArcPID arc_a;
 
-TranslationPID::TranslationPID(){
+TranslationPID::TranslationPID(){ // Translation PID Constructor
   mov_t.t_tol = 10;
   mov_t.t_error_thresh = 100;
 }
 
-RotationPID::RotationPID(){
+RotationPID::RotationPID(){ // Rotation PID Constructor
   rot_r.r_tol = 20;
   rot_r.r_error_thresh = 3;
 }
 
-CurvePID::CurvePID(){
+CurvePID::CurvePID(){ // Curve PID Constructor
   cur_c.c_tol = 20;
   cur_c.c_error_thresh = 3;
 }
 
+ArcPID::ArcPID(){ // Arc PID Constructor
+  arc_a.a_tol = 20;
+  arc_a.a_error_thresh = 10;
+}
+
+// Set the drivetrain constants (wheel size, motor cartridge, etc)
 void TranslationPID::set_dt_constants(double n_wheelDiameter, double n_gearRatio, double n_motorCartridge){
   mov_t.wheelDiameter = n_wheelDiameter;
   mov_t.ratio = n_gearRatio;
   mov_t.cartridge = n_motorCartridge;
 }
 
+// Reset core translation variables
 void TranslationPID::reset_t_alterables(){
   mov_t.t_derivative = 0;
   mov_t.t_integral = 0;
@@ -38,6 +46,7 @@ void TranslationPID::reset_t_alterables(){
   mov_t.t_failsafe = 0;
 }
 
+// Reset core rotation variables
 void RotationPID::reset_r_alterables(){
   rot_r.r_derivative = 0;
   rot_r.r_integral = 0;
@@ -47,6 +56,7 @@ void RotationPID::reset_r_alterables(){
   rot_r.r_failsafe = 0;
 }
 
+// Reset core curve variables
 void CurvePID::reset_c_alterables(){
   cur_c.c_derivative = 0;
   cur_c.c_integral = 0;
@@ -57,6 +67,18 @@ void CurvePID::reset_c_alterables(){
   cur_c.c_rightTurn = false;
 }
 
+// Reset core arc variables
+void ArcPID::reset_a_alterables(){
+  arc_a.a_derivative = 0;
+  arc_a.a_integral = 0;
+  arc_a.a_error = 0;
+  arc_a.a_prev_error = 0;
+  arc_a.a_iterator = 0;
+  arc_a.a_failsafe = 0;
+  arc_a.a_rightTurn = false;
+}
+
+// Set translation PID constants
 void TranslationPID::set_t_constants(double kp, double ki, double kd, double r_kp){
   mov_t.t_kp = kp;
   mov_t.t_ki = ki;
@@ -64,18 +86,28 @@ void TranslationPID::set_t_constants(double kp, double ki, double kd, double r_k
   mov_t.t_h_kp = r_kp;
 }
 
+// Set rotation PID constants
 void RotationPID::set_r_constants(double kp, double ki, double kd){
   rot_r.r_kp = kp;
   rot_r.r_ki = ki;
   rot_r.r_kd = kd;
 }
 
+// Set curve PID constants
 void CurvePID::set_c_constants(double kp, double ki, double kd){
   cur_c.c_kp = kp;
   cur_c.c_ki = ki;
   cur_c.c_kd = kd;
 }
 
+// Set arc PID constants
+void ArcPID::set_a_constants(double kp, double ki, double kd){
+  arc_a.a_kp = kp;
+  arc_a.a_ki = ki;
+  arc_a.a_kd = kd;
+}
+
+// Find min angle between target angle and currrent angle using ANGLE WRAPPED SYSTEM
 double TranslationPID::find_min_angle(int targetHeading, int currentrobotHeading){
   double turnAngle = targetHeading - currentrobotHeading;
   if (turnAngle > 180 || turnAngle < -180){
@@ -84,6 +116,7 @@ double TranslationPID::find_min_angle(int targetHeading, int currentrobotHeading
   return turnAngle;
 }
 
+// Compute translation logic
 double TranslationPID::compute_t(double current, double target){
   mov_t.t_error = target - current;
   mov_t.t_derivative = mov_t.t_error - mov_t.t_prev_error;
@@ -101,6 +134,7 @@ double TranslationPID::compute_t(double current, double target){
   return output;
 }
 
+// Compute rotation logic
 double RotationPID::compute_r(double current, double target){
   rot_r.r_error = target - current;
   rot_r.r_derivative = rot_r.r_error - rot_r.r_prev_error;
@@ -118,6 +152,7 @@ double RotationPID::compute_r(double current, double target){
   return output;
 }
 
+// Compute curve logic
 double CurvePID::compute_c(double current, double target){
   cur_c.c_error = target - current;
   cur_c.c_derivative = cur_c.c_error - cur_c.c_prev_error;
@@ -135,6 +170,25 @@ double CurvePID::compute_c(double current, double target){
   return output;
 }
 
+// Compute arc logic
+double ArcPID::compute_a(double tx, double ty){
+  arc_a.a_error = sqrt(pow(tx - gx, 2) + pow(ty - gy, 2));
+  arc_a.a_derivative = arc_a.a_error - arc_a.a_prev_error;
+  if (arc_a.a_ki != 0){
+    arc_a.a_integral += arc_a.a_error;
+  }
+  if (utility::sgn(arc_a.a_error) !=  utility::sgn(arc_a.a_prev_error)){
+    arc_a.a_integral = 0;
+  }
+  double output = (arc_a.a_kp * arc_a.a_error) + (arc_a.a_integral * arc_a.a_ki) + (arc_a.a_derivative * arc_a.a_kd);
+
+  if (output * (12000.0 / 127) >= arc_a.a_maxSpeed * (12000.0 / 127)) { output = arc_a.a_maxSpeed; }
+  if (output * (12000.0 / 127) <= -arc_a.a_maxSpeed * (12000.0 / 127)) { output = -arc_a.a_maxSpeed; }
+  arc_a.a_prev_error = arc_a.a_error;
+  return output;
+}
+
+// Translation PID Driver
 void TranslationPID::set_translation_pid(double target, double maxSpeed){
   utility::fullreset(0, false);
   mov_t.reset_t_alterables();
@@ -169,7 +223,7 @@ void TranslationPID::set_translation_pid(double target, double maxSpeed){
   }
 }
 
-int time = 0;
+// Rotation PID Driver
 void RotationPID::set_rotation_pid(double t_theta, double maxSpeed){
   utility::fullreset(0, false);
   rot_r.reset_r_alterables();
@@ -194,6 +248,7 @@ void RotationPID::set_rotation_pid(double t_theta, double maxSpeed){
   }
 }
 
+// Curve PID Driver
 void CurvePID::set_curve_pid(double t_theta, double maxSpeed, double curveDamper){
   utility::fullreset(0, false);
   cur_c.reset_c_alterables();
@@ -203,7 +258,7 @@ void CurvePID::set_curve_pid(double t_theta, double maxSpeed, double curveDamper
     double currentPos = imu_sensor.get_rotation();
     double vol = cur_c.compute_c(currentPos, t_theta);
 
-    if (cur_c.c_error >= 0){ c_rightTurn = true; } else { c_rightTurn = false;}
+    if (cur_c.c_error >= 0){ cur_c.c_rightTurn = true; } else { cur_c.c_rightTurn = false;}
     if (c_rightTurn){
       utility::leftvoltagereq(vol * (12000.0 / 127));
       utility::rightvoltagereq(vol * (12000.0 / 127) * curveDamper);
@@ -219,6 +274,43 @@ void CurvePID::set_curve_pid(double t_theta, double maxSpeed, double curveDamper
     }
     if (fabs(cur_c.c_error - cur_c.c_prev_error) < 0.3) {cur_c.c_failsafe++;}
     if (cur_c.c_failsafe > 100000){
+      utility::stop();
+      break;
+    }
+    pros::delay(10);
+  }
+}
+
+// Arc PID Driver
+void ArcPID::set_arc_pid(double t_x, double t_y, double maxSpeed, double arcDamper){
+  odom odometry;
+  FinalizeAuton data;
+  utility::fullreset(0, false);
+  arc_a.reset_a_alterables();
+  arc_a.a_maxSpeed = maxSpeed;
+  arc_a.a_rightTurn = false;
+  while (true){
+    odometry.Odometry();
+    data.DisplayData();
+    double currentPos = imu_sensor.get_rotation();
+    double vol = arc_a.compute_a(t_x, t_y);
+
+    if (arc_a.a_error >= 0){ arc_a.a_rightTurn = true; } else { arc_a.a_rightTurn = false;}
+    if (arc_a.a_rightTurn){
+      utility::leftvoltagereq(vol * (12000.0 / 127));
+      utility::rightvoltagereq(vol * (12000.0 / 127) * arcDamper);
+    }
+    else if (arc_a.a_rightTurn == false){
+      utility::leftvoltagereq(fabs(vol) * (12000.0 / 127) * arcDamper);
+      utility::rightvoltagereq(fabs(vol) * (12000.0 / 127));
+    }
+    if (fabs(arc_a.a_error) < arc_a.a_error_thresh) { arc_a.a_iterator++; } else { arc_a.a_iterator = 0;}
+    if (fabs(arc_a.a_iterator) >= arc_a.a_tol){
+      utility::stop();
+      break;
+    }
+    if (fabs(arc_a.a_error - arc_a.a_prev_error) < 0.3) {arc_a.a_failsafe++;}
+    if (arc_a.a_failsafe > 100000){
       utility::stop();
       break;
     }
