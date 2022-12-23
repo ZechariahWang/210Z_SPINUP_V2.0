@@ -7,7 +7,7 @@
 MotionAlgorithms mtp;
 
 // Find min angle between target heading and current heading
-int find_min_angle(int targetHeading, int currentrobotHeading){
+double find_min_angle(int targetHeading, int currentrobotHeading){
   double turnAngle = targetHeading - currentrobotHeading;
   if (turnAngle > 180 || turnAngle < -180){
     turnAngle = turnAngle - (utility::sgn(turnAngle) * 360);
@@ -66,6 +66,24 @@ void MotionAlgorithms::move_to_reference_pose(double targetX, double targetY, do
     }
     pros::delay(10);
   }
+}
+
+void MotionAlgorithms::swing_to_point(double tx, double ty, double swingDamper){
+    double currentPos = imu_sensor.get_rotation();
+    double targetAngle = atan2f(tx - gx, ty - gy) * 180 / M_PI;
+    if (targetAngle < 0) { targetAngle += 360; }
+    double vol = find_min_angle(targetAngle, ImuMon());
+
+    if (mtp.a_error >= 0){ mtp.a_rightTurn = true; } else { mtp.a_rightTurn = false;}
+    if (mtp.a_rightTurn){
+      utility::leftvoltagereq(vol * (12000.0 / 127));
+      utility::rightvoltagereq(vol * (12000.0 / 127) * swingDamper);
+    }
+    else if (mtp.a_rightTurn == false){
+      utility::leftvoltagereq(fabs(vol) * (12000.0 / 127) * swingDamper);
+      utility::rightvoltagereq(fabs(vol) * (12000.0 / 127));
+    }
+    pros::delay(10);
 }
 
 // Turn to target coordinate position

@@ -16,8 +16,23 @@ class MotionAlgorithms{
         double t_error;
         double r_error;
 
+        double a_kp;
+        double a_ki;
+        double a_kd;
+        double a_error;
+        double a_prev_error;
+        double a_integral;
+        double a_derivative;
+        double a_error_thresh = 3;
+        double a_iterator;
+        double a_tol = 10;
+        double a_failsafe;
+        double a_maxSpeed;
+        bool a_rightTurn;
+
         void TurnToPoint(int targetX, int targetY);
         void move_to_reference_pose(double tx, double ty, double targetHeading, double radius);
+        void swing_to_point(double tx, double ty, double swingDamper);
         void overRideCoordinatePos(double new_gx, double new_gy);
 };
 

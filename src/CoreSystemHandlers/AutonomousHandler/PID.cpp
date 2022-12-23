@@ -127,7 +127,7 @@ double TranslationPID::compute_t(double current, double target){
     mov_t.t_integral = 0;
   }
 
-  double output = (mov_t.t_kp * mov_t.t_error) + (mov_t.t_ki * mov_t.t_ki) + (mov_t.t_kd * mov_t.t_kd);
+  double output = (mov_t.t_kp * mov_t.t_error) + (mov_t.t_integral * mov_t.t_ki) + (mov_t.t_derivative * mov_t.t_kd);
   if (output * (12000.0 / 127) > mov_t.t_maxSpeed * (12000.0 / 127)) output = mov_t.t_maxSpeed;
   if (output * (12000.0 / 127) < -mov_t.t_maxSpeed * (12000.0 / 127)) output = -mov_t.t_maxSpeed;
   mov_t.t_prev_error = mov_t.t_error;
