@@ -17,7 +17,7 @@ class MotionAlgorithms{
         double r_error;
 
         void TurnToPoint(int targetX, int targetY);
-        void move_to_reference_pose(double tx, double ty, double targetHeading);
+        void move_to_reference_pose(double tx, double ty, double targetHeading, double radius);
         void overRideCoordinatePos(double new_gx, double new_gy);
 };
 

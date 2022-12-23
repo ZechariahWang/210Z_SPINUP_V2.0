@@ -4,6 +4,7 @@
 void PurePursuitTestPath(){
     MotionAlgorithms curveHandler;
     FinalizeAuton data;
+    odom odometry;
     std::vector<CurvePoint> Path;
 
     const double finalX = 40;
@@ -14,13 +15,14 @@ void PurePursuitTestPath(){
     CurvePoint EndPos(finalX, finalY, 0, 0, 10, 5, 1);
     Path.push_back(StartPos);
     Path.push_back(newPoint1); 
-    // Path.push_back(newPoint2);
+    Path.push_back(newPoint2);
     Path.push_back(EndPos);
 
     while (true){
       data.DisplayData();
+      odometry.Odometry();
       if (sqrt(pow(finalX - gx, 2) + pow(finalY - gy, 2)) <= 20){
-        curveHandler.move_to_reference_pose(finalX, finalY, 0);
+        curveHandler.move_to_reference_pose(finalX, finalY, 0, 5);
         break;
       }
       FollowCurve(Path, 0);

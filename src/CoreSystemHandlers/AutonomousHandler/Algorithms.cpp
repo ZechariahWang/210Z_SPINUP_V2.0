@@ -19,7 +19,7 @@ int radian_to_degrees(double angle) { return angle * 180 / M_PI; }
 int degrees_to_radians(double angle){ return angle * M_PI / 180; }
 
 // Move to reference pose algorithm
-void MotionAlgorithms::move_to_reference_pose(double targetX, double targetY, double targetHeading){
+void MotionAlgorithms::move_to_reference_pose(double targetX, double targetY, double targetHeading, double radius){
   MotionAlgorithms Auton_Framework;
   FinalizeAuton data;
   odom odometry;
@@ -32,7 +32,7 @@ void MotionAlgorithms::move_to_reference_pose(double targetX, double targetY, do
     mtp.distance = sqrt(pow(targetX - gx, 2) + pow(targetY - gy, 2));
     mtp.alpha = find_min_angle(abstargetAngle, targetHeading);
     mtp.t_error = find_min_angle(abstargetAngle, ImuMon());
-    mtp.beta = atan(1/ mtp.distance) * 180 / M_PI;
+    mtp.beta = atan(radius / mtp.distance) * 180 / M_PI;
 
     if (alpha < 0){ beta = -beta;}
     if (fabs(alpha) < fabs(beta)){ mtp.r_error = mtp.t_error + alpha; }

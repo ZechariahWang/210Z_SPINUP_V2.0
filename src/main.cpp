@@ -169,6 +169,7 @@ void disabled() {}
 void competition_initialize() {}
 //------------------------------\*
 
+// PID UNITS ARE IN INCHES
 void autonomous(){  // Autonomous function control
 	MotionAlgorithms Auton_Framework; // Auton framework class
 	FinalizeAuton Init_Process; // Init framework class
@@ -198,10 +199,7 @@ void autonomous(){  // Autonomous function control
 	// arc.set_a_constants(3, 0.003, 35);
 	// arc.set_arc_pid(20, 20, 90, 0.5);
 
-	Auton_Framework.move_to_reference_pose(20, 20, 45);
-
-	// cur.set_c_constants(3, 0.003, 35);
-	// cur.set_curve_pid(0, 90, 0.7);
+	Auton_Framework.move_to_reference_pose(20, 20, 45, 5);
 
 
 }

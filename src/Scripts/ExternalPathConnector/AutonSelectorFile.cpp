@@ -1,16 +1,8 @@
 #include "main.h"
 
-void Run_MTRP_Debug(){
-    Debug_MTRP();
-}
-
-void Run_PID_Debug(){
-    PID_Debug();
-}
-
-void StandardAuton(){
-	MotionAlgorithms Auton_Framework;
-}
+void Run_MTRP_Debug(){ Debug_MTRP(); }
+void Run_PID_Debug(){ PID_Debug(); }
+void StandardAuton(){}
 
 void SkillsPath(){
     // Skills function will go here
