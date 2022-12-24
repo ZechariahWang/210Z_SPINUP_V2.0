@@ -5,6 +5,7 @@ extern unsigned short int AutonFinalized; // Final auton choice
 extern unsigned short int SelectedAuton; // Auton choice
 extern const unsigned short int MaxLimit; // The max limit switches can go up to
 extern const unsigned short int MinLimit; // The min limit switches can go up to
+void iterate_legend();
 
 class Init_AutonSwitchMain{
     private:

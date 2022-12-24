@@ -232,33 +232,8 @@ void FollowCurve(std::vector<CurvePoint> allPoints, double followAngle){
     CurvePoint followMe = getFollowPointPath(allPoints, robotPosition, allPoints.at(0).getFollowDistance());
     //curver._CurveToPoint(followMe.getX(), followMe.getY()); // Go to point
     //ArcMovement(followMe.getX(), followMe.getY());
+
+    CurveHandler.swing_to_point(followMe.getX(), followMe.getY(), 0.6);
 }
 
-const int maxSpeed = 9000;
-void ArcMovement::_CurveToPoint(double targetX, double targetY){
-    odometry.Odometry();
-    double targetTheta = atan2f(targetX - gx, targetY - gy);
-    bool rightTurn = false;
 
-    targetTheta = (targetTheta - ImuMon());
-    targetTheta = atan2f(sinf(targetTheta), cosf(targetTheta)) * 180 / M_PI;
-    //std::cout << targetTheta << std::endl;
-
-    if (targetTheta >= 0) rightTurn = true;
-    else rightTurn = false;
-
-    if (fabs(targetTheta) < 1.5){ 
-        utility::leftvoltagereq(maxSpeed);
-        utility::rightvoltagereq(maxSpeed);
-    }
-    else if (rightTurn){
-        utility::leftvoltagereq(maxSpeed);
-        utility::rightvoltagereq(maxSpeed * SpeedCompensator);
-    }
-    else{
-        utility::leftvoltagereq(maxSpeed * SpeedCompensator);
-        utility::rightvoltagereq(maxSpeed);
-    }
-      
-  pros::delay(10);
-}

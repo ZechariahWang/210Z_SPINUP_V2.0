@@ -7,8 +7,8 @@ class MotionAlgorithms{
     public:
         double target_tol = 10;
         double target_final_tol = 5;
-        double t_kp = 13;
-        double r_kp = 3;
+        double t_kp = 10;
+        double r_kp = 5;
 
         double distance;
         double alpha;
@@ -30,6 +30,9 @@ class MotionAlgorithms{
         double a_maxSpeed;
         bool a_rightTurn;
 
+        void set_constants(double t_kp, double r_kp, double f_tt, double t);
+        void reset_mtp_constants();
+        void reset_swing_alterables();
         void TurnToPoint(int targetX, int targetY);
         void move_to_reference_pose(double tx, double ty, double targetHeading, double radius);
         void swing_to_point(double tx, double ty, double swingDamper);

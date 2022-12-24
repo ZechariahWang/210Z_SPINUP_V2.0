@@ -15,7 +15,7 @@ TranslationPID::TranslationPID(){ // Translation PID Constructor
 }
 
 RotationPID::RotationPID(){ // Rotation PID Constructor
-  rot_r.r_tol = 20;
+  rot_r.r_tol = 10;
   rot_r.r_error_thresh = 3;
 }
 
@@ -136,12 +136,12 @@ double TranslationPID::compute_t(double current, double target){
 
 // Compute rotation logic
 double RotationPID::compute_r(double current, double target){
-  rot_r.r_error = target - current;
+  rot_r.r_error = target - imu_sensor.get_rotation();
   rot_r.r_derivative = rot_r.r_error - rot_r.r_prev_error;
   if (rot_r.r_ki != 0){
     rot_r.r_integral += rot_r.r_error;
   }
-  if (utility::sgn(rot_r.r_error) !=  utility::sgn(rot_r.r_prev_error)){
+  if (rot_r.r_error == 0 || rot_r.r_error > target){
     rot_r.r_integral = 0;
   }
 
@@ -155,7 +155,7 @@ double RotationPID::compute_r(double current, double target){
 
 // Compute curve logic
 double CurvePID::compute_c(double current, double target){
-  cur_c.c_error = target - current;
+  cur_c.c_error = target - imu_sensor.get_rotation();
   cur_c.c_derivative = cur_c.c_error - cur_c.c_prev_error;
   if (cur_c.c_ki != 0){
     cur_c.c_integral += cur_c.c_error;
@@ -206,7 +206,6 @@ void TranslationPID::set_translation_pid(double target, double maxSpeed){
     double vol = mov_t.compute_t(currentPos, target);
     double headingAssist = mov_t.find_min_angle(TARGET_THETA, ImuMon()) * mov_t.t_h_kp;
     cd++; if (cd <= 10){ utility::leftvoltagereq(0); utility::rightvoltagereq(0); continue;}
-    std::cout << mov_t.t_error << std::endl;
 
     utility::leftvoltagereq(vol * (12000.0 / 127) + headingAssist);
     utility::rightvoltagereq(vol * (12000.0 / 127) - headingAssist);
@@ -259,12 +258,13 @@ void CurvePID::set_curve_pid(double t_theta, double maxSpeed, double curveDamper
     double currentPos = imu_sensor.get_rotation();
     double vol = cur_c.compute_c(currentPos, t_theta);
 
-    if (cur_c.c_error >= 0){ cur_c.c_rightTurn = true; } else { cur_c.c_rightTurn = false;}
-    if (c_rightTurn){
+    if (cur_c.c_error > 0){ cur_c.c_rightTurn = true; } else { cur_c.c_rightTurn = false;}
+    std::cout << (bool)cur_c.c_rightTurn << std::endl;
+    if (cur_c.c_rightTurn == true){
       utility::leftvoltagereq(vol * (12000.0 / 127));
       utility::rightvoltagereq(vol * (12000.0 / 127) * curveDamper);
     }
-    else if (c_rightTurn == false){
+    else if (cur_c.c_rightTurn == false){
       utility::leftvoltagereq(fabs(vol) * (12000.0 / 127) * curveDamper);
       utility::rightvoltagereq(fabs(vol) * (12000.0 / 127));
     }

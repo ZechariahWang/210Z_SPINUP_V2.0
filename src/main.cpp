@@ -1,14 +1,16 @@
 #include "main.h"
+#include "display/lv_objx/lv_label.h"
 #include "pros/motors.h"
 #include "vector"
 #include "variant"
 #include "array"
+#include "map"
+#include "string"
 
 const unsigned long int time = 100000; // Time until initialize phase ends. Effectively infinite.
 const unsigned short int delayAmount = 10; // Dont overload the CPU during OP control
 
 // wheres my dad ඞ
-
 //-- LVGL object pointer initialization //--
 lv_obj_t *displayDataL1;
 lv_obj_t *displayDataL2;
@@ -24,6 +26,20 @@ lv_obj_t *nextAutonButton;
 lv_obj_t *infoDisplay;
 lv_obj_t *infoPage = lv_page_create(lv_scr_act(), NULL);
 
+char buffer[100];
+std::map<int, std::string> auton_Legend = {
+    { 1, "Right Side Priority: Points" },
+    { 2, "Left Side Priority: Points" },
+    { 3, "Right Side Priority: WP" },
+	{ 4, "Left Side Priority: WP " },
+    { 5, "Solo Win Point (Left Side)" },
+    { 6, "Skills" },
+    { 7, "Empty Slot" },
+    { 8, "Empty Slot" },
+    { 9, "Empty Slot" },
+    { 10, "Empty Slot" }
+};
+
 //-- LVGL on input functions //--
 static lv_res_t btn_rel_action(lv_obj_t *btn){
 	static bool pressed = true;
@@ -36,29 +52,40 @@ static lv_res_t btn_rel_action(lv_obj_t *btn){
 //-- LVGL prev auton selector functions
 static lv_res_t onPrevPress(lv_obj_t *btn){
     SelectedAuton -= 1;
-    if (SelectedAuton >= 11){
+    if (SelectedAuton > 10){
         SelectedAuton = 1;
+		sprintf(buffer, SYMBOL_LIST " Selected Path %d: %s", SelectedAuton, auton_Legend[SelectedAuton].c_str());
+        lv_label_set_text(debugLine1, buffer);
     }
-    else if (SelectedAuton <= 0){
+    else if (SelectedAuton < 1){
         SelectedAuton = 10;
+		sprintf(buffer, SYMBOL_LIST " Selected Path %d: %s", SelectedAuton, auton_Legend[SelectedAuton].c_str());
+        lv_label_set_text(debugLine1, buffer);
 	}
+	sprintf(buffer, SYMBOL_LIST " Selected Path %d: %s", SelectedAuton, auton_Legend[SelectedAuton].c_str());
+    lv_label_set_text(debugLine1, buffer);
 	return 1;
 }
 
 //-- LVGL next auton selector functions
 static lv_res_t onNextPress(lv_obj_t *btn){
 	SelectedAuton += 1;
-    if (SelectedAuton >= 11){
+    if (SelectedAuton > 10){
         SelectedAuton = 1;
+		sprintf(buffer, SYMBOL_LIST " Selected Path %d: %s", SelectedAuton, auton_Legend[SelectedAuton].c_str());
+        lv_label_set_text(debugLine1, buffer);
     }
-    else if (SelectedAuton <= 0){
+    else if (SelectedAuton < 1){
         SelectedAuton = 10;
+		sprintf(buffer, SYMBOL_LIST " Selected Path %d: %s", SelectedAuton, auton_Legend[SelectedAuton].c_str());
+        lv_label_set_text(debugLine1, buffer);
     }
+	sprintf(buffer, SYMBOL_LIST " Selected Path %d: %s", SelectedAuton, auton_Legend[SelectedAuton].c_str());
+    lv_label_set_text(debugLine1, buffer);
 	return 1;
 }
 
 void initialize() { // Init function control
-
 	//-- New style initiation //--
     static lv_style_t style_new;                         
     lv_style_copy(&style_new, &lv_style_pretty);         
@@ -114,9 +141,9 @@ void initialize() { // Init function control
 	//-- Select Auton button //--
 	finalizeAutonButton = lv_btn_create(lv_scr_act(), NULL);
 	lv_btn_set_action(finalizeAutonButton, LV_BTN_ACTION_CLICK, btn_rel_action); 
-    lv_obj_align(finalizeAutonButton, NULL, LV_ALIGN_CENTER, -5, 100);
+    lv_obj_align(finalizeAutonButton, NULL, LV_ALIGN_CENTER, -18, 100);
 	lv_obj_set_height(finalizeAutonButton, 40);
-	lv_obj_set_width(finalizeAutonButton, 150);
+	lv_obj_set_width(finalizeAutonButton, 160);
 
 	lv_obj_t *buttonText = lv_label_create(infoPage, NULL);
     lv_label_set_text(buttonText, "");  /*Set the text*/
@@ -128,13 +155,13 @@ void initialize() { // Init function control
 	//-- Prev Auton button //--
 	prevAutonButton = lv_btn_create(lv_scr_act(), NULL);
 	lv_btn_set_action(prevAutonButton, LV_BTN_ACTION_CLICK, onPrevPress); 
-    lv_obj_align(prevAutonButton, NULL, LV_ALIGN_CENTER, -140, 100);
+    lv_obj_align(prevAutonButton, NULL, LV_ALIGN_CENTER, -155, 100);
 	lv_obj_set_height(prevAutonButton, 40);
 	lv_obj_set_width(prevAutonButton, 120);
 
 	lv_obj_t *prevbuttonText = lv_label_create(infoPage, NULL);
     lv_label_set_text(prevbuttonText, "");  /*Set the text*/
-    lv_obj_set_x(prevbuttonText, 50); 
+    lv_obj_set_x(prevbuttonText, 30); 
 
     prevbuttonText = lv_label_create(prevAutonButton, NULL);
     lv_label_set_text(prevbuttonText, SYMBOL_PREV " PREV");
@@ -161,7 +188,7 @@ void initialize() { // Init function control
 	Launcher.set_value(true);
 	OuterShooter.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 	InnerShooter.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-	//Init_Process.ReceiveInput(time); // 10000 = 10 seconds
+	// Init_Process.ReceiveInput(time); // Enabled Auton Selector (STEP 1)
 }
 
 //--DONT TOUCH THESE FUNCTIONS--\*
@@ -180,8 +207,14 @@ void autonomous(){  // Autonomous function control
 	ArcPID arc;
 	odometry.Odometry();
 	Auton_Framework.overRideCoordinatePos(0, 0);
-	mov.set_dt_constants(2, 1, 300); // Parameters are : Wheel diameter, gear ratio, motor cartridge type
+	mov.set_dt_constants(2, 1, 200); // Parameters are : Wheel diameter, gear ratio, motor cartridge type
 	imu_sensor.set_rotation(0);
+	// Init_Process.SelectAuton(); Enable Auton Selector (STEP 2)
+
+	// __left_side_priority_points__();
+
+    // mov.set_t_constants(0.45, 0, 5, 30);
+	// mov.set_translation_pid(72, 110);
 
 	// mov.set_t_constants(0.45, 0, 5, 1.5);
 	// mov.set_translation_pid(24, 90);
@@ -189,19 +222,69 @@ void autonomous(){  // Autonomous function control
 	// mov.set_t_constants(0.45, 0, 5, 1.5);
 	// mov.set_translation_pid(-24, 90);
 
+	// rot.set_r_constants(6, 0.003, 35);
+	// rot.set_rotation_pid(90, 110);
+
 	// mov.set_t_constants(0.45, 0, 5, 1.5);
 	// mov.set_translation_pid(24, 90);
 
 
-	// cur.set_c_constants(3, 0.003, 35);
-	// cur.set_curve_pid(90, 90, 0.7);
+	// cur.set_c_constants(5, 0.003, 35);
+	// cur.set_curve_pid(-360, 90, 0.1);
 
 	// arc.set_a_constants(3, 0.003, 35);
 	// arc.set_arc_pid(20, 20, 90, 0.5);
 
-	Auton_Framework.move_to_reference_pose(20, 20, 45, 5);
+	Auton_Framework.set_constants(7, 5, 4, 3);
+	Auton_Framework.move_to_reference_pose(20, 20, 0, 10);
+
+	pros::delay(1000);
+
+	Auton_Framework.set_constants(7, 5, 4, 3);
+	Auton_Framework.move_to_reference_pose(-10, 0, 270, 1);
+
+	// pros::delay(1000);
+
+	// Auton_Framework.set_constants(7, 5, 2.7, 3);
+	// Auton_Framework.move_to_reference_pose(10, -5, 90, 10);
 
 
+	// cur.set_c_constants(5, 0.003, 35);
+	// cur.set_curve_pid(-45, 90, 0);
+	// // Auton_Framework.overRideCoordinatePos(0, 0);
+	// // imu_sensor.set_rotation(0);
+
+
+	// mov.set_t_constants(0.45, 0, 5, 1.5);
+	// mov.set_translation_pid(12, 90);
+
+	// rot.set_r_constants(5, 0.003, 35);
+	// rot.set_rotation_pid(90, 90);
+
+	// mov.set_t_constants(0.45, 0, 5, 1.5);
+	// mov.set_translation_pid(-8, 90);
+
+	// cur.set_c_constants(5, 0.003, 35);
+	// cur.set_curve_pid(0, 90, 0.2);
+
+	// mov.set_t_constants(0.45, 0, 5, 1.5);
+	// mov.set_translation_pid(12, 90);
+
+	// mov.set_t_constants(0.45, 0, 5, 1.5);
+	// mov.set_translation_pid(-6, 90);
+
+	// rot.set_r_constants(5, 0.003, 35);
+	// rot.set_rotation_pid(45, 90);
+
+	// mov.set_t_constants(0.45, 0, 5, 1.5);
+	// mov.set_translation_pid(72, 90);
+
+	// pros::delay(1000);
+
+	// Auton_Framework.set_constants(7, 5, 1.5, 3);
+	// Auton_Framework.move_to_reference_pose(-20, 10, 270, 10);
+
+	// PurePursuitTestPath();
 }
 
 void opcontrol(){ // Driver control function

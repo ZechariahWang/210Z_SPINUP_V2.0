@@ -1,4 +1,6 @@
 #include "main.h"
+#include "map"
+#include "string"
 
 unsigned short int SelectedAuton = 1; // Auton choice
 unsigned short int AutonFinalized = 0; // 0 = false, 1 = true
@@ -17,78 +19,66 @@ static bool pressed2 = true; // Status of backward switch
 static bool currentlyPressed1 = false; // Local switch status
 static bool currentlyPressed2 = false; // Local switch status
 
+char buffer2[100];
+// std::map<int, std::string> auton_Legend = {
+//     { 1, "Right Side" },
+//     { 2, "Left Side" },
+//     { 3, "Solo WP" }
+// };
+
+void iterate_legend(){
+    pros::Mutex mutex;
+    int iterator = 1;
+    while (true){
+        mutex.take(1000);
+        // sprintf(buffer, "Auton %d: %s", iterator, auton_Legend[iterator].c_str());
+        // lv_label_set_text(debugLine1, buffer);
+
+        iterator++;
+        if (iterator > 3){ iterator = 1; }
+        if (iterator < 1) { iterator = 3; }
+        if (AutonFinalized == 1){
+            break;
+        }
+        pros::delay(1000);
+        mutex.give();
+    }
+}
+
 
 // This funcion receieves input from switches on robot. Used to determine which auton to use. Press both buttons at the same time OR LCD middle button to finalize choice.
 void Init_AutonSwitchMain::ReceiveInput(long int time){
     FinalizeAuton data;
     int currentTime = 0;
-
+    int iterator = 1;
+    int legend_counter = 0;
+    // sprintf(buffer, SYMBOL_LIST " Selected Path %d: %s", iterator, auton_Legend[iterator].c_str());
+    // lv_label_set_text(debugLine1, buffer);
     while (currentTime <= time){
+        legend_counter++;
     	data.DisplayData();
-
-        if (currentlyPressed1){
-            counterForward1 += 1;
-            pressed1 = false;
-            if (counterForward1 > 20){
-                pressed1 = true;
-                counterForward1 = 0;
-                currentlyPressed1 = false;
-            }
-        }
-        else if (currentlyPressed2){
-            counterBackward2 += 1;
-            pressed2 = false;
-            if (counterBackward2 > 20){
-                pressed2 = true;
-                counterBackward2 = 0;
-                currentlyPressed2 = false;
-            }
-        }
-
-        if (AutonSwitchForward.get_new_press()){
-            currentlyPressed1 = true;
-            SelectedAuton += 1;
-            if (SelectedAuton >= MaxLimit){
-                SelectedAuton = 1;
-            }
-            else if (SelectedAuton <= MinLimit){
-                SelectedAuton = 10;
-            }
-        }
-        else if (AutonSwitchBackward.get_new_press()){
-            currentlyPressed2 = true;
-            SelectedAuton -= 1;
-            if (SelectedAuton >= MaxLimit){
-                SelectedAuton = 1;
-            }
-            else if (SelectedAuton <= MinLimit){
-                SelectedAuton = 10;
-            }
-        }
-
-        if (pressed2 == false && pressed1 == false){
-            SelectedAuton += 1;
-            char buffer[100];
-        	sprintf(buffer, "Chosen Auton: %d", SelectedAuton);
-	        lv_label_set_text(displayDataL1, buffer);
-		    pros::delay(2000);
-        	sprintf(buffer, "Entering game phase...");
-	        lv_label_set_text(displayDataL1, buffer);
-            break;
-            // f
-        }
-
         if (AutonFinalized == 1){
-            char buffer[100];
-        	sprintf(buffer, "Chosen Auton: %d", SelectedAuton);
-	        lv_label_set_text(displayDataL1, buffer);
+        	sprintf(buffer2, "Chosen Auton: %d", SelectedAuton);
+	        lv_label_set_text(displayDataL1, buffer2);
 		    pros::delay(2000);
-        	sprintf(buffer, "Entering game phase...");
-	        lv_label_set_text(displayDataL1, buffer);
+        	sprintf(buffer2, "Entering game phase...");
+	        lv_label_set_text(displayDataL1, buffer2);
+            pros::delay(3000);
             break;
         }
 
-        currentTime += 10;
+        // if (legend_counter >= 300){
+        //     sprintf(buffer, SYMBOL_LIST " Selected Path %d: %s", iterator, auton_Legend[iterator].c_str());
+        //     lv_label_set_text(debugLine1, buffer);
+
+        //     iterator++;
+        //     if (iterator > 3){ iterator = 1; }
+        //     if (iterator < 1) { iterator = 3; }
+        //     if (AutonFinalized == 1){
+        //         break;
+        //     }
+        //     legend_counter = 0;
+        // }
         pros::delay(10);
     }
 }

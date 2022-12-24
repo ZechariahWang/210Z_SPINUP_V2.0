@@ -4,6 +4,50 @@ void Run_MTRP_Debug(){ Debug_MTRP(); }
 void Run_PID_Debug(){ PID_Debug(); }
 void StandardAuton(){}
 
+void __left_side_priority_points__(){
+	MotionAlgorithms Auton_Framework; // Auton framework class
+	FinalizeAuton Init_Process; // Init framework class
+	odom odometry;
+	TranslationPID mov;
+	RotationPID rot;
+	CurvePID cur;
+	ArcPID arc;
+	odometry.Odometry();
+	Auton_Framework.overRideCoordinatePos(0, 0);
+	mov.set_dt_constants(2, 1, 200); // Parameters are : Wheel diameter, gear ratio, motor cartridge type
+	imu_sensor.set_rotation(0);
+
+    mov.set_t_constants(0.45, 0, 5, 1.5);
+	mov.set_translation_pid(-2, 90);
+
+	cur.set_c_constants(5, 0.003, 35);
+	cur.set_curve_pid(50, 90, 0);
+
+    mov.set_t_constants(0.45, 0, 5, 1.5);
+	mov.set_translation_pid(24, 90);
+
+	rot.set_r_constants(5, 0.003, 35);
+	rot.set_rotation_pid(45, 90);
+
+    mov.set_t_constants(0.45, 0, 5, 1.5);
+	mov.set_translation_pid(24, 90);
+}
+
+void __right_side_priority_points__(){
+    
+}
+
+void __left_side_priority_wp__(){
+    
+}
+
+void __right_side_priority_wp__(){
+    
+}
+
+void __solo_wp__(){
+    
+}
 void SkillsPath(){
     // Skills function will go here
 }
@@ -12,40 +56,35 @@ void AutonSelectorPrimary(const int autonType){
     switch (autonType)
     {
     case 0: // doesnt run
-        a_rightSideDisk();
+        __left_side_priority_points__();
         break;
     case 1:
-		a_leftSideDisk();
+		__left_side_priority_points__();
         break;
     case 2:
-		a_rightSideDisk();
+		__right_side_priority_points__();
         break;
     case 3:
-		a_leftSideDisk();
+	    __left_side_priority_wp__();
         break;
     case 4:
-		a_leftSideDisk();
+		__right_side_priority_wp__();
         break;
     case 5:
-		a_leftSideDisk();
+		__solo_wp__();
         break;
     case 6:
-		a_leftSideDisk();
+		SkillsPath();
         break;
     case 7:
-		a_leftSideDisk();
         break;
     case 8:
-		a_leftSideDisk();
         break;
     case 9:
-		a_leftSideDisk();
         break;
     case 10:
-		a_leftSideDisk();
         break;
     default:
-		a_leftSideDisk();
         break;
     }
 }
