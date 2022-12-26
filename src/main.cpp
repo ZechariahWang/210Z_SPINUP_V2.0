@@ -235,13 +235,8 @@ void autonomous(){  // Autonomous function control
 	// arc.set_a_constants(3, 0.003, 35);
 	// arc.set_arc_pid(20, 20, 90, 0.5);
 
-	Auton_Framework.set_constants(7, 5, 4, 3);
-	Auton_Framework.move_to_reference_pose(20, 20, 0, 10);
-
-	pros::delay(1000);
-
-	Auton_Framework.set_constants(7, 5, 4, 3);
-	Auton_Framework.move_to_reference_pose(-10, 0, 270, 1);
+	// Auton_Framework.set_constants(7, 5, 4, 3);
+	// Auton_Framework.move_to_reference_pose(10, 40, 0, 10);
 
 	// pros::delay(1000);
 
@@ -284,7 +279,7 @@ void autonomous(){  // Autonomous function control
 	// Auton_Framework.set_constants(7, 5, 1.5, 3);
 	// Auton_Framework.move_to_reference_pose(-20, 10, 270, 10);
 
-	// PurePursuitTestPath();
+	PurePursuitTestPath();
 }
 
 void opcontrol(){ // Driver control function

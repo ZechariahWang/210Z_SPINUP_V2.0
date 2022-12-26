@@ -4,8 +4,9 @@
 #include "iostream"
 #include "algorithm"
 
-MotionAlgorithms mtp;
+MotionAlgorithms mtp; // move to point class
 
+// material theme ocean
 // Find min angle between target heading and current heading
 double find_min_angle(int targetHeading, int currentrobotHeading){
   double turnAngle = targetHeading - currentrobotHeading;
@@ -30,6 +31,7 @@ void MotionAlgorithms::reset_mtp_constants(){
   mtp.alpha = 0;
   mtp.t_error = 0;
   mtp.beta = 0;
+  mtp.iterator = 0;
 }
 
 void MotionAlgorithms::reset_swing_alterables(){
@@ -79,9 +81,9 @@ void MotionAlgorithms::move_to_reference_pose(double targetX, double targetY, do
     utility::leftvoltagereq(left_volage * (12000.0) / 127);
     utility::rightvoltagereq(right_voltage * (12000.0 / 127));
 
-    if (fabs(sqrt(pow(targetX - gx, 2) + pow(targetY - gy, 2))) < mtp.target_final_tol){
-      utility::leftvoltagereq(0);
-      utility::rightvoltagereq(0);
+    if (fabs(sqrt(pow(targetX - gx, 2) + pow(targetY - gy, 2))) < mtp.target_final_tol){ mtp.iterator++; } else {mtp.iterator = 0;}
+    if (mtp.iterator > 10) {
+      utility::stop();
       break;
     }
     pros::delay(10);
@@ -89,27 +91,13 @@ void MotionAlgorithms::move_to_reference_pose(double targetX, double targetY, do
 }
 
 void MotionAlgorithms::swing_to_point(double tx, double ty, double swingDamper){
-    //mtp.reset_swing_alterables();
-    double currentPos = imu_sensor.get_rotation();
+    mtp.reset_swing_alterables();
+    double defaultVoltage = 70;
     double abstargetAngle = atan2f(tx - gx, ty - gy) * 180 / M_PI;
-    double targetTheta = find_min_angle(abstargetAngle, ImuMon());
     if (abstargetAngle < 0){ abstargetAngle += 360; }
-
-    if (targetTheta >= 0 && targetTheta <= 180){ mtp.a_rightTurn = true;}
-    else{ mtp.a_rightTurn = false; }
-    if (fabs(targetTheta) < 1.5) // Close enough to theta just drive lmao
-    { 
-      utility::leftvoltagereq(targetTheta);
-      utility::rightvoltagereq(targetTheta);
-    }
-    if (mtp.a_rightTurn){
-      utility::leftvoltagereq(targetTheta * (12000.0 / 127));
-      utility::rightvoltagereq(targetTheta * (12000.0 / 127) * swingDamper);
-    }
-    else if (mtp.a_rightTurn == false){
-      utility::leftvoltagereq(fabs(targetTheta) * (12000.0 / 127) * swingDamper);
-      utility::rightvoltagereq(fabs(targetTheta) * (12000.0 / 127));
-    }
+    double targetTheta = find_min_angle(abstargetAngle, ImuMon()) * 100;
+    utility::leftvoltagereq((defaultVoltage * (12000.0 / 127)) + targetTheta);
+    utility::rightvoltagereq((defaultVoltage * (12000.0 / 127)) - targetTheta);
     pros::delay(10);
 }
 

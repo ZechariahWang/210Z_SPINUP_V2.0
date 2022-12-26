@@ -9,6 +9,7 @@ class MotionAlgorithms{
         double target_final_tol = 5;
         double t_kp = 10;
         double r_kp = 5;
+        double iterator = 0;
 
         double distance;
         double alpha;
