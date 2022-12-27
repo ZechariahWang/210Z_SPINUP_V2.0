@@ -55,7 +55,7 @@ double ImuMon() {
 // This function is for the primary odom framework used within the robot.
 void odom::Odometry(){
 	double currentTime = pros::millis();
-  double theta = imu_sensor.get_rotation();
+  double theta = ImuMon();
   double RX = (cos(ImuMon() * M_PI / 180 + M_PI)); // Local X value
   double RY = (sin(ImuMon() * M_PI / 180 + M_PI)); // local Y value
 
@@ -91,8 +91,12 @@ void odom::Odometry(){
   w2_odom.d_Theory2 += w2_odom.d_deltaTheory2;
   w2_odom.d_totalRotationTheta += w2_odom.d_rotationTheta;
 
+
   w2_odom.d_deltaX = ((w2_odom.d_deltaForward) * 1 * -sin(-theta));
   w2_odom.d_deltaY = ((w2_odom.d_deltaForward) * 1 * cos(-theta));
+
+  // w2_odom.d_deltaX = ((w2_odom.d_deltaForward) * 1 * -sin(-theta)) - ((w2_odom.d_deltaCenter - w2_odom.deltaArcLength) * 1 * -cos(-theta));
+  // w2_odom.d_deltaY = ((w2_odom.d_deltaForward) * 1 * cos(-theta)) - ((w2_odom.d_deltaCenter - w2_odom.deltaArcLength) * 1 * -sin(-theta));
 
   gx = gx + w2_odom.d_deltaX;
   gy = gy + w2_odom.d_deltaY;

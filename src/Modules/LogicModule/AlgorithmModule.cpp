@@ -42,12 +42,8 @@ int AngleWrap_C::AngleWrap(double angle){
 
 // Function takes in 2 points, and checks the intersection status between both points
 std::vector<Point> LineCircleIntersection(Point circleCenter, double radius, Point linePoint1, Point linePoint2){
-    if (fabs(linePoint1.getY() - linePoint2.getY()) < 0.003){
-        linePoint1.setY(linePoint2.getY() + 0.003);
-    }
-    if (fabs(linePoint1.getX() - linePoint2.getX()) < 0.003){
-        linePoint1.setX(linePoint2.getX() + 0.003);
-    }
+    if (fabs(linePoint1.getY() - linePoint2.getY()) < 0.003){ linePoint1.setY(linePoint2.getY() + 0.003); }
+    if (fabs(linePoint1.getX() - linePoint2.getX()) < 0.003){ linePoint1.setX(linePoint2.getX() + 0.003); }
 
     double m1 = (linePoint2.getY() - linePoint1.getY()) / (linePoint2.getX() - linePoint1.getX());
     double b = (linePoint1.getY()) - m1 * (linePoint1.getX());
@@ -61,7 +57,6 @@ std::vector<Point> LineCircleIntersection(Point circleCenter, double radius, Poi
 
     quadraticB = (-2 * gx) + (2.0 * m1 * b) - (2 * gy * m1);
     quadraticC = pow(gx, 2) + pow(b, 2) - (2 * b * gy) + pow(gy, 2) - pow(radius, 2);
-
 
     std::vector<Point> allPoints; double minX; double maxX;
     if (linePoint1.getX() < linePoint2.getX()){

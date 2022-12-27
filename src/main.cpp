@@ -28,10 +28,10 @@ lv_obj_t *infoPage = lv_page_create(lv_scr_act(), NULL);
 
 char buffer[100];
 std::map<int, std::string> auton_Legend = {
-    { 1, "Right Side Priority: Points" },
-    { 2, "Left Side Priority: Points" },
-    { 3, "Right Side Priority: WP" },
-	{ 4, "Left Side Priority: WP " },
+    { 1, "Left Side Priority: Points" },
+    { 2, "Right Side Priority: Points" },
+    { 3, "Left Side Priority: WP" },
+	{ 4, "Right Side Priority: WP " },
     { 5, "Solo Win Point (Left Side)" },
     { 6, "Skills" },
     { 7, "Empty Slot" },
@@ -188,6 +188,8 @@ void initialize() { // Init function control
 	Launcher.set_value(true);
 	OuterShooter.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 	InnerShooter.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+	sprintf(buffer, SYMBOL_LIST " Selected Path %d: %s", SelectedAuton, auton_Legend[SelectedAuton].c_str());
+    lv_label_set_text(debugLine1, buffer);
 	// Init_Process.ReceiveInput(time); // Enabled Auton Selector (STEP 1)
 }
 
@@ -209,77 +211,43 @@ void autonomous(){  // Autonomous function control
 	Auton_Framework.overRideCoordinatePos(0, 0);
 	mov.set_dt_constants(2, 1, 200); // Parameters are : Wheel diameter, gear ratio, motor cartridge type
 	imu_sensor.set_rotation(0);
-	// Init_Process.SelectAuton(); Enable Auton Selector (STEP 2)
+	// Init_Process.SelectAuton(); // Enable Auton Selector (STEP 2)
 
-	// __left_side_priority_points__();
 
     // mov.set_t_constants(0.45, 0, 5, 30);
-	// mov.set_translation_pid(72, 110);
-
-	// mov.set_t_constants(0.45, 0, 5, 1.5);
-	// mov.set_translation_pid(24, 90);
-
-	// mov.set_t_constants(0.45, 0, 5, 1.5);
-	// mov.set_translation_pid(-24, 90);
+	// mov.set_translation_pid(3, 110);
 
 	// rot.set_r_constants(6, 0.003, 35);
-	// rot.set_rotation_pid(90, 110);
-
-	// mov.set_t_constants(0.45, 0, 5, 1.5);
-	// mov.set_translation_pid(24, 90);
-
-
-	// cur.set_c_constants(5, 0.003, 35);
-	// cur.set_curve_pid(-360, 90, 0.1);
-
-	// arc.set_a_constants(3, 0.003, 35);
-	// arc.set_arc_pid(20, 20, 90, 0.5);
-
-	// Auton_Framework.set_constants(7, 5, 4, 3);
-	// Auton_Framework.move_to_reference_pose(10, 40, 0, 10);
-
-	// pros::delay(1000);
-
-	// Auton_Framework.set_constants(7, 5, 2.7, 3);
-	// Auton_Framework.move_to_reference_pose(10, -5, 90, 10);
-
-
-	// cur.set_c_constants(5, 0.003, 35);
-	// cur.set_curve_pid(-45, 90, 0);
-	// // Auton_Framework.overRideCoordinatePos(0, 0);
-	// // imu_sensor.set_rotation(0);
-
-
-	// mov.set_t_constants(0.45, 0, 5, 1.5);
-	// mov.set_translation_pid(12, 90);
-
-	// rot.set_r_constants(5, 0.003, 35);
 	// rot.set_rotation_pid(90, 90);
 
 	// mov.set_t_constants(0.45, 0, 5, 1.5);
-	// mov.set_translation_pid(-8, 90);
+	// mov.set_translation_pid(24, 90);
 
-	// cur.set_c_constants(5, 0.003, 35);
-	// cur.set_curve_pid(0, 90, 0.2);
-
-	// mov.set_t_constants(0.45, 0, 5, 1.5);
-	// mov.set_translation_pid(12, 90);
+	// rot.set_r_constants(6, 0.003, 35);
+	// rot.set_rotation_pid(0, 90);
 
 	// mov.set_t_constants(0.45, 0, 5, 1.5);
-	// mov.set_translation_pid(-6, 90);
+	// mov.set_translation_pid(-3, 90);
+
+
+	// rot.set_r_constants(6, 0.003, 35);
+	// rot.set_rotation_pid(-47, 90);
+
+	// mov.set_t_constants(0.45, 0, 5, 30);
+	// mov.set_translation_pid(60, 90);
+
+	// pros::delay(500);
 
 	// rot.set_r_constants(5, 0.003, 35);
 	// rot.set_rotation_pid(45, 90);
 
-	// mov.set_t_constants(0.45, 0, 5, 1.5);
-	// mov.set_translation_pid(72, 90);
+	// rot.set_r_constants(5, 0.003, 35);
+	// rot.set_rotation_pid(180, 40);
 
-	// pros::delay(1000);
+    // Auton_Framework.set_constants(7, 5, 5, 7);
+    // Auton_Framework.move_to_reference_pose(40, 10, 45, 20);
 
-	// Auton_Framework.set_constants(7, 5, 1.5, 3);
-	// Auton_Framework.move_to_reference_pose(-20, 10, 270, 10);
-
-	PurePursuitTestPath();
+	PurePursuit2();
 }
 
 void opcontrol(){ // Driver control function
@@ -299,7 +267,6 @@ void opcontrol(){ // Driver control function
 		mov.init_expansion();
 
 		odometry.Odometry();
-
 		data.DisplayData(); // Display robot stats and info
 		pros::delay(delayAmount); // Dont hog CPU ;)
 	}

@@ -81,7 +81,13 @@ void MotionAlgorithms::move_to_reference_pose(double targetX, double targetY, do
     utility::leftvoltagereq(left_volage * (12000.0) / 127);
     utility::rightvoltagereq(right_voltage * (12000.0 / 127));
 
-    if (fabs(sqrt(pow(targetX - gx, 2) + pow(targetY - gy, 2))) < mtp.target_final_tol){ mtp.iterator++; } else {mtp.iterator = 0;}
+    if (fabs(sqrt(pow(targetX - gx, 2) + pow(targetY - gy, 2))) < mtp.target_final_tol)
+    { 
+      //mtp.iterator++;
+      utility::stop();
+      break;
+    }
+    else {mtp.iterator = 0;}
     if (mtp.iterator > 10) {
       utility::stop();
       break;
@@ -92,13 +98,13 @@ void MotionAlgorithms::move_to_reference_pose(double targetX, double targetY, do
 
 void MotionAlgorithms::swing_to_point(double tx, double ty, double swingDamper){
     mtp.reset_swing_alterables();
-    double defaultVoltage = 70;
+    double defaultVoltage = 90;
     double abstargetAngle = atan2f(tx - gx, ty - gy) * 180 / M_PI;
     if (abstargetAngle < 0){ abstargetAngle += 360; }
     double targetTheta = find_min_angle(abstargetAngle, ImuMon()) * 100;
     utility::leftvoltagereq((defaultVoltage * (12000.0 / 127)) + targetTheta);
     utility::rightvoltagereq((defaultVoltage * (12000.0 / 127)) - targetTheta);
-    pros::delay(10);
+   // pros::delay(10);
 }
 
 // Turn to target coordinate position

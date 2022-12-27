@@ -138,12 +138,8 @@ double TranslationPID::compute_t(double current, double target){
 double RotationPID::compute_r(double current, double target){
   rot_r.r_error = target - imu_sensor.get_rotation();
   rot_r.r_derivative = rot_r.r_error - rot_r.r_prev_error;
-  if (rot_r.r_ki != 0){
-    rot_r.r_integral += rot_r.r_error;
-  }
-  if (rot_r.r_error == 0 || rot_r.r_error > target){
-    rot_r.r_integral = 0;
-  }
+  if (rot_r.r_ki != 0){ rot_r.r_integral += rot_r.r_error; }
+  if (rot_r.r_error == 0 || rot_r.r_error > target){ rot_r.r_integral = 0; }
 
   double output = (rot_r.r_kp * rot_r.r_error) + (rot_r.r_integral * rot_r.r_ki) + (rot_r.r_derivative * rot_r.r_kd);
   if (output * (12000.0 / 127) >= rot_r.r_maxSpeed * (12000.0 / 127)) { output = rot_r.r_maxSpeed; }
@@ -234,8 +230,8 @@ void RotationPID::set_rotation_pid(double t_theta, double maxSpeed){
 
     utility::leftvoltagereq(vol * (12000.0 / 127));
     utility::rightvoltagereq(-vol * (12000.0 / 127));
-    if (fabs(rot_r.r_error) < rot_r.r_error_thresh) { rot_r.r_iterator++; } else { rot_r.r_iterator = 0;}
-    if (fabs(rot_r.r_iterator) >= rot_r.r_tol){
+    if (fabs(rot_r.r_error) < 3) { rot_r.r_iterator++; } else { rot_r.r_iterator = 0;}
+    if (fabs(rot_r.r_iterator) >= 10){
       utility::stop();
       break;
     }
