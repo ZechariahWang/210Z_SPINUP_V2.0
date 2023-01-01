@@ -34,7 +34,37 @@ void __left_side_priority_points__(){
 }
 
 void __right_side_priority_points__(){
+	MotionAlgorithms Auton_Framework; // Auton framework class
+	FinalizeAuton Init_Process; // Init framework class
+	odom odometry;
+	TranslationPID mov;
+	RotationPID rot;
+	CurvePID cur;
+	ArcPID arc;
     
+	rot.set_r_constants(5, 0.003, 35);
+	rot.set_rotation_pid(-90, 90);
+
+	mov.set_t_constants(0.45, 0, 5, 1.5);
+	mov.set_translation_pid(-22, 90);
+
+	rot.set_r_constants(5, 0.003, 35);
+	rot.set_rotation_pid(0, 90);
+
+	mov.set_t_constants(0.45, 0, 5, 1.5);
+	mov.set_translation_pid(-5, 90);
+
+	mov.set_t_constants(0.45, 0, 5, 1.5);
+	mov.set_translation_pid(1, 90);
+
+	rot.set_r_constants(5, 0.003, 35);
+	rot.set_rotation_pid(-48, 90);
+
+	mov.set_t_constants(0.45, 0, 5, 5);
+	mov.set_translation_pid(60, 90);
+
+	rot.set_r_constants(5, 0.003, 35);
+	rot.set_rotation_pid(45, 90);
 }
 
 void __left_side_priority_wp__(){

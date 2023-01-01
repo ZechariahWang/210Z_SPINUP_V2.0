@@ -188,6 +188,12 @@ void initialize() { // Init function control
 	Launcher.set_value(true);
 	OuterShooter.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 	InnerShooter.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+	DriveFrontLeft.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+	DriveFrontRight.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+	DriveBackLeft.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+	DriveBackRight.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+	DriveMidLeft.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+	DriveMidRight.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
 	sprintf(buffer, SYMBOL_LIST " Selected Path %d: %s", SelectedAuton, auton_Legend[SelectedAuton].c_str());
     lv_label_set_text(debugLine1, buffer);
 	// Init_Process.ReceiveInput(time); // Enabled Auton Selector (STEP 1)
@@ -209,7 +215,7 @@ void autonomous(){  // Autonomous function control
 	ArcPID arc;
 	odometry.Odometry();
 	Auton_Framework.overRideCoordinatePos(0, 0);
-	mov.set_dt_constants(2, 1, 200); // Parameters are : Wheel diameter, gear ratio, motor cartridge type
+	mov.set_dt_constants(2, 1, 600); // Parameters are : Wheel diameter, gear ratio, motor cartridge type
 	imu_sensor.set_rotation(0);
 	// Init_Process.SelectAuton(); // Enable Auton Selector (STEP 2)
 
@@ -222,9 +228,6 @@ void autonomous(){  // Autonomous function control
 
 	// mov.set_t_constants(0.45, 0, 5, 1.5);
 	// mov.set_translation_pid(24, 90);
-
-	// rot.set_r_constants(6, 0.003, 35);
-	// rot.set_rotation_pid(0, 90);
 
 	// mov.set_t_constants(0.45, 0, 5, 1.5);
 	// mov.set_translation_pid(-3, 90);
@@ -247,7 +250,54 @@ void autonomous(){  // Autonomous function control
     // Auton_Framework.set_constants(7, 5, 5, 7);
     // Auton_Framework.move_to_reference_pose(40, 10, 45, 20);
 
-	PurePursuit2();
+	// PurePursuit2();
+
+	// pros::delay(1000);
+
+	// rot.set_r_constants(8, 0.003, 35);
+	// rot.set_rotation_pid(-90, 110);
+
+
+    mov.set_t_constants(0.45, 0, 5, 1.5);
+	mov.set_translation_pid(-2, 90);
+
+	cur.set_c_constants(5, 0.003, 35);
+	cur.set_curve_pid(-50, 90, 0);
+
+	pros::delay(500);
+
+    mov.set_t_constants(0.45, 0, 5, 1.5);
+	mov.set_translation_pid(2, 90);
+
+	pros::delay(1000);
+
+    mov.set_t_constants(0.45, 0, 5, 1.5);
+	mov.set_translation_pid(-2, 90);
+
+	pros::delay(500);
+
+	rot.set_r_constants(5, 0.003, 35);
+	rot.set_rotation_pid(45, 90);
+
+	pros::delay(500);
+
+    mov.set_t_constants(0.45, 0, 5, 1.5);
+	mov.set_translation_pid(28, 90);
+
+	pros::delay(500);
+
+	rot.set_r_constants(5, 0.003, 35);
+	rot.set_rotation_pid(-28, 90);
+
+	// PurePursuitTestPath();
+
+	// rot.set_r_constants(5, 0.003, 35);
+	// rot.set_rotation_pid(-90, 90);
+
+	// pros::delay(1000);
+
+	// mov.set_t_constants(0.45, 0, 5, 1.5);
+	// mov.set_translation_pid(-5, 90);
 }
 
 void opcontrol(){ // Driver control function

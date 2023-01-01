@@ -98,13 +98,18 @@ void MotionAlgorithms::move_to_reference_pose(double targetX, double targetY, do
 
 void MotionAlgorithms::swing_to_point(double tx, double ty, double swingDamper){
     mtp.reset_swing_alterables();
-    double defaultVoltage = 90;
+    double defaultVoltage = 50;
     double abstargetAngle = atan2f(tx - gx, ty - gy) * 180 / M_PI;
     if (abstargetAngle < 0){ abstargetAngle += 360; }
-    double targetTheta = find_min_angle(abstargetAngle, ImuMon()) * 100;
+    double targetTheta = find_min_angle(abstargetAngle, imu_sensor.get_rotation()) * 100;
     utility::leftvoltagereq((defaultVoltage * (12000.0 / 127)) + targetTheta);
     utility::rightvoltagereq((defaultVoltage * (12000.0 / 127)) - targetTheta);
    // pros::delay(10);
+}
+
+void curve_to_point(double tx, double ty, double curveDamper){
+  utility::leftvoltagereq(100 * (12000.0 / 127));
+  utility::rightvoltagereq(100 * (12000.0 / 127));
 }
 
 // Turn to target coordinate position
