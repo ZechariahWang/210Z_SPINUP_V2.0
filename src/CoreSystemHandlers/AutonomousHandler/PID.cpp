@@ -111,9 +111,7 @@ void ArcPID::set_a_constants(const double kp, const double ki, const double kd){
 // Find min angle between target angle and currrent angle using ANGLE WRAPPED SYSTEM
 double TranslationPID::find_min_angle(int16_t targetHeading, int16_t currentrobotHeading){
   double turnAngle = targetHeading - currentrobotHeading;
-  if (turnAngle > 180 || turnAngle < -180){
-    turnAngle = turnAngle - (utility::sgn(turnAngle) * 360);
-  }
+  if (turnAngle > 180 || turnAngle < -180){ turnAngle = turnAngle - (utility::sgn(turnAngle) * 360); }
   return turnAngle;
 }
 

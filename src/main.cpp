@@ -219,13 +219,47 @@ void autonomous(){  // Autonomous function control
 	// Init_Process.SelectAuton(); // Enable Auton Selector (STEP 2)
 
     mov.set_t_constants(0.45, 0, 5, 30);
-	mov.set_translation_pid(72, 60);
+	mov.set_translation_pid(36, 60);
 
-	rot.set_r_constants(4, 0.003, 35);
-	rot.set_rotation_pid(180, 90);
+	pros::delay(500);
+
+	rot.set_r_constants(5, 0.003, 35);
+	rot.set_rotation_pid(20, 90);
+
+	pros::delay(500);
+
+	rot.set_r_constants(5, 0.003, 35);
+	rot.set_rotation_pid(-45, 90);
+
+	pros::delay(500);
 
     mov.set_t_constants(0.45, 0, 5, 30);
-	mov.set_translation_pid(72, 60);
+	mov.set_translation_pid(24, 60);
+
+	pros::delay(500);
+
+	rot.set_r_constants(5, 0.003, 35);
+	rot.set_rotation_pid(45, 90);
+
+	pros::delay(500);
+
+	rot.set_r_constants(5, 0.003, 35);
+	rot.set_rotation_pid(-45, 90);
+
+	pros::delay(500);
+
+    mov.set_t_constants(0.45, 0, 5, 30);
+	mov.set_translation_pid(-72, 60);
+
+	pros::delay(500);
+
+	rot.set_r_constants(5, 0.003, 35);
+	rot.set_rotation_pid(0, 90);
+
+	pros::delay(500);
+
+    mov.set_t_constants(0.45, 0, 5, 30);
+	mov.set_translation_pid(-5, 60);
 
 }
 
