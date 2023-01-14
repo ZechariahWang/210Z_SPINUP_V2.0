@@ -21,6 +21,7 @@ class match_mov{
         void dt_Control();
         void tbh_Controller();
         void p_flywheel();
+        void on_off_controller();
         void power_shooter();
         void power_intake();
         void launch_disk();

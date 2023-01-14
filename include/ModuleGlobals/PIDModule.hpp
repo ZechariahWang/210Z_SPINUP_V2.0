@@ -27,10 +27,10 @@ class TranslationPID{
 
         TranslationPID();
         void reset_t_alterables();
-        void set_t_constants(double kp, double ki, double kd, double r_kp);
-        void set_dt_constants(double n_wheelDiameter, double n_gearRatio, double n_motorCartridge);
+        void set_t_constants(const double kp, const double ki, const double kd, const double r_kp);
+        void set_dt_constants(const double n_wheelDiameter, const double n_gearRatio, const double n_motorCartridge);
         void set_translation_pid(double target, double maxSpeed);
-        double find_min_angle(int targetHeading, int currentrobotHeading);
+        double find_min_angle(int16_t targetHeading, int16_t currentrobotHeading);
         double compute_t(double current, double target);
 };
 
@@ -53,7 +53,7 @@ class RotationPID{
 
         RotationPID();
         void reset_r_alterables();
-        void set_r_constants(double kp, double ki, double kd);
+        void set_r_constants(const double kp, const double ki, const double kd);
         double compute_r(double current, double target);
         void set_rotation_pid(double t_theta, double maxSpeed);
 };
@@ -78,7 +78,7 @@ class CurvePID{
 
         CurvePID();
         void reset_c_alterables();
-        void set_c_constants(double kp, double ki, double kd);
+        void set_c_constants(const double kp, const double ki, const double kd);
         double compute_c(double current, double target);
         void set_curve_pid(double t_theta, double maxSpeed, double curveDamper);
 };
@@ -103,7 +103,7 @@ class ArcPID{
 
         ArcPID();
         void reset_a_alterables();
-        void set_a_constants(double kp, double ki, double kd);
+        void set_a_constants(const double kp, const double ki, const double kd);
         double compute_a(double tx, double ty);
         void set_arc_pid(double t_x, double t_y, double maxSpeed, double arcDamper);
 };

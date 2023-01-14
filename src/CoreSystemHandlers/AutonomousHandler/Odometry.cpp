@@ -3,12 +3,11 @@
 #include "variant"
 #include "array"
 
-odom w2_odom;
+odom w2_odom; // odom class init
+double gx; // global X
+double gy; // global Y
 
-double gx;
-double gy;
-
-odom::odom(){
+odom::odom(){ // Odometry Constructor setting up all values for odom logic
   w2_odom.deltaArcLength                              = 0;
   w2_odom.previousArcLength                           = 0;
   w2_odom.currentarclength                            = 0;
@@ -92,11 +91,11 @@ void odom::Odometry(){
   w2_odom.d_totalRotationTheta += w2_odom.d_rotationTheta;
 
 
-  w2_odom.d_deltaX = ((w2_odom.d_deltaForward) * 1 * -sin(-theta));
-  w2_odom.d_deltaY = ((w2_odom.d_deltaForward) * 1 * cos(-theta));
+  // w2_odom.d_deltaX = ((w2_odom.d_deltaForward) * 1 * -sin(-theta));
+  // w2_odom.d_deltaY = ((w2_odom.d_deltaForward) * 1 * cos(-theta));
 
-  // w2_odom.d_deltaX = ((w2_odom.d_deltaForward) * 1 * -sin(-theta)) - ((w2_odom.d_deltaCenter - w2_odom.deltaArcLength) * 1 * -cos(-theta));
-  // w2_odom.d_deltaY = ((w2_odom.d_deltaForward) * 1 * cos(-theta)) - ((w2_odom.d_deltaCenter - w2_odom.deltaArcLength) * 1 * -sin(-theta));
+  w2_odom.d_deltaX = ((w2_odom.d_deltaForward) * 1 * -sin(-theta)) - ((w2_odom.d_deltaCenter - w2_odom.deltaArcLength) * 1 * -cos(-theta));
+  w2_odom.d_deltaY = ((w2_odom.d_deltaForward) * 1 * cos(-theta)) - ((w2_odom.d_deltaCenter - w2_odom.deltaArcLength) * 1 * -sin(-theta));
 
   gx = gx + w2_odom.d_deltaX;
   gy = gy + w2_odom.d_deltaY;

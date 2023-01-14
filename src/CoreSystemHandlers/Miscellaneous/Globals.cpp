@@ -41,17 +41,18 @@
 // PROGRAMMING ROBOT GLOBALS
 ////////////////////////////
 
+// // Motors
 pros::Motor DriveFrontLeft(11, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS);
 pros::Motor DriveFrontRight(20, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_COUNTS);
 pros::Motor DriveBackLeft(3, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS);
-pros::Motor DriveBackRight(4, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_COUNTS);
+pros::Motor DriveBackRight(2, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_COUNTS);
 pros::Motor DriveMidLeft(17, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_COUNTS);
 pros::Motor DriveMidRight(16, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS);
 
-pros::Motor OuterShooter(19, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS);
+pros::Motor OuterShooter(4, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_COUNTS);
 pros::Motor InnerShooter(14, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS);
 pros::Motor DiskIntakeBot(15, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS);
-pros::Motor DiskIntakeTop(2, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS);
+pros::Motor DiskIntakeTop(34, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS);
 
 // // Pistons
 pros::ADIDigitalOut Launcher('n');
@@ -73,5 +74,3 @@ pros::Vision vision_sensor(3);
 // Switches
 pros::ADIDigitalIn AutonSwitchForward('a');
 pros::ADIDigitalIn AutonSwitchBackward('b');
-
-//

@@ -2,12 +2,12 @@
 
 // vision control concept. No actual implementation yet
 void vision_main_red(){
-    const int maxlimit      = 150;
-    const int minlimit      = -150;
-    const int lockrange     = 80;
-    const int defx          = 33; // || 37;
-    const int defy          = 31488; // || 18688;
-    const int redSIGint     = 1;
+    constexpr int maxlimit      = 150;
+    constexpr int minlimit      = -150;
+    constexpr int lockrange     = 80;
+    constexpr int defx          = 33; // || 37;
+    constexpr int defy          = 31488; // || 18688;
+    constexpr int redSIGint     = 1;
 
     int prevX               = 0;
     int prevY               = 0;
@@ -22,18 +22,10 @@ void vision_main_red(){
     xcoord = 0;
     ycoord = 0;
 
-    if ((xcoord == defx) && (ycoord == defy)) {
-        // pros::lcd::print(3, "Past limit, idle");
-    }
-    else if((xcoord < lockrange) && (xcoord > -lockrange)){
-        // pros::lcd::print(3, "Decision Overrided: Locked on");    
-    }
-    else if ((xcoord > 0) && (xcoord > lockrange) && (xcoord != defx)) {
-        // pros::lcd::print(3, "Action: Move turret right");
-    }
-    else if((xcoord < 0) && (xcoord < -lockrange) && (xcoord != defx)) {
-        // (3, "Action: Move turret left");
-    }
+    if ((xcoord == defx) && (ycoord == defy)) {} // idle
+    else if((xcoord < lockrange) && (xcoord > -lockrange)){} // Locked on
+    else if ((xcoord > 0) && (xcoord > lockrange) && (xcoord != defx)) {} // Move turret right
+    else if((xcoord < 0) && (xcoord < -lockrange) && (xcoord != defx)) {} // Move turret left
     else{
         // pros::lcd::print(3, "Action: Spin Idle");
     }

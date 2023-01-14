@@ -4,6 +4,7 @@
 #include "array"
 
 // Class init
+FinalizeAuton data;
 TranslationPID mov_t;
 RotationPID rot_r;
 CurvePID cur_c;
@@ -30,7 +31,7 @@ ArcPID::ArcPID(){ // Arc PID Constructor
 }
 
 // Set the drivetrain constants (wheel size, motor cartridge, etc)
-void TranslationPID::set_dt_constants(double n_wheelDiameter, double n_gearRatio, double n_motorCartridge){
+void TranslationPID::set_dt_constants(const double n_wheelDiameter, const double n_gearRatio, const double n_motorCartridge){
   mov_t.wheelDiameter = n_wheelDiameter;
   mov_t.ratio = n_gearRatio;
   mov_t.cartridge = n_motorCartridge;
@@ -79,7 +80,7 @@ void ArcPID::reset_a_alterables(){
 }
 
 // Set translation PID constants
-void TranslationPID::set_t_constants(double kp, double ki, double kd, double r_kp){
+void TranslationPID::set_t_constants(const double kp, const double ki, const double kd, const double r_kp){
   mov_t.t_kp = kp;
   mov_t.t_ki = ki;
   mov_t.t_kd = kd;
@@ -87,28 +88,28 @@ void TranslationPID::set_t_constants(double kp, double ki, double kd, double r_k
 }
 
 // Set rotation PID constants
-void RotationPID::set_r_constants(double kp, double ki, double kd){
+void RotationPID::set_r_constants(const double kp, const double ki, const double kd){
   rot_r.r_kp = kp;
   rot_r.r_ki = ki;
   rot_r.r_kd = kd;
 }
 
 // Set curve PID constants
-void CurvePID::set_c_constants(double kp, double ki, double kd){
+void CurvePID::set_c_constants(const double kp, const double ki, const double kd){
   cur_c.c_kp = kp;
   cur_c.c_ki = ki;
   cur_c.c_kd = kd;
 }
 
 // Set arc PID constants
-void ArcPID::set_a_constants(double kp, double ki, double kd){
+void ArcPID::set_a_constants(const double kp, const double ki, const double kd){
   arc_a.a_kp = kp;
   arc_a.a_ki = ki;
   arc_a.a_kd = kd;
 }
 
 // Find min angle between target angle and currrent angle using ANGLE WRAPPED SYSTEM
-double TranslationPID::find_min_angle(int targetHeading, int currentrobotHeading){
+double TranslationPID::find_min_angle(int16_t targetHeading, int16_t currentrobotHeading){
   double turnAngle = targetHeading - currentrobotHeading;
   if (turnAngle > 180 || turnAngle < -180){
     turnAngle = turnAngle - (utility::sgn(turnAngle) * 360);
@@ -198,13 +199,14 @@ void TranslationPID::set_translation_pid(double target, double maxSpeed){
   mov_t.ticks_per_inches = (mov_t.ticks_per_rev / mov_t.circumfrance);
   target *= mov_t.ticks_per_inches;
   while (true){
-    double currentPos = (DriveFrontLeft.get_position() + DriveFrontRight.get_position()) / 2;
-    double vol = mov_t.compute_t(currentPos, target);
+    data.DisplayData();
+    double avgPos = (DriveFrontLeft.get_position() + DriveFrontRight.get_position()) / 2;
+    double avg_voltage_req = mov_t.compute_t(avgPos, target);
     double headingAssist = mov_t.find_min_angle(TARGET_THETA, ImuMon()) * mov_t.t_h_kp;
     cd++; if (cd <= 10){ utility::leftvoltagereq(0); utility::rightvoltagereq(0); continue;}
 
-    utility::leftvoltagereq(vol * (12000.0 / 127) + headingAssist);
-    utility::rightvoltagereq(vol * (12000.0 / 127) - headingAssist);
+    utility::leftvoltagereq(avg_voltage_req * (12000.0 / 127) + headingAssist);
+    utility::rightvoltagereq(avg_voltage_req * (12000.0 / 127) - headingAssist);
     if (fabs(mov_t.t_error) < mov_t.t_error_thresh){ mov_t.t_iterator++; } else { mov_t.t_iterator = 0;}
     if (fabs(mov_t.t_iterator) > mov_t.t_tol){
       utility::stop();
@@ -225,6 +227,7 @@ void RotationPID::set_rotation_pid(double t_theta, double maxSpeed){
   rot_r.reset_r_alterables();
   rot_r.r_maxSpeed = maxSpeed;
   while (true){
+    data.DisplayData();
     double currentPos = imu_sensor.get_rotation();
     double vol = rot_r.compute_r(currentPos, t_theta);
 
@@ -251,6 +254,7 @@ void CurvePID::set_curve_pid(double t_theta, double maxSpeed, double curveDamper
   cur_c.c_maxSpeed = maxSpeed;
   cur_c.c_rightTurn = false;
   while (true){
+    data.DisplayData();
     double currentPos = imu_sensor.get_rotation();
     double vol = cur_c.compute_c(currentPos, t_theta);
 

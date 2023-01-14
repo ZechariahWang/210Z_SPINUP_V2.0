@@ -2,58 +2,49 @@
 #include "map"
 #include "string"
 
-unsigned short int SelectedAuton = 1; // Auton choice
-unsigned short int AutonFinalized = 0; // 0 = false, 1 = true
+constexpr u_int16_t MaxLimit              = 11; // The max limit switches can go up to
+constexpr u_int16_t MinLimit              = 0; // The min limit switches can go up to
+u_int16_t SelectedAuton                   = 1; // Auton choice
+u_int16_t AutonFinalized                  = 0; // 0 = false, 1 = true
+u_int16_t globalAuton                     = 1; // Different auton function depending on selected auton
+u_int16_t counterForward1                 = 0; // Forward counter
+u_int16_t counterBackward2                = 0; // Reverse Counter
+u_int16_t simultaneousInputLimit          = 20; // Limit before simultaneous switch is reverted back
 
-const unsigned short int MaxLimit = 11; // The max limit switches can go up to
-const unsigned short int MinLimit = 0; // The min limit switches can go up to
-
-unsigned short int globalAuton = 1; // Different auton function depending on selected auton
-unsigned short int counterForward1 = 0; // Forward counter
-unsigned short int counterBackward2 = 0; // Reverse Counter
-unsigned short int simultaneousInputLimit = 20; // Limit before simultaneous switch is reverted back
-
-static bool pressed1 = true; // Status of forward switch
-static bool pressed2 = true; // Status of backward switch
-
-static bool currentlyPressed1 = false; // Local switch status
-static bool currentlyPressed2 = false; // Local switch status
+static bool pressed1                      = true; // Status of forward switch
+static bool pressed2                      = true; // Status of backward switch
+static bool currentlyPressed1             = false; // Local switch status
+static bool currentlyPressed2             = false; // Local switch status
 
 char buffer2[100];
-// std::map<int, std::string> auton_Legend = {
-//     { 1, "Right Side" },
-//     { 2, "Left Side" },
-//     { 3, "Solo WP" }
-// };
+std::map<int, std::string> auton_Legend_secondary = {
+    { 1, "Right Side" },
+    { 2, "Left Side" },
+    { 3, "Solo WP" }
+};
 
 void iterate_legend(){
     pros::Mutex mutex;
-    int iterator = 1;
+    u_int16_t iterator = 1;
     while (true){
         mutex.take(1000);
-        // sprintf(buffer, "Auton %d: %s", iterator, auton_Legend[iterator].c_str());
-        // lv_label_set_text(debugLine1, buffer);
-
+        sprintf(buffer2, "Auton %d: %s", iterator, auton_Legend_secondary[iterator].c_str());
+        lv_label_set_text(debugLine1, buffer2);
         iterator++;
         if (iterator > 3){ iterator = 1; }
         if (iterator < 1) { iterator = 3; }
-        if (AutonFinalized == 1){
-            break;
-        }
+        if (AutonFinalized == 1){ break;}
         pros::delay(1000);
         mutex.give();
     }
 }
 
-
-// This funcion receieves input from switches on robot. Used to determine which auton to use. Press both buttons at the same time OR LCD middle button to finalize choice.
-void Init_AutonSwitchMain::ReceiveInput(long int time){
+// This funcion receieves input from lvgl auton selector. Calls the external path connector to run desired auton path.
+void Init_AutonSwitchMain::ReceiveInput(u_int32_t time){
     FinalizeAuton data;
     int currentTime = 0;
-    int iterator = 1;
-    int legend_counter = 0;
-    // sprintf(buffer, SYMBOL_LIST " Selected Path %d: %s", iterator, auton_Legend[iterator].c_str());
-    // lv_label_set_text(debugLine1, buffer);
+    u_int16_t iterator = 1;
+    u_int16_t legend_counter = 0;
     while (currentTime <= time){
         legend_counter++;
     	data.DisplayData();
@@ -66,60 +57,49 @@ void Init_AutonSwitchMain::ReceiveInput(long int time){
             pros::delay(3000);
             break;
         }
-
-        // if (legend_counter >= 300){
-        //     sprintf(buffer, SYMBOL_LIST " Selected Path %d: %s", iterator, auton_Legend[iterator].c_str());
-        //     lv_label_set_text(debugLine1, buffer);
-
-        //     iterator++;
-        //     if (iterator > 3){ iterator = 1; }
-        //     if (iterator < 1) { iterator = 3; }
-        //     if (AutonFinalized == 1){
-        //         break;
-        //     }
-        //     legend_counter = 0;
-        // }
         pros::delay(10);
     }
 }
 
 // This function is for the auton selector, however with no time limit on choosing the desired auton. Will only break out once middle button is pressed.
-void Init_AutonSwitchMain::ReceiveInput_noLimit(long int time){
+void Init_AutonSwitchMain::ReceiveInput_noLimit(int32_t time){
     FinalizeAuton data;
-    int currentTime = 0;
-
+    u_int16_t currentTime = 0;
     while (currentTime <= time){
     	data.DisplayData();
         if (AutonSwitchForward.get_new_press()){
             SelectedAuton += 1;
-            if (SelectedAuton >= MaxLimit){
-                SelectedAuton = 0;
-            }
-            else if (SelectedAuton <= MinLimit){
-                SelectedAuton = 10;
-            }
+            if (SelectedAuton >= MaxLimit){ SelectedAuton = 0; }
+            else if (SelectedAuton <= MinLimit){ SelectedAuton = 10; }
         }
         else if (AutonSwitchBackward.get_new_press()){
             SelectedAuton -= 1;
-            if (SelectedAuton >= MaxLimit){
-                SelectedAuton = 0;
-            }
-            else if (SelectedAuton <= MinLimit){
-                SelectedAuton = 10;
-            }
+            if (SelectedAuton >= MaxLimit){ SelectedAuton = 0; }
+            else if (SelectedAuton <= MinLimit){ SelectedAuton = 10; }
         }
-        else if (AutonSwitchBackward.get_new_press() && AutonSwitchForward.get_new_press()){
-            break;
-        }
-
-        if (AutonFinalized == 1){
-		    pros::delay(2000);
-		   // pros::lcd::print(7, "Entering game phase...");
-            break;
-        }
-
+        else if (AutonSwitchBackward.get_new_press() && AutonSwitchForward.get_new_press()){ break; }
+        if (AutonFinalized == 1){ pros::delay(2000); break; }
         currentTime += 10;
         pros::delay(10);
+    }
+}
+
+// Finalize auton choices
+void FinalizeAuton::SelectAuton(){
+    int16_t chosenAuton = SelectedAuton;
+    switch (chosenAuton) {
+    case 0:  globalAuton = 0;  AutonSelectorPrimary(0);       break;
+    case 1:  globalAuton = 1;  AutonSelectorPrimary(1);       break;
+    case 2:  globalAuton = 2;  AutonSelectorPrimary(2);       break;
+    case 3:  globalAuton = 3;  AutonSelectorPrimary(3);       break;
+    case 4:  globalAuton = 4;  AutonSelectorPrimary(4);       break;
+    case 5:  globalAuton = 5;  AutonSelectorPrimary(5);       break;
+    case 6:  globalAuton = 6;  AutonSelectorPrimary(6);       break;
+    case 7:  globalAuton = 7;  AutonSelectorPrimary(7);       break;
+    case 8:  globalAuton = 8;  AutonSelectorPrimary(8);       break;
+    case 9:  globalAuton = 9;  AutonSelectorPrimary(9);       break;
+    case 10: globalAuton = 10; AutonSelectorPrimary(10);      break;
+    default: globalAuton = 0;  AutonSelectorPrimary(0);       break;
     }
 }
 
@@ -136,75 +116,18 @@ void ResetSensors::ResetAllPrimarySensors(){
     Launcher.set_value(true);
 }
 
-// Finalize auton choices
-void FinalizeAuton::SelectAuton(){
-
-    int chosenAuton = SelectedAuton;
-    switch (chosenAuton)
-    {
-    case 0: // Skills
-        globalAuton = 0;
-        AutonSelectorPrimary(0);
-        break;
-    case 1:
-        globalAuton = 1;
-        AutonSelectorPrimary(1);
-        break;
-    case 2:
-        AutonSelectorPrimary(2);
-        globalAuton = 2;
-        break;
-    case 3:
-        AutonSelectorPrimary(3);
-        globalAuton = 3;
-        break;
-    case 4:
-        AutonSelectorPrimary(4);
-        globalAuton = 4;
-        break;
-    case 5:
-        AutonSelectorPrimary(5);
-        globalAuton = 5;
-        break;
-    case 6:
-        AutonSelectorPrimary(6);
-        globalAuton = 6;
-        break;
-    case 7:
-        AutonSelectorPrimary(7);
-        globalAuton = 7;
-        break;
-    case 8:
-        AutonSelectorPrimary(8);
-        globalAuton = 8;
-        break;
-    case 9:
-        AutonSelectorPrimary(9);
-        globalAuton = 9;
-        break;
-    case 10:
-        AutonSelectorPrimary(10);
-        globalAuton = 10;
-        break;
-    default:
-         AutonSelectorPrimary(0);
-         globalAuton = 0;
-        break;
-    }
-}
-
 // Display chosen auton
 void FinalizeAuton::DisplayCurrentAuton(){
-    //pros::lcd::print(7, "Final Chosen Auton: %d", SelectedAuton);
+	sprintf(buffer2, SYMBOL_LIST " Selected Path %d: %s", SelectedAuton, auton_Legend_secondary[SelectedAuton].c_str());
+    lv_label_set_text(debugLine1, buffer2);
 }
 
 // Display metrics/robot data
 void FinalizeAuton::DisplayData(){
 	char buffer[300];
-
 	sprintf(buffer, SYMBOL_GPS " X: %.2f Y: %.2f Theta: %f", gx, gy, ImuMon());
 	lv_label_set_text(displayDataL5, buffer);
-
+    
 	sprintf(buffer, SYMBOL_WARNING " FL: %.2f BL: %.2f", DriveFrontLeft.get_temperature(), DriveBackLeft.get_temperature());
 	lv_label_set_text(displayDataL4, buffer);
 

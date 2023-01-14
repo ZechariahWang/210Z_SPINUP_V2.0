@@ -11,8 +11,8 @@ class Init_AutonSwitchMain{
     private:
         bool init;
     public:
-        void ReceiveInput(long int time);
-        void ReceiveInput_noLimit(long int time);
+        void ReceiveInput(u_int32_t time);
+        void ReceiveInput_noLimit(int32_t time);
 };
 
 class ResetSensors : public Init_AutonSwitchMain{

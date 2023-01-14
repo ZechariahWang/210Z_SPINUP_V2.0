@@ -3,6 +3,10 @@
 void Run_MTRP_Debug(){ Debug_MTRP(); }
 void Run_PID_Debug(){ PID_Debug(); }
 void StandardAuton(){}
+void __left_side_priority_wp__(){}
+void __right_side_priority_wp__(){}
+void __solo_wp__(){}
+void SkillsPath(){}
 
 void __left_side_priority_points__(){
 	MotionAlgorithms Auton_Framework; // Auton framework class
@@ -67,54 +71,19 @@ void __right_side_priority_points__(){
 	rot.set_rotation_pid(45, 90);
 }
 
-void __left_side_priority_wp__(){
-    
-}
-
-void __right_side_priority_wp__(){
-    
-}
-
-void __solo_wp__(){
-    
-}
-void SkillsPath(){
-    // Skills function will go here
-}
-
-void AutonSelectorPrimary(const int autonType){
-    switch (autonType)
-    {
-    case 0: // doesnt run
-        __left_side_priority_points__();
-        break;
-    case 1:
-		__left_side_priority_points__();
-        break;
-    case 2:
-		__right_side_priority_points__();
-        break;
-    case 3:
-	    __left_side_priority_wp__();
-        break;
-    case 4:
-		__right_side_priority_wp__();
-        break;
-    case 5:
-		__solo_wp__();
-        break;
-    case 6:
-		SkillsPath();
-        break;
-    case 7:
-        break;
-    case 8:
-        break;
-    case 9:
-        break;
-    case 10:
-        break;
-    default:
-        break;
+void AutonSelectorPrimary(const u_int16_t autonType){
+    switch (autonType){
+    case 0:  __left_side_priority_points__();  break;
+    case 1: __left_side_priority_points__();   break;
+    case 2: __right_side_priority_points__();  break;
+    case 3: __left_side_priority_wp__();       break;
+    case 4: __right_side_priority_wp__();      break;
+    case 5: __solo_wp__();                     break;
+    case 6: SkillsPath();                      break;
+    case 7:                                    break;
+    case 8:                                    break;
+    case 9:                                    break;
+    case 10:                                   break;
+    default:                                   break;
     }
 }

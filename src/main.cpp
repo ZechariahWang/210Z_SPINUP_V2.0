@@ -7,8 +7,8 @@
 #include "map"
 #include "string"
 
-const unsigned long int time = 100000; // Time until initialize phase ends. Effectively infinite.
-const unsigned short int delayAmount = 10; // Dont overload the CPU during OP control
+const u_int32_t time = 100000; // Time until initialize phase ends. Effectively infinite.
+const u_int16_t delayAmount = 10; // Dont overload the CPU during OP control
 
 // wheres my dad ඞ
 //-- LVGL object pointer initialization //--
@@ -22,7 +22,6 @@ lv_obj_t *debugLine2;
 lv_obj_t *finalizeAutonButton;
 lv_obj_t *prevAutonButton;
 lv_obj_t *nextAutonButton;
-
 lv_obj_t *infoDisplay;
 lv_obj_t *infoPage = lv_page_create(lv_scr_act(), NULL);
 
@@ -215,89 +214,19 @@ void autonomous(){  // Autonomous function control
 	ArcPID arc;
 	odometry.Odometry();
 	Auton_Framework.overRideCoordinatePos(0, 0);
-	mov.set_dt_constants(2, 1, 600); // Parameters are : Wheel diameter, gear ratio, motor cartridge type
+	mov.set_dt_constants(2.75, 1, 600); // Parameters are : Wheel diameter, gear ratio, motor cartridge type
 	imu_sensor.set_rotation(0);
 	// Init_Process.SelectAuton(); // Enable Auton Selector (STEP 2)
 
+    mov.set_t_constants(0.45, 0, 5, 30);
+	mov.set_translation_pid(72, 60);
 
-    // mov.set_t_constants(0.45, 0, 5, 30);
-	// mov.set_translation_pid(3, 110);
+	rot.set_r_constants(4, 0.003, 35);
+	rot.set_rotation_pid(180, 90);
 
-	// rot.set_r_constants(6, 0.003, 35);
-	// rot.set_rotation_pid(90, 90);
+    mov.set_t_constants(0.45, 0, 5, 30);
+	mov.set_translation_pid(72, 60);
 
-	// mov.set_t_constants(0.45, 0, 5, 1.5);
-	// mov.set_translation_pid(24, 90);
-
-	// mov.set_t_constants(0.45, 0, 5, 1.5);
-	// mov.set_translation_pid(-3, 90);
-
-
-	// rot.set_r_constants(6, 0.003, 35);
-	// rot.set_rotation_pid(-47, 90);
-
-	// mov.set_t_constants(0.45, 0, 5, 30);
-	// mov.set_translation_pid(60, 90);
-
-	// pros::delay(500);
-
-	// rot.set_r_constants(5, 0.003, 35);
-	// rot.set_rotation_pid(45, 90);
-
-	// rot.set_r_constants(5, 0.003, 35);
-	// rot.set_rotation_pid(180, 40);
-
-    // Auton_Framework.set_constants(7, 5, 5, 7);
-    // Auton_Framework.move_to_reference_pose(40, 10, 45, 20);
-
-	// PurePursuit2();
-
-	// pros::delay(1000);
-
-	// rot.set_r_constants(8, 0.003, 35);
-	// rot.set_rotation_pid(-90, 110);
-
-
-    mov.set_t_constants(0.45, 0, 5, 1.5);
-	mov.set_translation_pid(-2, 90);
-
-	cur.set_c_constants(5, 0.003, 35);
-	cur.set_curve_pid(-50, 90, 0);
-
-	pros::delay(500);
-
-    mov.set_t_constants(0.45, 0, 5, 1.5);
-	mov.set_translation_pid(2, 90);
-
-	pros::delay(1000);
-
-    mov.set_t_constants(0.45, 0, 5, 1.5);
-	mov.set_translation_pid(-2, 90);
-
-	pros::delay(500);
-
-	rot.set_r_constants(5, 0.003, 35);
-	rot.set_rotation_pid(45, 90);
-
-	pros::delay(500);
-
-    mov.set_t_constants(0.45, 0, 5, 1.5);
-	mov.set_translation_pid(28, 90);
-
-	pros::delay(500);
-
-	rot.set_r_constants(5, 0.003, 35);
-	rot.set_rotation_pid(-28, 90);
-
-	// PurePursuitTestPath();
-
-	// rot.set_r_constants(5, 0.003, 35);
-	// rot.set_rotation_pid(-90, 90);
-
-	// pros::delay(1000);
-
-	// mov.set_t_constants(0.45, 0, 5, 1.5);
-	// mov.set_translation_pid(-5, 90);
 }
 
 void opcontrol(){ // Driver control function
@@ -305,18 +234,19 @@ void opcontrol(){ // Driver control function
 	MotionAlgorithms Auton_Framework; // Auton framework class
 	Init_AutonSwitchMain Init; // Init class framework
 	FinalizeAuton data; // Data class
-	odom odometry;
-	char buffer[300];
+	odom odometry; // Odom class
+	char buffer[300]; // Display Buffer
 	while (true){
 		mov.dt_Control(); // Drivetrain control
 		mov.power_intake(); // Intake control
 		mov.launch_disk(); // Disk control
 		mov.set_power_amount(); // Power control
-		mov.power_shooter(); // Shooter control OVERRIDE 
-		mov.set_motor_type();
-		mov.init_expansion();
+		mov.on_off_controller(); // Bang bang controller
+		mov.set_motor_type(); // Set motor brake type
+		mov.init_expansion(); // Initiate expansion
+		// mov.power_shooter(); // Shooter control OVERRIDE 
 
-		odometry.Odometry();
+		odometry.Odometry(); // Odometry logic
 		data.DisplayData(); // Display robot stats and info
 		pros::delay(delayAmount); // Dont hog CPU ;)
 	}
@@ -324,4 +254,3 @@ void opcontrol(){ // Driver control function
 
 //lol ඞ
 //background as black as kartik
-// yes yesssss

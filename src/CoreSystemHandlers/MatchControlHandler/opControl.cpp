@@ -2,32 +2,41 @@
 #include "pros/misc.h"
 #include "pros/motors.h"
 
-match_mov mov;
+match_mov mov; // Op Control class init
+MotionAlgorithms t;
+match_mov::match_mov(){mov.p_set = 0.6;} // Class Constructor
+static bool expansionSet           = true;  // Expansion value
+static bool PHASE_ONE              = false; // Expansion failsafe setback 1
+static bool PHASE_TWO              = false; // Expansion failsafe setback 2
+static bool maxPowerEnabled        = true;  // Max Power Setting
+static bool maxIntakePowerEnabled  = true;  // Max Intake Setting
 
-match_mov::match_mov(){
-    mov.p_set = 0.6;
-}
+u_int16_t expansionCounter = 0; // Expansion power
+u_int16_t speed_bang = 127; // Flywheel acceleration
 
 // The og code, standard h-drive control
 void match_mov::dt_Control(){
-    double leftYjoystick  = (double)(controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y)); // Axis 3
-    double leftXjoystick  = (double)(controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X)); // Axis 4
-    double rightYjoystick = (double)(controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y)); // Axis 2
-    double rightXjoystick = (double)(controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X)); // Axis 1
-    if(fabs(leftYjoystick) < 10) leftYjoystick = 0;
-    if(fabs(rightYjoystick) < 10) rightYjoystick = 0;
+    int32_t rightXjoystick = (controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X)); // Axis 1
+    int32_t rightYjoystick = (controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y)); // Axis 2
+    int32_t leftYjoystick  = (controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y)); // Axis 3
+    int32_t leftXjoystick  = (controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X)); // Axis 4
+    if(abs(leftYjoystick) < 10) leftYjoystick = 0;
+    if(abs(rightYjoystick) < 10) rightYjoystick = 0;
 
-    double left = (rightXjoystick + leftYjoystick) * (12000.0 / 127);
-    double right = (leftYjoystick - rightXjoystick) * (12000.0 / 127);
+    int32_t left = (rightXjoystick + leftYjoystick) * (12000.0 / 127);
+    int32_t right = (leftYjoystick - rightXjoystick) * (12000.0 / 127);
     utility::leftvoltagereq(left);
     utility::rightvoltagereq(right);
 }
 
-// Power shooter function
-void match_mov::power_shooter(){
+void match_mov::on_off_controller(){
     if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){
-        OuterShooter.move_voltage(12000 * mov.p_set);
-        InnerShooter.move_voltage(12000 * mov.p_set);
+        if (OuterShooter.get_voltage() > ((90 * (12000.0 / 127)))){
+            OuterShooter.move_voltage((127 * (12000.0 / 127)) - 100);
+        }
+        else if (OuterShooter.get_voltage() < (90 * (12000.0 / 127))){
+            OuterShooter.move_voltage((127 * (12000.0 / 127)) + 100);
+        }
     }
     else{
         OuterShooter.move_voltage(0);
@@ -35,8 +44,12 @@ void match_mov::power_shooter(){
     }
 }
 
-// Power intake function
-void match_mov::power_intake(){
+void match_mov::power_shooter(){ // Power shooter function
+    if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){OuterShooter.move_voltage(12000 * mov.p_set); InnerShooter.move_voltage(12000 * mov.p_set);}
+    else{ OuterShooter.move_voltage(0); InnerShooter.move_voltage(0);}
+}
+
+void match_mov::power_intake(){ // Power intake function
     if ((controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2))){
         DiskIntakeTop.move_voltage(12000 * mov.it_ps);
         DiskIntakeBot.move_voltage(12000);
@@ -51,8 +64,7 @@ void match_mov::power_intake(){
     }
 }
 
-// Launch disk/piston control function
-void match_mov::launch_disk(){
+void match_mov::launch_disk(){ // Launch disk/piston control function
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1)){
         mov.l_stat = !mov.l_stat;
         Launcher.set_value(mov.l_stat);
@@ -65,10 +77,10 @@ void match_mov::launch_disk(){
     }
 }
 
-// Function for changing power of flywheel
-bool maxPowerEnabled = true;
-bool maxIntakePowerEnabled = true;
-void match_mov::set_power_amount(){
+void match_mov::set_power_amount(){ // Function for changing power of flywheel
+    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)){
+        t.TurnToPoint(50, 0);
+    }
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)){
         maxPowerEnabled = !maxPowerEnabled;
         if (maxPowerEnabled) mov.p_set = 0.6;
@@ -118,25 +130,14 @@ void match_mov::set_motor_type(){
     }
 }
 
-bool expansionSet = true;
-bool rightstat = false;
-bool ystat = false;
-int expansionCounter = 0;
 void match_mov::init_expansion(){
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT)){
-        rightstat = true;
-    }
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y)){
-        ystat = true;
-    }
-    if (ystat && rightstat) Expansion.set_value(false);
+    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT)){ PHASE_ONE = true; }
+    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y)){ PHASE_TWO = true; }
+    if (PHASE_ONE && PHASE_TWO) Expansion.set_value(false);
 }
 
 void ForceReset(){
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT)){
-        gx = 0;
-        gy = 0;
-    }
+    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT)){ gx = 0; gy = 0; }
 }
 
 
