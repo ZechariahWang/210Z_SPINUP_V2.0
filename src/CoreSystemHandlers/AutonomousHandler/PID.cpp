@@ -190,7 +190,7 @@ void TranslationPID::set_translation_pid(double target, double maxSpeed){
   mov_t.reset_t_alterables();
   double TARGET_THETA = ImuMon();
   double POSITION_TARGET = target;
-  double cd = 0;
+  int8_t cd = 0;
   mov_t.t_maxSpeed = maxSpeed;
   mov_t.circumfrance = mov_t.wheelDiameter * M_PI;
   mov_t.ticks_per_rev = (50.0 * (3600.0 / mov_t.cartridge) * mov_t.ratio);

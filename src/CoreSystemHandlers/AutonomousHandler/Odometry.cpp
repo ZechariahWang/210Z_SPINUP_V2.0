@@ -36,6 +36,7 @@ odom::odom(){ // Odometry Constructor setting up all values for odom logic
   w2_odom.d_previousOTheta                            = 0;
   w2_odom.d_previoustheta                             = 0;
   w2_odom.counter                                     = 0;
+  
 }
 
 // Global heading function. Essentially, consider this the robots current heading.

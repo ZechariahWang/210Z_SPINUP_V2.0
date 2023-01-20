@@ -7,8 +7,8 @@
 #include "map"
 #include "string"
 
-const u_int32_t time = 100000; // Time until initialize phase ends. Effectively infinite.
-const u_int16_t delayAmount = 10; // Dont overload the CPU during OP control
+constexpr u_int32_t time = 100000; // Time until initialize phase ends. Effectively infinite.
+constexpr u_int16_t delayAmount = 10; // Dont overload the CPU during OP control
 
 // wheres my dad ඞ
 //-- LVGL object pointer initialization //--
@@ -27,13 +27,13 @@ lv_obj_t *infoPage = lv_page_create(lv_scr_act(), NULL);
 
 char buffer[100];
 std::map<int, std::string> auton_Legend = {
-    { 1, "Left Side Priority: Points" },
-    { 2, "Right Side Priority: Points" },
-    { 3, "Left Side Priority: WP" },
-	{ 4, "Right Side Priority: WP " },
-    { 5, "Solo Win Point (Left Side)" },
-    { 6, "Skills" },
-    { 7, "Empty Slot" },
+    { 1, "Solo Win Point" },
+    { 2, "Left Side Priority: Eight Disks" },
+    { 3, "Left Side Priority: Five Disks" },
+	{ 4, "Left Side Priority: Single Roller " },
+    { 5, "Right Side Priority: Eight Disks" },
+    { 6, "Right Side Priority: Five Disks" },
+    { 7, "Right Side Priority: Single Roller" },
     { 8, "Empty Slot" },
     { 9, "Empty Slot" },
     { 10, "Empty Slot" }
@@ -42,9 +42,7 @@ std::map<int, std::string> auton_Legend = {
 //-- LVGL on input functions //--
 static lv_res_t btn_rel_action(lv_obj_t *btn){
 	static bool pressed = true;
-	if (pressed) {
-		AutonFinalized = 1;
-	} 
+	if (pressed) { AutonFinalized = 1; } 
 	return 0;
 }
 
@@ -85,6 +83,7 @@ static lv_res_t onNextPress(lv_obj_t *btn){
 }
 
 void initialize() { // Init function control
+
 	//-- New style initiation //--
     static lv_style_t style_new;                         
     lv_style_copy(&style_new, &lv_style_pretty);         
@@ -275,10 +274,10 @@ void opcontrol(){ // Driver control function
 		mov.power_intake(); // Intake control
 		mov.launch_disk(); // Disk control
 		mov.set_power_amount(); // Power control
-		mov.on_off_controller(); // Bang bang controller
+		//mov.on_off_controller(); // Bang bang controller
 		mov.set_motor_type(); // Set motor brake type
 		mov.init_expansion(); // Initiate expansion
-		// mov.power_shooter(); // Shooter control OVERRIDE 
+		mov.power_shooter(); // Shooter control OVERRIDE 
 
 		odometry.Odometry(); // Odometry logic
 		data.DisplayData(); // Display robot stats and info

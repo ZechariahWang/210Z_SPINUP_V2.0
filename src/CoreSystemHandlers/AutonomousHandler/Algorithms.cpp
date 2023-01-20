@@ -5,14 +5,14 @@
 #include "algorithm"
 
 // Find min angle between target heading and current heading
-double find_min_angle(int16_t targetHeading, int16_t currentrobotHeading){
+double find_min_angle(const int16_t targetHeading, const int16_t currentrobotHeading){
   double turnAngle = targetHeading - currentrobotHeading;
   if (turnAngle > 180 || turnAngle < -180){ turnAngle = turnAngle - (utility::sgn(turnAngle) * 360); }
   return turnAngle;
 }
 
-int radian_to_degrees(double angle) { return angle * 180 / M_PI; } // convert radian to degrees
-int degrees_to_radians(double angle){ return angle * M_PI / 180; } // Convert degrees to radian
+int16_t radian_to_degrees(const double angle) { return angle * 180 / M_PI; } // convert radian to degrees
+int16_t degrees_to_radians(const double angle){ return angle * M_PI / 180; } // Convert degrees to radian
 
 MotionAlgorithms mtp; // move to point class material theme ocean
 
@@ -37,7 +37,7 @@ void MotionAlgorithms::reset_swing_alterables(){ // Reset mtp values
 }
 
 // Move to reference pose algorithm
-void MotionAlgorithms::move_to_reference_pose(double targetX, double targetY, double targetHeading, double radius){
+void MotionAlgorithms::move_to_reference_pose(const double targetX, const double targetY, const double targetHeading, const double radius){
   MotionAlgorithms Auton_Framework;
   FinalizeAuton data;
   odom odometry;
@@ -71,9 +71,9 @@ void MotionAlgorithms::move_to_reference_pose(double targetX, double targetY, do
     }
     // if (fabs(linearVel) > (90 * (12000.0 / 127))) { linearVel = 90 * (12000.0 / 127); }
 
-    u_int16_t left_volage = linearVel + turnVel;
-    u_int16_t right_voltage = linearVel - turnVel;
-    u_int16_t linError_f = sqrt(pow(targetX - gx, 2) + pow(targetY - gy, 2));
+    int16_t left_volage = linearVel + turnVel;
+    int16_t right_voltage = linearVel - turnVel;
+    int16_t linError_f = sqrt(pow(targetX - gx, 2) + pow(targetY - gy, 2));
 
     utility::leftvoltagereq(left_volage * (12000.0) / 127);
     utility::rightvoltagereq(right_voltage * (12000.0 / 127));
@@ -93,7 +93,7 @@ void MotionAlgorithms::move_to_reference_pose(double targetX, double targetY, do
 }
 
 // Swing to desired point
-void MotionAlgorithms::swing_to_point(double tx, double ty, double swingDamper){
+void MotionAlgorithms::swing_to_point(const double tx, const double ty, const double swingDamper){
   mtp.reset_swing_alterables();
   double defaultVoltage = 40;
   double abstargetAngle = atan2f(tx - gx, ty - gy) * 180 / M_PI;
@@ -104,13 +104,13 @@ void MotionAlgorithms::swing_to_point(double tx, double ty, double swingDamper){
 }
 
 // Curve to desired point
-void curve_to_point(double tx, double ty, double curveDamper){
+void curve_to_point(const double tx, const double ty, const double curveDamper){
   utility::leftvoltagereq(100 * (12000.0 / 127));
   utility::rightvoltagereq(100 * (12000.0 / 127));
 }
 
 // Turn to target coordinate position
-void MotionAlgorithms::TurnToPoint(int targetX, int targetY){
+void MotionAlgorithms::TurnToPoint(const int targetX, const int targetY){
   odom odometry;
   RotationPID rot;
   odometry.Odometry();

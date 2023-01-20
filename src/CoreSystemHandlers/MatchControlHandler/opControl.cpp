@@ -4,15 +4,16 @@
 
 match_mov mov; // Op Control class init
 MotionAlgorithms t;
-match_mov::match_mov(){mov.p_set = 0.6;} // Class Constructor
+match_mov::match_mov(){ mov.p_set = 1; mov.it_ps = 1; } // Class Constructor
+
 static bool expansionSet           = true;  // Expansion value
 static bool PHASE_ONE              = false; // Expansion failsafe setback 1
 static bool PHASE_TWO              = false; // Expansion failsafe setback 2
 static bool maxPowerEnabled        = true;  // Max Power Setting
 static bool maxIntakePowerEnabled  = true;  // Max Intake Setting
 
-u_int16_t expansionCounter = 0; // Expansion power
-u_int16_t speed_bang = 127; // Flywheel acceleration
+u_int16_t expansionCounter         = 0; // Expansion power
+u_int16_t speed_bang               = 127; // Flywheel acceleration
 
 // The og code, standard h-drive control
 void match_mov::dt_Control(){
@@ -31,22 +32,24 @@ void match_mov::dt_Control(){
 
 void match_mov::on_off_controller(){
     if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){
-        if (OuterShooter.get_voltage() > ((90 * (12000.0 / 127)))){
-            OuterShooter.move_voltage((127 * (12000.0 / 127)) - 100);
+        if (abs(OuterShooter.get_voltage()) > ((127 * (12000.0 / 127)))){
+            OuterShooter.move_voltage((-127 * (12000.0 / 127)));
         }
-        else if (OuterShooter.get_voltage() < (90 * (12000.0 / 127))){
-            OuterShooter.move_voltage((127 * (12000.0 / 127)) + 100);
+        else if (abs(OuterShooter.get_voltage()) < (127 * (12000.0 / 127))){
+            OuterShooter.move_voltage((-127 * (12000.0 / 127)));
         }
     }
-    else{
-        OuterShooter.move_voltage(0);
-        InnerShooter.move_voltage(0);
-    }
+    else{ OuterShooter.move_voltage(0); }
+    std::cout << OuterShooter.get_voltage() << std::endl;
 }
 
 void match_mov::power_shooter(){ // Power shooter function
-    if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){OuterShooter.move_voltage(12000 * mov.p_set); InnerShooter.move_voltage(12000 * mov.p_set);}
+    if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){
+        OuterShooter.move_voltage(-12000 * mov.p_set);
+        InnerShooter.move_voltage(-12000 * mov.p_set);
+    }
     else{ OuterShooter.move_voltage(0); InnerShooter.move_voltage(0);}
+    std::cout << OuterShooter.get_voltage() << std::endl;
 }
 
 void match_mov::power_intake(){ // Power intake function
@@ -58,10 +61,7 @@ void match_mov::power_intake(){ // Power intake function
         DiskIntakeTop.move_voltage(-12000 * mov.it_ps);
         DiskIntakeBot.move_voltage(-12000);
     }
-    else{
-        DiskIntakeTop.move_voltage(0);
-        DiskIntakeBot.move_voltage(0);
-    }
+    else{ DiskIntakeTop.move_voltage(0); DiskIntakeBot.move_voltage(0); }
 }
 
 void match_mov::launch_disk(){ // Launch disk/piston control function
@@ -79,7 +79,7 @@ void match_mov::launch_disk(){ // Launch disk/piston control function
 
 void match_mov::set_power_amount(){ // Function for changing power of flywheel
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)){
-        t.TurnToPoint(50, 0);
+        // t.TurnToPoint(50, 0);
     }
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)){
         maxPowerEnabled = !maxPowerEnabled;

@@ -3,16 +3,16 @@
 #include "string"
 
 constexpr u_int16_t MaxLimit              = 11; // The max limit switches can go up to
-constexpr u_int16_t MinLimit              = 0; // The min limit switches can go up to
-u_int16_t SelectedAuton                   = 1; // Auton choice
-u_int16_t AutonFinalized                  = 0; // 0 = false, 1 = true
-u_int16_t globalAuton                     = 1; // Different auton function depending on selected auton
-u_int16_t counterForward1                 = 0; // Forward counter
-u_int16_t counterBackward2                = 0; // Reverse Counter
+constexpr u_int16_t MinLimit              = 0;  // The min limit switches can go up to
+u_int16_t SelectedAuton                   = 1;  // Auton choice
+u_int16_t AutonFinalized                  = 0;  // 0 = false, 1 = true
+u_int16_t globalAuton                     = 1;  // Different auton function depending on selected auton
+u_int16_t counterForward1                 = 0;  // Forward counter
+u_int16_t counterBackward2                = 0;  // Reverse Counter
 u_int16_t simultaneousInputLimit          = 20; // Limit before simultaneous switch is reverted back
 
-static bool pressed1                      = true; // Status of forward switch
-static bool pressed2                      = true; // Status of backward switch
+static bool pressed1                      = true;  // Status of forward switch
+static bool pressed2                      = true;  // Status of backward switch
 static bool currentlyPressed1             = false; // Local switch status
 static bool currentlyPressed2             = false; // Local switch status
 
