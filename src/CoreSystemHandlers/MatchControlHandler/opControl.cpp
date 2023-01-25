@@ -11,9 +11,11 @@ static bool PHASE_ONE              = false; // Expansion failsafe setback 1
 static bool PHASE_TWO              = false; // Expansion failsafe setback 2
 static bool maxPowerEnabled        = true;  // Max Power Setting
 static bool maxIntakePowerEnabled  = true;  // Max Intake Setting
+static bool arcLaunchToggle        = false;
 
 u_int16_t expansionCounter         = 0; // Expansion power
 u_int16_t speed_bang               = 127; // Flywheel acceleration
+u_int16_t shot_iteration_counter    = 0;
 
 // The og code, standard h-drive control
 void match_mov::dt_Control(){
@@ -32,11 +34,24 @@ void match_mov::dt_Control(){
 
 void match_mov::on_off_controller(){
     if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){
-        if (abs(OuterShooter.get_voltage()) > ((127 * (12000.0 / 127)))){
-            OuterShooter.move_voltage((-127 * (12000.0 / 127)));
+        if (abs(OuterShooter.get_voltage()) > ((90 * (12000.0 / 127)))){
+            OuterShooter.move_voltage((90 * (12000.0 / 127)));
         }
-        else if (abs(OuterShooter.get_voltage()) < (127 * (12000.0 / 127))){
-            OuterShooter.move_voltage((-127 * (12000.0 / 127)));
+        else if (abs(OuterShooter.get_voltage()) < (90 * (12000.0 / 127))){
+            OuterShooter.move_voltage((127 * (12000.0 / 127)));
+        }
+    }
+    else{ OuterShooter.move_voltage(0); }
+    std::cout << OuterShooter.get_voltage() << std::endl;
+}
+
+void match_mov::on_off_v2(){
+    if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){
+        if (abs(OuterShooter.get_voltage()) > (12000 * mov.p_set)){
+            OuterShooter.move_voltage(12000 * mov.p_set);
+        }
+        else if (abs(OuterShooter.get_voltage()) < (12000 * mov.p_set)){
+            OuterShooter.move_voltage(12000);
         }
     }
     else{ OuterShooter.move_voltage(0); }
@@ -45,11 +60,18 @@ void match_mov::on_off_controller(){
 
 void match_mov::power_shooter(){ // Power shooter function
     if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){
-        OuterShooter.move_voltage(-12000 * mov.p_set);
-        InnerShooter.move_voltage(-12000 * mov.p_set);
+        OuterShooter.move_voltage(12000 * mov.p_set);
+        InnerShooter.move_voltage(12000 * mov.p_set);
     }
     else{ OuterShooter.move_voltage(0); InnerShooter.move_voltage(0);}
     std::cout << OuterShooter.get_voltage() << std::endl;
+}
+
+void match_mov::misc_control(){
+    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)) {
+        arcLaunchToggle = !arcLaunchToggle;
+        YaoMing.set_value(arcLaunchToggle);
+    }
 }
 
 void match_mov::power_intake(){ // Power intake function
@@ -67,20 +89,19 @@ void match_mov::power_intake(){ // Power intake function
 void match_mov::launch_disk(){ // Launch disk/piston control function
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1)){
         mov.l_stat = !mov.l_stat;
-        Launcher.set_value(mov.l_stat);
+        Angler.set_value(mov.l_stat); 
     }
-    if (mov.l_stat == false) mov.launch_iterator++;
-    if (mov.launch_iterator > 10){
+    if (mov.l_stat == false){ mov.launch_iterator++; shot_iteration_counter++; }
+    if (shot_iteration_counter > 20){ DiskIntakeTop.move_voltage((-127 * (12000.0 / 127)) * mov.it_ps); } // wait for piston to fully extend before moving motors
+    if (mov.launch_iterator > 150){ // Reset after a moment
         mov.l_stat = !mov.l_stat;
-        Launcher.set_value(mov.l_stat); 
+        DiskIntakeTop.move_voltage(0); Angler.set_value(mov.l_stat); 
         mov.launch_iterator = 0;
+        shot_iteration_counter = 0;
     }
 }
 
 void match_mov::set_power_amount(){ // Function for changing power of flywheel
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)){
-        // t.TurnToPoint(50, 0);
-    }
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)){
         maxPowerEnabled = !maxPowerEnabled;
         if (maxPowerEnabled) mov.p_set = 0.6;
@@ -95,11 +116,6 @@ void match_mov::set_power_amount(){ // Function for changing power of flywheel
         mov.p_set -= 0.05;
         if (mov.p_set> 1) mov.p_set = 0;
         else if (mov.p_set < 0) mov.p_set = 1;
-    }
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)){
-        maxIntakePowerEnabled = !maxIntakePowerEnabled;
-        if (maxIntakePowerEnabled) mov.it_ps = 1;
-        else mov.it_ps = 0.6;
     }
     controller.print(1, 0, "FW: %.2f SD: %f", mov.p_set, mov.it_ps);
 }

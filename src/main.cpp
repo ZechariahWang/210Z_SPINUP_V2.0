@@ -28,12 +28,12 @@ lv_obj_t *infoPage = lv_page_create(lv_scr_act(), NULL);
 char buffer[100];
 std::map<int, std::string> auton_Legend = {
     { 1, "Solo Win Point" },
-    { 2, "Left Side Priority: Eight Disks" },
-    { 3, "Left Side Priority: Five Disks" },
-	{ 4, "Left Side Priority: Single Roller " },
-    { 5, "Right Side Priority: Eight Disks" },
-    { 6, "Right Side Priority: Five Disks" },
-    { 7, "Right Side Priority: Single Roller" },
+    { 2, "LS Priority: Eight Disks" },
+    { 3, "LS Priority: Five Disks" },
+	{ 4, "LS Priority: Single Roller " },
+    { 5, "RS Priority: Eight Disks" },
+    { 6, "RS Priority: Five Disks" },
+    { 7, "RS Priority: Single Roller" },
     { 8, "Empty Slot" },
     { 9, "Empty Slot" },
     { 10, "Empty Slot" }
@@ -184,6 +184,7 @@ void initialize() { // Init function control
 	Init_Process.ResetAllPrimarySensors();
     Expansion.set_value(true);
 	Launcher.set_value(true);
+    Angler.set_value(true); 
 	OuterShooter.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 	InnerShooter.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 	DriveFrontLeft.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
@@ -202,6 +203,18 @@ void disabled() {}
 void competition_initialize() {}
 //------------------------------\*
 
+void shoot_iterator(){
+    Angler.set_value(false); 
+	pros::delay(200);
+	DiskIntakeTop.move_voltage(-40 * (12000.0 / 127));
+	pros::delay(2500);
+    DiskIntakeTop.move_voltage(12000);
+	Angler.set_value(true); 
+}
+
+// 90 DEGREE CONSTANTS: 6, 0, 45
+// 45 DEGREE CONSTANTS: 6, 0.003, 35
+
 // PID UNITS ARE IN INCHES
 void autonomous(){  // Autonomous function control
 	MotionAlgorithms Auton_Framework; // Auton framework class
@@ -213,52 +226,52 @@ void autonomous(){  // Autonomous function control
 	ArcPID arc;
 	odometry.Odometry();
 	Auton_Framework.overRideCoordinatePos(0, 0);
-	mov.set_dt_constants(2.75, 1, 600); // Parameters are : Wheel diameter, gear ratio, motor cartridge type
+	mov.set_dt_constants(3.125, 1.6, 600); // Parameters are : Wheel diameter, gear ratio, motor cartridge type
 	imu_sensor.set_rotation(0);
-	// Init_Process.SelectAuton(); // Enable Auton Selector (STEP 2)
+	// Init_Process.ReceiveInput(time); // Enabled Auton Selector (STEP 1) ONLY FOR PROTOTYPE USE
+	// Init_Process.SelectAuton(); // Enable Auton Selector (STEP 2) no
 
-    mov.set_t_constants(0.45, 0, 5, 30);
-	mov.set_translation_pid(36, 60);
+    DiskIntakeTop.move_voltage(12000);
+    OuterShooter.move_voltage(12000);
+	YaoMing.set_value(true);
 
-	pros::delay(500);
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(25, 70);
 
-	rot.set_r_constants(5, 0.003, 35);
-	rot.set_rotation_pid(20, 90);
-
-	pros::delay(500);
-
-	rot.set_r_constants(5, 0.003, 35);
+	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(-45, 90);
 
-	pros::delay(500);
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(-34, 70);
 
-    mov.set_t_constants(0.45, 0, 5, 30);
-	mov.set_translation_pid(24, 60);
+    DiskIntakeTop.move_voltage(12000);
 
-	pros::delay(500);
-
-	rot.set_r_constants(5, 0.003, 35);
-	rot.set_rotation_pid(45, 90);
-
-	pros::delay(500);
-
-	rot.set_r_constants(5, 0.003, 35);
-	rot.set_rotation_pid(-45, 90);
-
-	pros::delay(500);
-
-    mov.set_t_constants(0.45, 0, 5, 30);
-	mov.set_translation_pid(-72, 60);
-
-	pros::delay(500);
-
-	rot.set_r_constants(5, 0.003, 35);
+	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(0, 90);
 
-	pros::delay(500);
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(-5, 70);
 
-    mov.set_t_constants(0.45, 0, 5, 30);
-	mov.set_translation_pid(-5, 60);
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(8, 70);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(10, 90);
+	pros::delay(2500);
+
+	shoot_iterator();
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(-45, 90);
+	DiskIntakeTop.move_voltage(12000);
+
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(65, 70);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(42, 90);
+
+	shoot_iterator();
 
 }
 
@@ -274,10 +287,12 @@ void opcontrol(){ // Driver control function
 		mov.power_intake(); // Intake control
 		mov.launch_disk(); // Disk control
 		mov.set_power_amount(); // Power control
-		//mov.on_off_controller(); // Bang bang controller
+		mov.misc_control();
 		mov.set_motor_type(); // Set motor brake type
 		mov.init_expansion(); // Initiate expansion
-		mov.power_shooter(); // Shooter control OVERRIDE 
+		mov.on_off_v2();
+		//mov.on_off_controller(); // Bang bang controller
+		//mov.power_shooter(); // Shooter control OVERRIDE 
 
 		odometry.Odometry(); // Odometry logic
 		data.DisplayData(); // Display robot stats and info

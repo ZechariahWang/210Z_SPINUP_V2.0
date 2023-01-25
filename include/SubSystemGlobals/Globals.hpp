@@ -24,6 +24,8 @@ extern pros::ADIDigitalOut Launcher;
 extern pros::ADIDigitalOut Expansion;
 extern pros::ADIDigitalOut LeftBrake;
 extern pros::ADIDigitalOut RightBrake;
+extern pros::ADIDigitalOut Angler;
+extern pros::ADIDigitalOut YaoMing;
 
 extern pros::ADIDigitalIn AutonSwitchForward;
 extern pros::ADIDigitalIn AutonSwitchBackward;

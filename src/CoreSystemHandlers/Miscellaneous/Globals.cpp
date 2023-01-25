@@ -19,17 +19,19 @@ pros::Motor DiskIntakeTop(20, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENC
 // Pistons
 pros::ADIDigitalOut Launcher('a');
 pros::ADIDigitalOut Expansion('b');
-pros::ADIDigitalOut LeftBrake('c');
-pros::ADIDigitalOut RightBrake('d');
-//
+pros::ADIDigitalOut LeftBrake('v');
+pros::ADIDigitalOut RightBrake('n');
+pros::ADIDigitalOut Angler('c');
+pros::ADIDigitalOut YaoMing('g');
+
 // Controller
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
 // Sensors
-pros::ADIEncoder FrontAux('e', 'f', true);
-pros::ADIEncoder ForwardAux('g', 'h', false);
+pros::ADIEncoder FrontAux('l', 'x', true);
+pros::ADIEncoder ForwardAux('v', 'h', false);
 pros::Rotation RotationSensor(13);
-pros::Imu imu_sensor(20);
+pros::Imu imu_sensor(19);
 pros::Imu imu_sensor_secondary(10);
 pros::Vision vision_sensor(3);
 

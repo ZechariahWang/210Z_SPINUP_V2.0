@@ -28,4 +28,6 @@ class match_mov{
         void set_power_amount();
         void set_motor_type();
         void init_expansion();
+        void misc_control();
+        void on_off_v2();
 };
