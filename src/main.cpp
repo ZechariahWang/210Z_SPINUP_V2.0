@@ -28,15 +28,15 @@ lv_obj_t *infoPage = lv_page_create(lv_scr_act(), NULL);
 char buffer[100];
 std::map<int, std::string> auton_Legend = {
     { 1, "Solo Win Point" },
-    { 2, "LS Priority: Eight Disks" },
-    { 3, "LS Priority: Five Disks" },
-	{ 4, "LS Priority: Single Roller " },
-    { 5, "RS Priority: Eight Disks" },
-    { 6, "RS Priority: Five Disks" },
-    { 7, "RS Priority: Single Roller" },
+    { 2, "LS Priority: Six Disks" },
+    { 3, "LS Priority: Single Roller" },
+	{ 4, "RS Priority: Six Disks " },
+    { 5, "RS Priority: Single Disks" },
+    { 6, "Empty Slot" },
+    { 7, "Empty Slot" },
     { 8, "Empty Slot" },
     { 9, "Empty Slot" },
-    { 10, "Empty Slot" }
+    { 10,"Empty Slot" }
 };
 
 //-- LVGL on input functions //--
@@ -206,9 +206,9 @@ void competition_initialize() {}
 void shoot_iterator(){
     Angler.set_value(false); 
 	pros::delay(200);
-	DiskIntakeTop.move_voltage(-40 * (12000.0 / 127));
+	DiskIntakeTop.move_voltage(-6000);
 	pros::delay(2500);
-    DiskIntakeTop.move_voltage(12000);
+    DiskIntakeTop.move_voltage(9000);
 	Angler.set_value(true); 
 }
 
@@ -228,50 +228,57 @@ void autonomous(){  // Autonomous function control
 	Auton_Framework.overRideCoordinatePos(0, 0);
 	mov.set_dt_constants(3.125, 1.6, 600); // Parameters are : Wheel diameter, gear ratio, motor cartridge type
 	imu_sensor.set_rotation(0);
-	// Init_Process.ReceiveInput(time); // Enabled Auton Selector (STEP 1) ONLY FOR PROTOTYPE USE
-	// Init_Process.SelectAuton(); // Enable Auton Selector (STEP 2) no
+	Init_Process.ReceiveInput(time); // Enabled Auton Selector (STEP 1) ONLY FOR PROTOTYPE USE
+	Init_Process.SelectAuton(); // Enable Auton Selector (STEP 2) no
 
-    DiskIntakeTop.move_voltage(12000);
-    OuterShooter.move_voltage(12000);
-	YaoMing.set_value(true);
+    // DiskIntakeTop.move_voltage(9000);
+    // OuterShooter.move_voltage(12000);
+	// YaoMing.set_value(false);
 
-    mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(25, 70);
+    // mov.set_t_constants(0.45, 0, 5, 50);
+	// mov.set_translation_pid(-2, 90);
 
-	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(-45, 90);
+	// cur.set_c_constants(6, 0, 45);
+	// cur.set_curve_pid(45, 90, 0.1, false);
 
-    mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(-34, 70);
+    // mov.set_t_constants(0.45, 0, 5, 50);
+	// mov.set_translation_pid(40, 90);
 
-    DiskIntakeTop.move_voltage(12000);
+	// rot.set_r_constants(6, 0, 45);
+	// rot.set_rotation_pid(-30, 90);
 
-	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(0, 90);
+	// shoot_iterator();
 
-    mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(-5, 70);
+	// rot.set_r_constants(6, 0, 45);
+	// rot.set_rotation_pid(45, 90);
 
-    mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(8, 70);
+    // mov.set_t_constants(0.45, 0, 5, 50);
+	// mov.set_translation_pid(80, 90);
 
-	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(10, 90);
-	pros::delay(2500);
+    // DiskIntakeTop.move_voltage(9000);
 
-	shoot_iterator();
+	// rot.set_r_constants(6, 0, 45);
+	// rot.set_rotation_pid(-84, 90);
 
-	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(-45, 90);
-	DiskIntakeTop.move_voltage(12000);
+	// shoot_iterator();
 
-    mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(65, 70);
+	// rot.set_r_constants(6, 0, 45);
+	// rot.set_rotation_pid(-180, 90);
 
-	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(42, 90);
+    // DiskIntakeTop.move_voltage(9000);
 
-	shoot_iterator();
+	// cur.set_c_constants(6, 0, 45);
+	// cur.set_curve_pid(-90, 90, 0.15, true);
+
+    // DiskIntakeTop.move_voltage(9000);
+
+    // mov.set_t_constants(0.45, 0, 5, 50);
+	// mov.set_translation_pid(-3, 90);
+
+	// pros::delay(500);
+
+    // mov.set_t_constants(0.45, 0, 5, 50);
+	// mov.set_translation_pid(3, 70);
 
 }
 

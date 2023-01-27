@@ -211,7 +211,7 @@ void TranslationPID::set_translation_pid(double target, double maxSpeed){
       break;
     }
     if (fabs(mov_t.t_error - mov_t.t_prev_error) < 0.3) mov_t.t_failsafe++;
-    if (mov_t.t_failsafe > 300){
+    if (mov_t.t_failsafe > 10000){
       utility::stop();
       break;
     }
@@ -246,7 +246,7 @@ void RotationPID::set_rotation_pid(double t_theta, double maxSpeed){
 }
 
 // Curve PID Driver
-void CurvePID::set_curve_pid(double t_theta, double maxSpeed, double curveDamper){
+void CurvePID::set_curve_pid(double t_theta, double maxSpeed, double curveDamper, bool backwards){
   utility::fullreset(0, false);
   cur_c.reset_c_alterables();
   cur_c.c_maxSpeed = maxSpeed;
@@ -257,14 +257,22 @@ void CurvePID::set_curve_pid(double t_theta, double maxSpeed, double curveDamper
     double vol = cur_c.compute_c(currentPos, t_theta);
 
     if (cur_c.c_error > 0){ cur_c.c_rightTurn = true; } else { cur_c.c_rightTurn = false;}
-    std::cout << (bool)cur_c.c_rightTurn << std::endl;
-    if (cur_c.c_rightTurn == true){
+    if (cur_c.c_rightTurn == true && backwards == false){
       utility::leftvoltagereq(vol * (12000.0 / 127));
       utility::rightvoltagereq(vol * (12000.0 / 127) * curveDamper);
     }
-    else if (cur_c.c_rightTurn == false){
+    else if (cur_c.c_rightTurn == false && backwards == false){
       utility::leftvoltagereq(fabs(vol) * (12000.0 / 127) * curveDamper);
       utility::rightvoltagereq(fabs(vol) * (12000.0 / 127));
+    }
+    if (cur_c.c_rightTurn == true && backwards == true){
+      utility::leftvoltagereq(-vol * (12000.0 / 127) * curveDamper);
+      utility::rightvoltagereq(-vol * (12000.0 / 127));
+    }
+    else if (cur_c.c_rightTurn == false && backwards == true){
+      utility::leftvoltagereq(vol * (12000.0 / 127));
+      utility::rightvoltagereq(vol * (12000.0 / 127) * curveDamper);
+      std::cout << "running" << std::endl;
     }
     if (fabs(cur_c.c_error) < cur_c.c_error_thresh) { cur_c.c_iterator++; } else { cur_c.c_iterator = 0;}
     if (fabs(cur_c.c_iterator) >= cur_c.c_tol){

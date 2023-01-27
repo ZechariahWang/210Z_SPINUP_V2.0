@@ -80,7 +80,7 @@ class CurvePID{
         void reset_c_alterables();
         void set_c_constants(const double kp, const double ki, const double kd);
         double compute_c(double current, double target);
-        void set_curve_pid(double t_theta, double maxSpeed, double curveDamper);
+        void set_curve_pid(double t_theta, double maxSpeed, double curveDamper, bool backwards);
 };
 
 class ArcPID{
