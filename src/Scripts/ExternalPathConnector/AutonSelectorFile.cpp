@@ -55,7 +55,7 @@ void __solo_wp__(){
     DiskIntakeTop.move_voltage(9000);
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(-84, 90);
+	rot.set_rotation_pid(-75, 90);
 
 	shoot_iterator_2();
 

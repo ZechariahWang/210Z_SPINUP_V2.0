@@ -31,7 +31,7 @@ std::map<int, std::string> auton_Legend = {
     { 2, "LS Priority: Six Disks" },
     { 3, "LS Priority: Single Roller" },
 	{ 4, "RS Priority: Six Disks " },
-    { 5, "RS Priority: Single Disks" },
+    { 5, "RS Priority: Single Roller" },
     { 6, "Empty Slot" },
     { 7, "Empty Slot" },
     { 8, "Empty Slot" },
@@ -290,7 +290,8 @@ void opcontrol(){ // Driver control function
 	odom odometry; // Odom class
 	char buffer[300]; // Display Buffer
 	while (true){
-		mov.dt_Control(); // Drivetrain control
+		// mov.dt_Control(); // Drivetrain control
+		mov.exponential_curve_accelerator();
 		mov.power_intake(); // Intake control
 		mov.launch_disk(); // Disk control
 		mov.set_power_amount(); // Power control
