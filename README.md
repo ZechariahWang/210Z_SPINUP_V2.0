@@ -1,3 +1,3 @@
 # 210Z Framework V2
-Code Framework for the second half of the 2022-2023 season.
+Code Framework for the second half of the 2022-2023 season. \n
 Simulations: https://github.com/ZechariahWang/Motion-Profiling-Algorithm_Simulations
