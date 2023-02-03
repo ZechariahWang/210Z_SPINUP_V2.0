@@ -11,14 +11,14 @@ pros::Motor DriveBackRight(18, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_EN
 pros::Motor DriveMidLeft(17, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_COUNTS);
 pros::Motor DriveMidRight(15, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS);
 
-pros::Motor OuterShooter(13, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS); // REAL ONE
+pros::Motor OuterShooter(13, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_COUNTS); // REAL ONE
 pros::Motor InnerShooter(80, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS);
 pros::Motor DiskIntakeBot(69, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS);
 pros::Motor DiskIntakeTop(20, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS);
 
 // Pistons
-pros::ADIDigitalOut Launcher('a');
-pros::ADIDigitalOut Expansion('b');
+pros::ADIDigitalOut Launcher('z');
+pros::ADIDigitalOut Expansion('a');
 pros::ADIDigitalOut LeftBrake('v');
 pros::ADIDigitalOut RightBrake('n');
 pros::ADIDigitalOut Angler('c');

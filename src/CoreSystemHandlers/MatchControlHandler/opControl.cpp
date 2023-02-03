@@ -9,7 +9,9 @@ match_mov::match_mov(){ mov.p_set = 1; mov.it_ps = 1; } // Class Constructor
 
 const u_int16_t forwardCurve       = 10;
 const u_int16_t turnCurve          = 5;
+const double euler                 = 2.71828;
 
+static bool anglerStatus           = false; // False = set for priority intake
 static bool expansionSet           = true;  // Expansion value
 static bool PHASE_ONE              = false; // Expansion failsafe setback 1
 static bool PHASE_TWO              = false; // Expansion failsafe setback 2
@@ -101,32 +103,30 @@ void match_mov::power_shooter(){ // Power shooter function
 void match_mov::power_intake(){ // Power intake function
     if ((controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2))){
         DiskIntakeTop.move_voltage(12000 * mov.it_ps);
-        DiskIntakeBot.move_voltage(12000);
     }
     else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){
         DiskIntakeTop.move_voltage(-12000 * mov.it_ps);
-        DiskIntakeBot.move_voltage(-12000);
     }
-    else{ DiskIntakeTop.move_voltage(0); DiskIntakeBot.move_voltage(0); }
+    else{ DiskIntakeTop.move_voltage(0); }
 }
 
 void match_mov::launch_disk(){ // Launch disk/piston control function
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1)){
-        mov.l_stat = !mov.l_stat;
-        Angler.set_value(mov.l_stat); 
-    }
-    if (mov.l_stat == false){ mov.launch_iterator++; shot_iteration_counter++; }
-    if (shot_iteration_counter > 20){ DiskIntakeTop.move_voltage((-127 * (12000.0 / 127)) * mov.it_ps); } // wait for piston to fully extend before moving motors
-    if (mov.launch_iterator > 150){ // Reset after a moment
-        mov.l_stat = !mov.l_stat;
-        DiskIntakeTop.move_voltage(0); Angler.set_value(mov.l_stat); 
-        mov.launch_iterator = 0;
-        shot_iteration_counter = 0;
+    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1)){ if (mov.l_stat == false) { anglerStatus = true; } }
+    if (anglerStatus) { mov.launch_iterator++; shot_iteration_counter++; }
+    if (shot_iteration_counter > 5) {
+        DiskIntakeTop.move_voltage((-127 * (12000.0 / 127)) * mov.it_ps); 
+        mov.l_stat = true;
+        if (mov.launch_iterator > 150){
+            DiskIntakeTop.move_voltage(0); Angler.set_value(mov.l_stat); 
+            mov.launch_iterator = 0;
+            shot_iteration_counter = 0;
+            anglerStatus = false;
+        }
     }
 }
 
 void match_mov::set_power_amount(){ // Function for changing power of flywheel
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN)){
+    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP)){
         mov.p_set += 0.05;
         if (mov.p_set > 1) mov.p_set = 0;
         else if (mov.p_set < 0) mov.p_set = 1;
@@ -149,13 +149,18 @@ void match_mov::misc_control(){
         turningRed = !turningRed;
         forwardRed = !forwardRed;
     }
+    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN)) {
+        if (anglerStatus) return;
+        mov.l_stat = !mov.l_stat;
+        Angler.set_value(mov.l_stat);
+    }
 }
 
 void match_mov::set_motor_type(){
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP)){
-        mov.robotBrakeType = !mov.robotBrakeType;
+        // mov.robotBrakeType = !mov.robotBrakeType;
     }
-    if (mov.robotBrakeType){
+    if (mov.robotBrakeType == false){
         DriveFrontLeft.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
         DriveBackLeft.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
         DriveMidLeft.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
@@ -186,6 +191,17 @@ void match_mov::init_expansion(){
 void ForceReset(){
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT)){ gx = 0; gy = 0; }
 }
+
+    //     mov.l_stat = !mov.l_stat;
+    //     Angler.set_value(mov.l_stat); 
+    // }
+    // if (mov.l_stat == false){ mov.launch_iterator++; shot_iteration_counter++; }
+    // if (shot_iteration_counter > 20){ DiskIntakeTop.move_voltage((-127 * (12000.0 / 127)) * mov.it_ps); } // wait for piston to fully extend before moving motors
+    // if (mov.launch_iterator > 150){ // Reset after a moment
+    //     mov.l_stat = !mov.l_stat;
+    //     DiskIntakeTop.move_voltage(0); Angler.set_value(mov.l_stat); 
+    //     mov.launch_iterator = 0;
+    //     shot_iteration_counter = 0;
 
 
 
