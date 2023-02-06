@@ -187,12 +187,13 @@ void initialize() { // Init function control
     Angler.set_value(true); 
 	OuterShooter.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 	InnerShooter.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-	DriveFrontLeft.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
-	DriveFrontRight.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
-	DriveBackLeft.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
-	DriveBackRight.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
-	DriveMidLeft.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
-	DriveMidRight.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+
+	DriveFrontLeft.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+	DriveFrontRight.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+	DriveBackLeft.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+	DriveBackRight.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+	DriveMidLeft.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+	DriveMidRight.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 	sprintf(buffer, SYMBOL_LIST " Selected Path %d: %s", SelectedAuton, auton_Legend[SelectedAuton].c_str());
     lv_label_set_text(debugLine1, buffer);
 	// Init_Process.ReceiveInput(time); // Enabled Auton Selector (STEP 1)
@@ -205,10 +206,26 @@ void competition_initialize() {}
 
 void shoot_iterator(){
     Angler.set_value(false); 
-	for (auto i = 0; i < 2; i++){
-		pros::delay(500);
+	for (int i = 0; i < 5; i++){
+		pros::delay(1000);
 		DiskIntakeTop.move_voltage(-12000);
-		pros::delay(500);
+		pros::delay(90);
+		DiskIntakeTop.move_voltage(0);
+	}
+	DiskIntakeTop.move_voltage(9000);
+	Angler.set_value(true); 
+}
+
+void shoot_iterator_left(){
+    Angler.set_value(false); 
+	pros::delay(1000);
+	DiskIntakeTop.move_voltage(-12000);
+	pros::delay(150);
+	DiskIntakeTop.move_voltage(0);
+	for (int i = 0; i < 3; i++){
+		pros::delay(1000);
+		DiskIntakeTop.move_voltage(-12000);
+		pros::delay(105);
 		DiskIntakeTop.move_voltage(0);
 	}
 	DiskIntakeTop.move_voltage(9000);
@@ -234,55 +251,66 @@ void autonomous(){  // Autonomous function control
 	// Init_Process.ReceiveInput(time); // Enabled Auton Selector (STEP 1) ONLY FOR PROTOTYPE USE
 	// Init_Process.SelectAuton(); // Enable Auton Selector (STEP 2) 
 
-    DiskIntakeTop.move_voltage(9000);
-    OuterShooter.move_voltage(12000);
 	YaoMing.set_value(false);
 
-    mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(-3, 90);
-
-	pros::delay(200);
-
-	cur.set_c_constants(6, 0, 45);
-	cur.set_curve_pid(45, 90, 0.1, false);
+    DiskIntakeTop.move_voltage(12000);
+    OuterShooter.move_voltage(12000);
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(40, 60);
+	mov.set_translation_pid(25, 70);
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(-35, 90);
+	rot.set_rotation_pid(24.5, 90);
+	pros::delay(2200);
 
-	pros::delay(2000);
-
-	shoot_iterator();
-
-	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(45, 90);
-
-    mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(80, 60);
-
-    DiskIntakeTop.move_voltage(9000);
-
-	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(-180, 90);
-
-    DiskIntakeTop.move_voltage(9000);
-
-	cur.set_c_constants(6, 0, 45);
-	cur.set_curve_pid(-90, 90, 0.1, true);
-
-    DiskIntakeTop.move_voltage(9000);
-
-    mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(-6, 90);
+	shoot_iterator_left();
 
 	pros::delay(500);
 
-    mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(3, 90);
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(-45, 90);
 
-	YaoMing.set_value(true);
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(-29, 70);
+
+    DiskIntakeTop.move_voltage(-10000);
+
+	cur.set_c_constants(6, 0, 45);
+	cur.set_curve_pid(0, 60, 0.15, true);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(0, 90);
+
+    DiskIntakeTop.move_voltage(-10000);
+
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(-4, 70);
+
+	DiskIntakeTop.move_voltage(-10000);
+
+	pros::delay(300);
+
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(8, 70);
+
+	DiskIntakeTop.move_voltage(10000);
+
+	// EVERYTHING ELSE IS EXTRA
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(-45, 90);
+	
+	DiskIntakeTop.move_voltage(10000);
+
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(65, 70);
+
+    DiskIntakeTop.move_voltage(10000);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(42, 90);
+
+	shoot_iterator();
 
 
 }
@@ -304,9 +332,9 @@ void opcontrol(){ // Driver control function
 		mov.misc_control();
 		mov.set_motor_type(); // Set motor brake type
 		mov.init_expansion(); // Initiate expansion
-		mov.on_off_v2();
+		// mov.on_off_v2();
 		//mov.on_off_controller(); // Bang bang controller
-		//mov.power_shooter(); // Shooter control OVERRIDE 
+		mov.power_shooter(); // Shooter control OVERRIDE 
 
 		odometry.Odometry(); // Odometry logic
 		data.DisplayData(); // Display robot stats and info

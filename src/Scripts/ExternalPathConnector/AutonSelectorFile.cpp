@@ -2,10 +2,13 @@
 
 void shoot_iterator_2(){
     Angler.set_value(false); 
-	pros::delay(200);
-	DiskIntakeTop.move_voltage(-60 * (12000.0 / 127));
-	pros::delay(2500);
-    DiskIntakeTop.move_voltage(12000);
+	for (int i = 0; i < 5; i++){
+		pros::delay(1500);
+		DiskIntakeTop.move_voltage(-12000);
+		pros::delay(100);
+		DiskIntakeTop.move_voltage(0);
+	}
+	DiskIntakeTop.move_voltage(9000);
 	Angler.set_value(true); 
 }
 
@@ -28,7 +31,7 @@ void __solo_wp__(){
 	// Init_Process.ReceiveInput(time); // Enabled Auton Selector (STEP 1) ONLY FOR PROTOTYPE USE
 	// Init_Process.SelectAuton(); // Enable Auton Selector (STEP 2) no
 
-    DiskIntakeTop.move_voltage(9000);
+    DiskIntakeTop.move_voltage(-12000);
     OuterShooter.move_voltage(12000);
 	YaoMing.set_value(false);
 
@@ -38,48 +41,59 @@ void __solo_wp__(){
 	pros::delay(200);
 
 	cur.set_c_constants(6, 0, 45);
-	cur.set_curve_pid(45, 90, 0.1, false);
+	cur.set_curve_pid(45, 90, 0.4, false);
+
+    DiskIntakeTop.move_voltage(12000);
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(40, 60);
+	mov.set_translation_pid(40, 40);
 
+    Angler.set_value(false); 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(-30, 90);
+	rot.set_rotation_pid(-38, 90);
 
-	pros::delay(1000);
+  	mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(3, 40);
+
+	pros::delay(2000);
+
+    DiskIntakeTop.move_voltage(12000);
 
 	shoot_iterator_2();
+
+	pros::delay(500);
+
 
 	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(45, 90);
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(80, 90);
+	mov.set_translation_pid(74, 60);
 
     DiskIntakeTop.move_voltage(9000);
-
-	// rot.set_r_constants(6, 0, 45);
-	// rot.set_rotation_pid(-75, 90);
-
-	// shoot_iterator_2();
 
 	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(-180, 90);
 
-    DiskIntakeTop.move_voltage(9000);
+	OuterShooter.move_voltage(6000);
+    Angler.set_value(false); 
+	DiskIntakeTop.move_voltage(-12000);
+	pros::delay(1000);
 
 	cur.set_c_constants(6, 0, 45);
-	cur.set_curve_pid(-90, 90, 0.1, true);
+	cur.set_curve_pid(-90, 90, 0.05, true);
 
-    DiskIntakeTop.move_voltage(9000);
+    DiskIntakeTop.move_voltage(-9000);
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(-6, 90);
+	mov.set_translation_pid(-7, 90);
 
 	pros::delay(500);
 
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(3, 90);
+
+	YaoMing.set_value(true);
 }
 
 void __left_side_priority_6_disks__(){
@@ -100,7 +114,7 @@ void __left_side_priority_6_disks__(){
 
     DiskIntakeTop.move_voltage(10000);
     OuterShooter.move_voltage(12000);
-	YaoMing.set_value(true);
+	YaoMing.set_value(false);
 
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(-3, 70);
@@ -162,15 +176,23 @@ void __right_side_priority_6_disks__(){
 	Auton_Framework.overRideCoordinatePos(0, 0);
 	mov.set_dt_constants(3.125, 1.6, 600); // Parameters are : Wheel diameter, gear ratio, motor cartridge type
 	imu_sensor.set_rotation(0);
-    DiskIntakeTop.move_voltage(12000);
-    OuterShooter.move_voltage(12000);
-	YaoMing.set_value(true);
+	YaoMing.set_value(false);
 
-    DiskIntakeTop.move_voltage(10000);
+	YaoMing.set_value(false);
+
+    DiskIntakeTop.move_voltage(12000);
     OuterShooter.move_voltage(12000);
 
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(25, 70);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(24, 90);
+	pros::delay(2500);
+
+	shoot_iterator_2();
+
+	pros::delay(500);
 
 	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(-45, 90);
@@ -178,36 +200,33 @@ void __right_side_priority_6_disks__(){
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(-29, 70);
 
-    DiskIntakeTop.move_voltage(10000);
+    DiskIntakeTop.move_voltage(-10000);
 
 	cur.set_c_constants(6, 0, 45);
 	cur.set_curve_pid(0, 60, 0.15, true);
 
-    DiskIntakeTop.move_voltage(10000);
-
 	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(0, 90);
 
-    DiskIntakeTop.move_voltage(10000);
+    DiskIntakeTop.move_voltage(-10000);
 
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(-4, 70);
 
-	DiskIntakeTop.move_voltage(10000);
+	DiskIntakeTop.move_voltage(-10000);
+
+	pros::delay(500);
 
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(8, 70);
 
 	DiskIntakeTop.move_voltage(10000);
 
-	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(10, 90);
-	pros::delay(2500);
-
-	shoot_iterator_2();
+	// EVERYTHING ELSE IS EXTRA
 
 	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(-45, 90);
+	
 	DiskIntakeTop.move_voltage(10000);
 
     mov.set_t_constants(0.45, 0, 5, 50);

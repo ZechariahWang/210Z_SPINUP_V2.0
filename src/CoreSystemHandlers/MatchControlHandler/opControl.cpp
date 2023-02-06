@@ -2,10 +2,11 @@
 #include "pros/misc.h"
 #include "pros/motors.h"
 #include "cmath"
+#include "fstream"
 
 match_mov mov; // Op Control class init
 MotionAlgorithms t;
-match_mov::match_mov(){ mov.p_set = 1; mov.it_ps = 1; } // Class Constructor
+match_mov::match_mov(){ mov.p_set = 0.85; mov.it_ps = 1; } // Class Constructor
 
 const u_int16_t forwardCurve       = 10;
 const u_int16_t turnCurve          = 5;
@@ -77,35 +78,35 @@ void match_mov::on_off_controller(){
         }
     }
     else{ OuterShooter.move_voltage(0); }
-    std::cout << OuterShooter.get_voltage() << std::endl;
 }
 
 void match_mov::on_off_v2(){
+    //std::ofstream fw_writer("flywheelData.txt");
     if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){
-        if (abs(OuterShooter.get_voltage()) > (12000 * mov.p_set)){ OuterShooter.move_voltage(12000 * mov.p_set); }
-        else if (abs(OuterShooter.get_voltage()) < (12000 * mov.p_set)){ OuterShooter.move_voltage(12000); }
+        std::cout << OuterShooter.get_voltage() << std::endl;
+        //fw_writer << "Flywheel speed: " << OuterShooter.get_voltage() << std::endl;
+        if (abs(OuterShooter.get_voltage()) > (12000 * 0.9)){ OuterShooter.move_voltage(12000 * 0.9); }
+        else if (abs(OuterShooter.get_voltage()) < (12000 * 0.9)){ OuterShooter.move_voltage(12000); }
     }
     else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_A)){ OuterShooter.move_voltage(-12000); }
     else{ OuterShooter.move_voltage(0); }
 
-    std::cout << OuterShooter.get_voltage() << std::endl;
 }
 
-void match_mov::power_shooter(){ // Power shooter function
+void match_mov::power_shooter(){ // Power shooter function 
     if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){
         OuterShooter.move_voltage(12000 * mov.p_set);
         InnerShooter.move_voltage(12000 * mov.p_set);
     }
     else{ OuterShooter.move_voltage(0); InnerShooter.move_voltage(0);}
-    std::cout << OuterShooter.get_voltage() << std::endl;
 }
 
 void match_mov::power_intake(){ // Power intake function
     if ((controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2))){
-        DiskIntakeTop.move_voltage(12000 * mov.it_ps);
+        DiskIntakeTop.move_voltage(12000);
     }
     else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){
-        DiskIntakeTop.move_voltage(-12000 * mov.it_ps);
+        DiskIntakeTop.move_voltage(-12000);
     }
     else{ DiskIntakeTop.move_voltage(0); }
 }
@@ -140,15 +141,15 @@ void match_mov::set_power_amount(){ // Function for changing power of flywheel
 }
 
 void match_mov::misc_control(){
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)) {
+    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) {
         arcLaunchToggle = !arcLaunchToggle;
         YaoMing.set_value(arcLaunchToggle);
     }
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) { 
-        toggleRedCurve = !toggleRedCurve; 
-        turningRed = !turningRed;
-        forwardRed = !forwardRed;
-    }
+    // if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) { 
+    //     toggleRedCurve = !toggleRedCurve; 
+    //     turningRed = !turningRed;
+    //     forwardRed = !forwardRed;
+    // }
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN)) {
         if (anglerStatus) return;
         mov.l_stat = !mov.l_stat;
@@ -157,26 +158,24 @@ void match_mov::misc_control(){
 }
 
 void match_mov::set_motor_type(){
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP)){
-        // mov.robotBrakeType = !mov.robotBrakeType;
-    }
+    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)){ mov.robotBrakeType = !mov.robotBrakeType; }
     if (mov.robotBrakeType == false){
-        DriveFrontLeft.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-        DriveBackLeft.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-        DriveMidLeft.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-        DriveFrontRight.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-        DriveBackRight.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-        DriveMidRight.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-        LeftBrake.set_value(true);
-        RightBrake.set_value(true);
-    }
-    else {
         DriveFrontLeft.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
         DriveBackLeft.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
         DriveMidLeft.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
         DriveFrontRight.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
         DriveBackRight.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
         DriveMidRight.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+        LeftBrake.set_value(true);
+        RightBrake.set_value(true);
+    }
+    else {
+        DriveFrontLeft.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+        DriveBackLeft.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+        DriveMidLeft.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+        DriveFrontRight.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+        DriveBackRight.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+        DriveMidRight.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
         LeftBrake.set_value(false);
         RightBrake.set_value(false);
     }
