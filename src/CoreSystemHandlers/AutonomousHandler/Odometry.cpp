@@ -1,45 +1,50 @@
+/**
+ * @file Odometry.cpp
+ * @author Zechariah Wang
+ * @brief Odometry logic for global position tracking within robot
+ * @version 0.1
+ * @date 2023-02-13
+ * 
+ */
+
 #include "main.h"
 #include "vector"
 #include "variant"
 #include "array"
 
-odom w2_odom; // odom class init
-double gx; // global X
-double gy; // global Y
+odom      w2_odom; // odom class init
+new_odom  pt;  // odom position tracking init
+double    gx;    // global X
+double    gy;    // global Y
 
-odom::odom(){ // Odometry Constructor setting up all values for odom logic
-  w2_odom.deltaArcLength                              = 0;
-  w2_odom.previousArcLength                           = 0;
-  w2_odom.currentarclength                            = 0;
+/**
+ * @brief Set position tracking constants
+ * 
+ * @param vertical_wheel_distance distance from the vertical wheel to the center of gravity within the robot
+ * @param horizontal_wheel_distance distance from the horizontal wheel to the center of gravity within the robot
+ */
 
-  w2_odom.d_currentForward                            = 0;
-  w2_odom.d_currentCenter                             = 0;
-  w2_odom.d_currentOtheta                             = 0;
-  w2_odom.d_rotationTheta                             = 0;
-
-  w2_odom.d_deltaForward                              = 0;
-  w2_odom.d_deltaCenter                               = 0;
-  w2_odom.d_deltaTheta                                = 0;
-  w2_odom.d_deltaOTheta                               = 0;
-
-  w2_odom.d_deltaTheory                               = 0;
-  w2_odom.d_deltaTheory2                              = 0;
-  w2_odom.d_Theory                                    = 0;
-  w2_odom.d_Theory2                                   = 0;
-  w2_odom.d_totalRotationTheta                        = 0;
-
-  w2_odom.d_deltaX                                    = 0;
-  w2_odom.d_deltaY                                    = 0;
-
-  w2_odom.d_previousForward                           = 0;
-  w2_odom.d_previousCenter                            = 0;
-  w2_odom.d_previousOTheta                            = 0;
-  w2_odom.d_previoustheta                             = 0;
-  w2_odom.counter                                     = 0;
-  
+void new_odom::set_pt_constants(const double vertical_wheel_distance, const double horizontal_wheel_distance) {
+  pt.vertical_distance = vertical_wheel_distance;
+  pt.horizontal_distance = horizontal_distance;
 }
 
-// Global heading function. Essentially, consider this the robots current heading.
+/**
+ * @brief Conversion functions
+ * 
+ * @param angle Eithercurrent radian or degrees of robot
+ * @return angle converted to desired unit
+ */
+
+int16_t radian_to_degrees(const double angle) { return angle * 180 / M_PI; } // convert radian to degrees
+int16_t degrees_to_radians(const double angle){ return angle * M_PI / 180; } // Convert degrees to radian
+
+/**
+ * @brief The current theta of the robot wrapped to 360 degrees
+ * 
+ * @return angle wrapped to 360 degrees from raw IMU sensor data
+ */
+
 double globalTheta = 0;
 double ImuMon() {
   globalTheta = fmod(imu_sensor.get_rotation(), 360);
@@ -52,7 +57,56 @@ double ImuMon() {
   return globalTheta;
 }
 
-// This function is for the primary odom framework used within the robot.
+/**
+ * @brief New Odometry version 2.0 currently WIP
+ *
+ */
+
+void new_odom::compute_odometry(){
+  double vertical_delta = (-ForwardAux.get_value() - pt.prev_vertical);
+  double horizontal_delta = ((double(-RotationSensor.get_position()) * 3 / 500) - pt.prev_horizontal);
+  
+  pt.vertical_value = -ForwardAux.get_value();
+  pt.horizontal_value = ((double(-RotationSensor.get_position())) * 3 / 500);
+  pt.heading_value = ImuMon();
+
+  double heading_rad = degrees_to_radians(ImuMon());
+  double prev_heading_rad = degrees_to_radians(pt.prev_heading_value);
+  double delta_heading_rad = heading_rad - prev_heading_rad;
+
+  double local_x = 0;
+  double local_y = 0;
+
+  if (delta_heading_rad == 0) { local_x = horizontal_delta; local_y = vertical_delta; }
+  else { 
+    // Formula from team 5225A for position vector
+    local_x = (2 * std::sin(delta_heading_rad / 2)) * ((horizontal_delta / delta_heading_rad + pt.horizontal_distance)); 
+    local_y = (2 * std::sin(delta_heading_rad / 2)) * ((vertical_delta / delta_heading_rad + pt.vertical_distance));
+  }
+  double local_polar_angle = 0;
+  double local_polar_length = 0;
+  if (local_x == 0 && local_y == 0){ local_polar_angle = 0; local_polar_length = 0; }
+  else {
+    local_polar_angle = atan2f(local_y, local_x);
+    local_polar_length = sqrt(pow(local_x, 2) + pow(local_y, 2));
+  }
+  double global_polar_angle = local_polar_angle - prev_heading_rad - (delta_heading_rad / 2);
+  double delta_x = local_polar_length * cos(global_polar_angle);
+  double delta_y = local_polar_length * sin(global_polar_angle);
+
+  gx += delta_x;
+  gy += delta_y;
+
+  pt.prev_heading_value = pt.heading_value;
+  pt.prev_vertical = pt.vertical_value;
+  pt.prev_horizontal = pt.horizontal_value;
+}
+
+/**
+ * @brief Currently operating Odometry Logic 
+ * 
+ */
+
 void odom::Odometry(){
 	double currentTime = pros::millis();
   double theta = ImuMon();
@@ -90,7 +144,6 @@ void odom::Odometry(){
   w2_odom.d_Theory += w2_odom.d_deltaTheory;
   w2_odom.d_Theory2 += w2_odom.d_deltaTheory2;
   w2_odom.d_totalRotationTheta += w2_odom.d_rotationTheta;
-
 
   // w2_odom.d_deltaX = ((w2_odom.d_deltaForward) * 1 * -sin(-theta));
   // w2_odom.d_deltaY = ((w2_odom.d_deltaForward) * 1 * cos(-theta));

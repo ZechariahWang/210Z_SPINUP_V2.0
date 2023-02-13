@@ -6,7 +6,7 @@
 
 match_mov mov; // Op Control class init
 MotionAlgorithms t;
-match_mov::match_mov(){ mov.p_set = 0.85; mov.it_ps = 1; } // Class Constructor
+match_mov::match_mov(){ mov.p_set = 0.8; mov.it_ps = 1; } // Class Constructor
 
 const u_int16_t forwardCurve       = 10;
 const u_int16_t turnCurve          = 5;
@@ -108,17 +108,25 @@ void match_mov::power_intake(){ // Power intake function
     else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){
         DiskIntakeTop.move_voltage(-12000);
     }
-    else{ DiskIntakeTop.move_voltage(0); }
+    else if (anglerStatus){
+        DiskIntakeTop.move_voltage(-8000);
+     }
+    else{
+        DiskIntakeTop.move_voltage(0);
+     }
 }
 
 void match_mov::launch_disk(){ // Launch disk/piston control function
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1)){ if (mov.l_stat == false) { anglerStatus = true; } }
+    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1)){ 
+        if (mov.l_stat == false) { anglerStatus = true; }
+     }
     if (anglerStatus) { mov.launch_iterator++; shot_iteration_counter++; }
     if (shot_iteration_counter > 5) {
-        DiskIntakeTop.move_voltage((-127 * (12000.0 / 127)) * mov.it_ps); 
+        DiskIntakeTop.move_voltage(-8000); 
         mov.l_stat = true;
         if (mov.launch_iterator > 150){
-            DiskIntakeTop.move_voltage(0); Angler.set_value(mov.l_stat); 
+            DiskIntakeTop.move_voltage(0); 
+            Angler.set_value(mov.l_stat); 
             mov.launch_iterator = 0;
             shot_iteration_counter = 0;
             anglerStatus = false;

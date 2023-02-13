@@ -107,3 +107,48 @@ class ArcPID{
         double compute_a(double tx, double ty);
         void set_arc_pid(double t_x, double t_y, double maxSpeed, double arcDamper);
 };
+
+class SimultaneousPID{
+    private:
+        bool init;
+    public:
+        double t_s_kp;
+        double t_s_ki;
+        double t_s_kd;
+        double t_s_r_kp;
+        double t_s_error;
+        double t_s_prev_error;
+        double t_s_integral;
+        double t_s_derivative;
+        double t_s_error_thresh = 3;
+        double t_s_iterator;
+        double t_s_tol = 10;
+        double t_s_failsafe;
+        double t_s_maxSpeed;
+
+        double c_s_kp;
+        double c_s_ki;
+        double c_s_kd;
+        double c_s_error;
+        double c_s_prev_error;
+        double c_s_integral;
+        double c_s_derivative;
+        double c_s_error_thresh = 3;
+        double c_s_iterator;
+        double c_s_tol = 10;
+        double c_s_failsafe;
+        double c_s_maxSpeed;
+        bool c_s_rightTurn;
+
+        bool curvePhaseStart = true;
+        bool translationPhase = false;
+        bool curvePhaseEnd = false;
+
+        SimultaneousPID();
+        void reset_sim_alterables();
+        void set_sim_t_constants(const double kp, const double ki, const double kd, const double r_kp);
+        void set_sim_c_constants(const double kp, const double ki, const double kd);
+        double compute_sim_mov_pid(double translationTarget, double translationCurrent);
+        double compute_sim_cur_pid(double curvetargetTheta, double curveCurrent);
+        void set_sim_pid(bool curveStartEnabled, double curvetargetThetaStart, double curveDamperStart, double curveMaxSpeedStart, bool backwardsStart, bool translationEnabled, double translationTarget, double translationMaxSpeed, bool curveEndEnabled, double curvetargetThetaEnd, double curveDamperEnd, double curveMaxSpeedEnd, bool backwardsEnd);
+};

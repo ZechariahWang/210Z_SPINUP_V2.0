@@ -12,6 +12,19 @@ void shoot_iterator_2(){
 	Angler.set_value(true); 
 }
 
+void shoot_iterator_auto_2(){
+	pros::delay(500);
+    Angler.set_value(false); 
+	DiskIntakeTop.move_voltage(-6000);
+	pros::delay(400);
+	DiskIntakeTop.move_voltage(-3000);
+	pros::delay(1500);
+	DiskIntakeTop.move_voltage(-3300);
+	pros::delay(1000);
+	DiskIntakeTop.move_voltage(9000);
+	Angler.set_value(true); 
+}
+
 void Run_MTRP_Debug(){ Debug_MTRP(); }
 void Run_PID_Debug(){ PID_Debug(); }
 void StandardAuton(){}
@@ -187,10 +200,11 @@ void __right_side_priority_6_disks__(){
 	mov.set_translation_pid(25, 70);
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(24, 90);
-	pros::delay(2500);
+	rot.set_rotation_pid(25, 90);
+	pros::delay(2000);
 
-	shoot_iterator_2();
+
+	shoot_iterator_auto_2();
 
 	pros::delay(500);
 
@@ -215,7 +229,7 @@ void __right_side_priority_6_disks__(){
 
 	DiskIntakeTop.move_voltage(-10000);
 
-	pros::delay(500);
+	pros::delay(300);
 
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(8, 70);
@@ -237,7 +251,6 @@ void __right_side_priority_6_disks__(){
 	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(42, 90);
 
-	shoot_iterator_2();
 }
 
 void __left_side_priority_roller__(){

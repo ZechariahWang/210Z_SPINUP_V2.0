@@ -1,18 +1,34 @@
+/**
+ * @file Algorithms.cpp
+ * @author Zechariah Wang
+ * @brief MTRP algorithm, TTP, STP, CTP
+ * @version 0.1
+ * @date 2023-02-13
+ * 
+ */
+
 #include "main.h"
 #include "vector"
 #include "array"
 #include "iostream"
 #include "algorithm"
 
-// Find min angle between target heading and current heading
+/**
+ * @brief Find min angle to reach a target angle when wrapped to 360 degrees
+ * 
+ * @param targetHeading the target angle the robot reaches to turn to
+ * @param currentrobotHeading the current robot angle
+ * @return shortest path needed to reach desired angle
+ */
+
 double find_min_angle(const int16_t targetHeading, const int16_t currentrobotHeading){
   double turnAngle = targetHeading - currentrobotHeading;
   if (turnAngle > 180 || turnAngle < -180){ turnAngle = turnAngle - (utility::sgn(turnAngle) * 360); }
   return turnAngle;
 }
 
-int16_t radian_to_degrees(const double angle) { return angle * 180 / M_PI; } // convert radian to degrees
-int16_t degrees_to_radians(const double angle){ return angle * M_PI / 180; } // Convert degrees to radian
+int16_t radian_to_degrees_converter(const double angle) { return angle * 180 / M_PI; } // convert radian to degrees
+int16_t degrees_to_radians_converter(const double angle){ return angle * M_PI / 180; } // Convert degrees to radian
 
 MotionAlgorithms mtp; // move to point class material theme ocean
 

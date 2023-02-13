@@ -1,14 +1,29 @@
+/**
+ * @file PID.cpp
+ * @author Zechariah Wang
+ * @brief PID logic for translation, rotation, curve, arc, and sim
+ * @version 0.1
+ * @date 2023-02-13
+ * 
+ */
+
 #include "main.h"
 #include "vector"
 #include "variant"
 #include "array"
 
 // Class init
-FinalizeAuton data;
-TranslationPID mov_t;
-RotationPID rot_r;
-CurvePID cur_c;
-ArcPID arc_a;
+FinalizeAuton    data;
+TranslationPID   mov_t;
+RotationPID      rot_r;
+CurvePID         cur_c;
+ArcPID           arc_a;
+SimultaneousPID  sim_s;
+
+/**
+ * @brief PID class constructors
+ * 
+ */
 
 TranslationPID::TranslationPID(){ // Translation PID Constructor
   mov_t.t_tol = 10;
@@ -28,6 +43,13 @@ CurvePID::CurvePID(){ // Curve PID Constructor
 ArcPID::ArcPID(){ // Arc PID Constructor
   arc_a.a_tol = 20;
   arc_a.a_error_thresh = 10;
+}
+
+SimultaneousPID::SimultaneousPID(){
+  sim_s.t_s_tol = 10;
+  sim_s.t_s_error_thresh = 100;
+  sim_s.c_s_tol = 20;
+  sim_s.c_s_error_thresh = 3;
 }
 
 // Set the drivetrain constants (wheel size, motor cartridge, etc)
@@ -79,6 +101,28 @@ void ArcPID::reset_a_alterables(){
   arc_a.a_rightTurn = false;
 }
 
+void SimultaneousPID::reset_sim_alterables(){
+  sim_s.t_s_derivative = 0;
+  sim_s.t_s_integral = 0;
+  sim_s.t_s_error = 0;
+  sim_s.t_s_prev_error = 0;
+  sim_s.t_s_iterator = 0;
+  sim_s.t_s_failsafe = 0;
+
+  sim_s.c_s_derivative = 0;
+  sim_s.c_s_integral = 0;
+  sim_s.c_s_error = 0;
+  sim_s.c_s_prev_error = 0;
+  sim_s.c_s_iterator = 0;
+  sim_s.c_s_failsafe = 0;
+  sim_s.c_s_rightTurn = false;
+}
+
+/**
+ * @brief PID class constants
+ * 
+ */
+
 // Set translation PID constants
 void TranslationPID::set_t_constants(const double kp, const double ki, const double kd, const double r_kp){
   mov_t.t_kp = kp;
@@ -108,14 +152,41 @@ void ArcPID::set_a_constants(const double kp, const double ki, const double kd){
   arc_a.a_kd = kd;
 }
 
-// Find min angle between target angle and currrent angle using ANGLE WRAPPED SYSTEM
+void SimultaneousPID::set_sim_t_constants(const double kp, const double ki, const double kd, const double r_kp){
+  sim_s.t_s_kp = kp;
+  sim_s.t_s_ki = ki;
+  sim_s.t_s_kd = kd;
+  sim_s.t_s_r_kp = r_kp;
+}
+
+void SimultaneousPID::set_sim_c_constants(const double kp, const double ki, const double kd){
+  sim_s.c_s_kp = kp;
+  sim_s.c_s_ki = ki;
+  sim_s.c_s_kd = kd;
+}
+
+/**
+ * @brief calculate the min angle needed to reach a target theta within 360 degrees
+ * 
+ * @param targetHeading the target heading of the robot
+ * @param currentrobotHeading the current angle held by the robot
+ * @return the shortest turn angle needed to reach target theta
+ */
+
 double TranslationPID::find_min_angle(int16_t targetHeading, int16_t currentrobotHeading){
   double turnAngle = targetHeading - currentrobotHeading;
   if (turnAngle > 180 || turnAngle < -180){ turnAngle = turnAngle - (utility::sgn(turnAngle) * 360); }
   return turnAngle;
 }
 
-// Compute translation logic
+/**
+ * @brief compute translation PID movement logic
+ * 
+ * @param current the current position of the robot
+ * @param target the desired target of the robot
+ * @return PID calculated voltage at that specific position relative to target
+ */
+
 double TranslationPID::compute_t(double current, double target){
   mov_t.t_error = target - current;
   mov_t.t_derivative = mov_t.t_error - mov_t.t_prev_error;
@@ -133,7 +204,14 @@ double TranslationPID::compute_t(double current, double target){
   return output;
 }
 
-// Compute rotation logic
+/**
+ * @brief compute rotation PID movement logic
+ * 
+ * @param current the current raw IMU value of the robot
+ * @param target the desired target theta of the robot (IN RAW IMU VALUES)
+ * @return PID calculated voltage at that specific angle relative to target angle
+ */
+
 double RotationPID::compute_r(double current, double target){
   rot_r.r_error = target - imu_sensor.get_rotation();
   rot_r.r_derivative = rot_r.r_error - rot_r.r_prev_error;
@@ -146,9 +224,15 @@ double RotationPID::compute_r(double current, double target){
   rot_r.r_prev_error = rot_r.r_error;
   return output;
 }
-//
 
-// Compute curve logic
+/**
+ * @brief compute curve PID movement logic
+ * 
+ * @param current the current raw IMU value of the robot
+ * @param target the desired target theta the robot will curve to
+ * @return PID calculated voltage at that specific angle relative to target curve
+ */
+
 double CurvePID::compute_c(double current, double target){
   cur_c.c_error = target - imu_sensor.get_rotation();
   cur_c.c_derivative = cur_c.c_error - cur_c.c_prev_error;
@@ -166,7 +250,14 @@ double CurvePID::compute_c(double current, double target){
   return output;
 }
 
-// Compute arc logic
+/**
+ * @brief compute arc PID movement logic
+ * 
+ * @param tx the target global X value calculated from Odometry logic
+ * @param ty the target global Y value calculated from Odometry logic
+ * @return PID calculated voltage at that specific coordinate vector relative to target vector
+ */
+
 double ArcPID::compute_a(double tx, double ty){
   arc_a.a_error = sqrt(pow(tx - gx, 2) + pow(ty - gy, 2));
   arc_a.a_derivative = arc_a.a_error - arc_a.a_prev_error;
@@ -184,7 +275,61 @@ double ArcPID::compute_a(double tx, double ty){
   return output;
 }
 
-// Translation PID Driver
+/**
+ * @brief compute simultaneous translation PID movement logic
+ * 
+ * @param translationTarget the target translation target position
+ * @param translationCurrent the current position of the robot relative to the target location
+ * @return PID calculated voltage at that specific position relative to the target position
+ */
+
+double SimultaneousPID::compute_sim_mov_pid(double translationTarget, double translationCurrent){
+  sim_s.t_s_error = translationTarget - translationCurrent;
+  sim_s.t_s_derivative = sim_s.t_s_error - sim_s.t_s_prev_error;
+  if (sim_s.t_s_ki != 0){
+    sim_s.t_s_integral += sim_s.t_s_error;
+  }
+  if (utility::sgn(sim_s.t_s_error) !=  utility::sgn(sim_s.t_s_prev_error)){ sim_s.t_s_integral = 0; }
+
+  double output = (sim_s.t_s_kp * sim_s.t_s_error) + (sim_s.t_s_integral * sim_s.t_s_ki) + (sim_s.t_s_derivative * sim_s.t_s_kd);
+  if (output * (12000.0 / 127) > sim_s.t_s_maxSpeed * (12000.0 / 127)) output = sim_s.t_s_maxSpeed;
+  if (output * (12000.0 / 127) < -sim_s.t_s_maxSpeed * (12000.0 / 127)) output = -sim_s.t_s_maxSpeed;
+  sim_s.t_s_prev_error = sim_s.t_s_error;
+  return output;
+}
+
+/**
+ * @brief compute simultaneous curve PID movement logic
+ * 
+ * @param current the current raw IMU value of the robot
+ * @param target the desired target theta the robot will curve to
+ * @return PID calculated voltage at that specific angle relative to target curve
+ */
+
+double SimultaneousPID::compute_sim_cur_pid(double curvetargetTheta, double curveCurrent){
+  sim_s.c_s_error = curvetargetTheta - imu_sensor.get_rotation();
+  sim_s.c_s_derivative = sim_s.c_s_error - sim_s.c_s_prev_error;
+  if (sim_s.c_s_ki != 0){
+    sim_s.c_s_integral += sim_s.c_s_error;
+  }
+  if (utility::sgn(sim_s.c_s_error) !=  utility::sgn(sim_s.c_s_prev_error)){
+    sim_s.c_s_integral = 0;
+  }
+  double output = (sim_s.c_s_kp * sim_s.c_s_error) + (sim_s.c_s_integral * sim_s.c_s_ki) + (sim_s.c_s_derivative * sim_s.c_s_kd);
+
+  if (output * (12000.0 / 127) >= sim_s.c_s_maxSpeed * (12000.0 / 127)) { output = sim_s.c_s_maxSpeed; }
+  if (output * (12000.0 / 127) <= -sim_s.c_s_maxSpeed * (12000.0 / 127)) { output = -sim_s.c_s_maxSpeed; }
+  sim_s.c_s_prev_error = sim_s.c_s_error;
+  return output;
+}
+
+/**
+ * @brief Driver PID function. Main logic function, combining all translation PID components together
+ * 
+ * @param target the target translation target position
+ * @param maxSpeed the maxspeed the robot may travel at
+ */
+
 void TranslationPID::set_translation_pid(double target, double maxSpeed){
   utility::fullreset(0, false);
   mov_t.reset_t_alterables();
@@ -219,7 +364,13 @@ void TranslationPID::set_translation_pid(double target, double maxSpeed){
   }
 }
 
-// Rotation PID Driver
+/**
+ * @brief Driver Rotation PID function. Main logic function, combining all rotation PID components together
+ * 
+ * @param t_theta the target theta angle
+ * @param maxSpeed the maxspeed the robot may make the turn in 
+ */
+
 void RotationPID::set_rotation_pid(double t_theta, double maxSpeed){
   utility::fullreset(0, false);
   rot_r.reset_r_alterables();
@@ -245,7 +396,15 @@ void RotationPID::set_rotation_pid(double t_theta, double maxSpeed){
   }
 }
 
-// Curve PID Driver
+/**
+ * @brief Driver Curve PID function. Main logic function, combining all curve PID components together
+ * 
+ * @param t_theta the target theta angle
+ * @param maxSpeed the maxspeed the robot may make the turn in 
+ * @param curveDamper The amount the swing will be dampered by
+ * @param backwards whether or not the robot will make the curve backwards or forwards
+ */
+
 void CurvePID::set_curve_pid(double t_theta, double maxSpeed, double curveDamper, bool backwards){
   utility::fullreset(0, false);
   cur_c.reset_c_alterables();
@@ -288,7 +447,15 @@ void CurvePID::set_curve_pid(double t_theta, double maxSpeed, double curveDamper
   }
 }
 
-// Arc PID Driver
+/**
+ * @brief Driver Arc PID function. Main logic function, combining all arc PID components together
+ * 
+ * @param t_x the target X position coordinate
+ * @param t_y the target Y position coordinate
+ * @param maxSpeed the max speed the robot may make the turn in 
+ * @param arcDamper the amount the arc movement will be dampered by
+ */
+
 void ArcPID::set_arc_pid(double t_x, double t_y, double maxSpeed, double arcDamper){
   odom odometry;
   FinalizeAuton data;
@@ -322,6 +489,132 @@ void ArcPID::set_arc_pid(double t_x, double t_y, double maxSpeed, double arcDamp
       break;
     }
     pros::delay(10);
+  }
+}
+
+/**
+ * @brief Driver simultaneous PID function. CURRENTLY WIP, not in use
+ * 
+ * @param curveStartEnabled the target theta angle
+ * @param curvetargetThetaStart the maxspeed the robot may make the turn in 
+ * @param curveDamperStart
+ * @param curveMaxSpeedStart
+ * @param backwardsStart
+ * @param translationEnabled
+ * @param translationTarget
+ * @param translationMaxSpeed
+ * @param curveEndEnabled
+ * @param curvetargetThetaEnd
+ * @param curveDamperEnd
+ * @param curveMaxSpeedEnd
+ * @param backwardsEnd
+ */
+
+void SimultaneousPID::set_sim_pid(bool curveStartEnabled, double curvetargetThetaStart, double curveDamperStart, double curveMaxSpeedStart, bool backwardsStart, bool translationEnabled, double translationTarget, double translationMaxSpeed, bool curveEndEnabled, double curvetargetThetaEnd, double curveDamperEnd, double curveMaxSpeedEnd, bool backwardsEnd){
+  utility::fullreset(0, false);
+  sim_s.reset_sim_alterables();
+
+  if (curveStartEnabled && curvePhaseStart == true) {
+    utility::fullreset(0, false);
+    sim_s.reset_sim_alterables();
+    while (sim_s.curvePhaseStart == true && sim_s.translationPhase == false && sim_s.curvePhaseEnd == false){
+      data.DisplayData();
+      double currentPos = imu_sensor.get_rotation();
+      double vol = sim_s.compute_sim_cur_pid(currentPos, curvetargetThetaEnd);
+
+      if (sim_s.c_s_error > 0){ sim_s.c_s_rightTurn = true; } else { sim_s.c_s_rightTurn = false;}
+      if (sim_s.c_s_rightTurn == true && backwardsEnd == false){
+        utility::leftvoltagereq(vol * (12000.0 / 127));
+        utility::rightvoltagereq(vol * (12000.0 / 127) * curveDamperEnd);
+      }
+      else if (sim_s.c_s_rightTurn == false && backwardsEnd == false){
+        utility::leftvoltagereq(fabs(vol) * (12000.0 / 127) * curveDamperEnd);
+        utility::rightvoltagereq(fabs(vol) * (12000.0 / 127));
+      }
+      if (sim_s.c_s_rightTurn == true && backwardsEnd == true){
+        utility::leftvoltagereq(-vol * (12000.0 / 127) * curveDamperEnd);
+        utility::rightvoltagereq(-vol * (12000.0 / 127));
+      }
+      else if (sim_s.c_s_rightTurn == false && backwardsEnd == true){
+        utility::leftvoltagereq(vol * (12000.0 / 127));
+        utility::rightvoltagereq(vol * (12000.0 / 127) * curveDamperEnd);
+        std::cout << "running" << std::endl;
+      }
+      if (fabs(sim_s.c_s_error) < sim_s.c_s_error_thresh) { sim_s.c_s_iterator++; } else { sim_s.c_s_iterator = 0;}
+      if (fabs(sim_s.c_s_iterator) >= sim_s.c_s_tol){
+        curvePhaseEnd = false;
+        curvePhaseStart = false;
+        translationPhase = true;
+        break;
+      }
+      pros::delay(10);
+    }
+  }
+
+  if (translationEnabled && translationPhase == true) {
+    utility::fullreset(0, false);
+    sim_s.reset_sim_alterables();
+    double TARGET_THETA = ImuMon();
+    double POSITION_TARGET = translationTarget;
+    int8_t cd = 0;
+    sim_s.t_s_maxSpeed = translationMaxSpeed;
+    mov_t.circumfrance = mov_t.wheelDiameter * M_PI;
+    mov_t.ticks_per_rev = (50.0 * (3600.0 / mov_t.cartridge) * mov_t.ratio);
+    mov_t.ticks_per_inches = (mov_t.ticks_per_rev / mov_t.circumfrance);
+    translationTarget *= mov_t.ticks_per_inches;
+    while (sim_s.curvePhaseStart == false && sim_s.translationPhase == true && sim_s.curvePhaseEnd == false){
+      data.DisplayData();
+      double avgPos = (DriveFrontLeft.get_position() + DriveFrontRight.get_position()) / 2;
+      double avg_voltage_req = mov_t.compute_t(avgPos, translationTarget);
+      double headingAssist = mov_t.find_min_angle(TARGET_THETA, ImuMon()) * sim_s.t_s_r_kp;
+      cd++; if (cd <= 10){ utility::leftvoltagereq(0); utility::rightvoltagereq(0); continue;}
+
+      utility::leftvoltagereq(avg_voltage_req * (12000.0 / 127) + headingAssist);
+      utility::rightvoltagereq(avg_voltage_req * (12000.0 / 127) - headingAssist);
+      if (fabs(sim_s.t_s_error) < sim_s.t_s_error_thresh){ sim_s.t_s_iterator++; } else { sim_s.t_s_iterator = 0;}
+      if (fabs(sim_s.t_s_iterator) > sim_s.t_s_tol){
+        curvePhaseEnd = true;
+        curvePhaseStart = false;
+        translationPhase = false;
+        break;
+      }
+      pros::delay(10);
+    }
+  }
+
+  if (curveEndEnabled && curvePhaseEnd == true) {
+    utility::fullreset(0, false);
+    sim_s.reset_sim_alterables();
+    while (sim_s.curvePhaseStart == false && sim_s.translationPhase == false && sim_s.curvePhaseEnd == true){
+      data.DisplayData();
+      double currentPos = imu_sensor.get_rotation();
+      double vol = sim_s.compute_sim_cur_pid(currentPos, curvetargetThetaEnd);
+
+      if (sim_s.c_s_error > 0){ sim_s.c_s_rightTurn = true; } else { sim_s.c_s_rightTurn = false;}
+      if (sim_s.c_s_rightTurn == true && backwardsEnd == false){
+        utility::leftvoltagereq(vol * (12000.0 / 127));
+        utility::rightvoltagereq(vol * (12000.0 / 127) * curveDamperEnd);
+      }
+      else if (sim_s.c_s_rightTurn == false && backwardsEnd == false){
+        utility::leftvoltagereq(fabs(vol) * (12000.0 / 127) * curveDamperEnd);
+        utility::rightvoltagereq(fabs(vol) * (12000.0 / 127));
+      }
+      if (sim_s.c_s_rightTurn == true && backwardsEnd == true){
+        utility::leftvoltagereq(-vol * (12000.0 / 127) * curveDamperEnd);
+        utility::rightvoltagereq(-vol * (12000.0 / 127));
+      }
+      else if (sim_s.c_s_rightTurn == false && backwardsEnd == true){
+        utility::leftvoltagereq(vol * (12000.0 / 127));
+        utility::rightvoltagereq(vol * (12000.0 / 127) * curveDamperEnd);
+        std::cout << "running" << std::endl;
+      }
+      if (fabs(sim_s.c_s_error) < sim_s.c_s_error_thresh) { sim_s.c_s_iterator++; } else { sim_s.c_s_iterator = 0;}
+      if (fabs(sim_s.c_s_iterator) >= sim_s.c_s_tol){
+        utility::stop();
+        break;
+      }
+      pros::delay(10);
+    }
   }
 }
 

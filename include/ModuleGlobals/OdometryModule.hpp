@@ -9,7 +9,6 @@ class odom{
     private:
         bool init = true;
     public:
-        odom();
         double deltaArcLength                              = 0;
         double previousArcLength                           = 0;
         double currentarclength                            = 0;
@@ -41,4 +40,23 @@ class odom{
         double counter                                     = 0;
 
         void Odometry();
+};
+
+class new_odom{
+    private:
+        bool init = true;
+    public:
+        double prev_vertical = 0;
+        double prev_horizontal = 0;
+        double prev_heading_value;
+
+        double vertical_value;
+        double horizontal_value;
+        double heading_value;
+
+        double vertical_distance = 0;
+        double horizontal_distance = 0;
+
+        void set_pt_constants(const double vertical_wheel_distance, const double horizontal_wheel_distance);
+        void compute_odometry();
 };

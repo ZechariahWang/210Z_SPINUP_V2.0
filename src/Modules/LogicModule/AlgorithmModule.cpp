@@ -1,6 +1,5 @@
 #include "main.h"
 
-odom odometry; // odom class
 const double SpeedCompensator = 0.3; // Adjusts speed 
 
 // Assigns values to the constructor
@@ -127,8 +126,7 @@ void ArcMovement(double targetX, double targetY){
     bool a_turnFixToggle = false;
     bool a_rightTurn = false;
     bool a_switched = false;
-
-    odometry.Odometry();
+    
     a_distanceError = sqrt(pow(targetX - gx, 2) + pow(targetY - gy, 2));
     double speed = a_kP * a_distanceError * a_driveMultiplier;
     double modifier = 0.48;
