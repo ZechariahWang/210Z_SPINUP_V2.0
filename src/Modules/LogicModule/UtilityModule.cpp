@@ -1,6 +1,19 @@
+/**
+ * @file UtilityModule.cpp
+ * @author Zechariah Wang
+ * @brief Helper functions and utlity namespace
+ * @version 0.1
+ * @date 2023-02-13
+ */
+
 #include "main.h"
 
 MotionAlgorithms Auton_Framework;
+
+/**
+ * @brief idek what happened here it just makes common functions easier to access
+ * 
+ */
 
 namespace utility // Global utility namespace for helper functions within PID autons
 {
@@ -77,7 +90,10 @@ namespace utility // Global utility namespace for helper functions within PID au
     }
   }
 }
-
+/**
+ * @brief Override coordinate position to desired position
+ * 
+ */
 
 void MotionAlgorithms::overRideCoordinatePos(double new_gx, double new_gy){
   gx = new_gx;

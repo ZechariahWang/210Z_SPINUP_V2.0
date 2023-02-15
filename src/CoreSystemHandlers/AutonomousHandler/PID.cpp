@@ -21,6 +21,21 @@ ArcPID           arc_a;
 SimultaneousPID  sim_s;
 
 /**
+ * @brief Set drivetrain specs
+ * 
+ * @param n_wheelDiameter the dimater of the drivetrain wheel
+ * @param n_gearRatio The gear ratio of the drivetrain
+ * @param n_motorCartidge The motor cartridge of the drivetrain
+ */
+
+// Set the drivetrain constants (wheel size, motor cartridge, etc)
+void TranslationPID::set_dt_constants(const double n_wheelDiameter, const double n_gearRatio, const double n_motorCartridge){
+  mov_t.wheelDiameter = n_wheelDiameter;
+  mov_t.ratio = n_gearRatio;
+  mov_t.cartridge = n_motorCartridge;
+}
+
+/**
  * @brief PID class constructors
  * 
  */
@@ -50,13 +65,6 @@ SimultaneousPID::SimultaneousPID(){
   sim_s.t_s_error_thresh = 100;
   sim_s.c_s_tol = 20;
   sim_s.c_s_error_thresh = 3;
-}
-
-// Set the drivetrain constants (wheel size, motor cartridge, etc)
-void TranslationPID::set_dt_constants(const double n_wheelDiameter, const double n_gearRatio, const double n_motorCartridge){
-  mov_t.wheelDiameter = n_wheelDiameter;
-  mov_t.ratio = n_gearRatio;
-  mov_t.cartridge = n_motorCartridge;
 }
 
 // Reset core translation variables

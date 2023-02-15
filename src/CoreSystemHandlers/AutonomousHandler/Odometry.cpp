@@ -12,10 +12,27 @@
 #include "variant"
 #include "array"
 
-odom      w2_odom; // odom class init
-new_odom  pt;  // odom position tracking init
-double    gx;    // global X
-double    gy;    // global Y
+odom      w2_odom;  // odom class init
+new_odom  pt;       // odom position tracking init
+double    gx;       // global X
+double    gy;       // global Y
+
+/**
+ * @brief The current theta of the robot wrapped to 360 degrees
+ * @return angle wrapped to 360 degrees from raw IMU sensor data
+ */
+
+double globalTheta = 0;
+double ImuMon() {
+  globalTheta = fmod(imu_sensor.get_rotation(), 360);
+  while (globalTheta < 0) {
+    globalTheta += 360;
+  }
+  while (globalTheta > 360) {
+    globalTheta -= 360;
+  }
+  return globalTheta;
+}
 
 /**
  * @brief Set position tracking constants
@@ -38,24 +55,6 @@ void new_odom::set_pt_constants(const double vertical_wheel_distance, const doub
 
 int16_t radian_to_degrees(const double angle) { return angle * 180 / M_PI; } // convert radian to degrees
 int16_t degrees_to_radians(const double angle){ return angle * M_PI / 180; } // Convert degrees to radian
-
-/**
- * @brief The current theta of the robot wrapped to 360 degrees
- * 
- * @return angle wrapped to 360 degrees from raw IMU sensor data
- */
-
-double globalTheta = 0;
-double ImuMon() {
-  globalTheta = fmod(imu_sensor.get_rotation(), 360);
-  while (globalTheta < 0) {
-    globalTheta += 360;
-  }
-  while (globalTheta > 360) {
-    globalTheta -= 360;
-  }
-  return globalTheta;
-}
 
 /**
  * @brief New Odometry version 2.0 currently WIP

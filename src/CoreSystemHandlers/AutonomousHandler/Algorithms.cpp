@@ -27,6 +27,13 @@ double find_min_angle(const int16_t targetHeading, const int16_t currentrobotHea
   return turnAngle;
 }
 
+/**
+ * @brief Convert angle to desired unit
+ * 
+ * @param angle the current angle
+ * @return angle in desired unit (degree or radians)
+ */
+
 int16_t radian_to_degrees_converter(const double angle) { return angle * 180 / M_PI; } // convert radian to degrees
 int16_t degrees_to_radians_converter(const double angle){ return angle * M_PI / 180; } // Convert degrees to radian
 
@@ -52,7 +59,15 @@ void MotionAlgorithms::reset_swing_alterables(){ // Reset mtp values
   mtp.a_rightTurn = false;
 }
 
-// Move to reference pose algorithm
+/**
+ * @brief move to a specific position at a specific angle
+ * 
+ * @param targetX the target x coordinate
+ * @param targetY the target y coordinate
+ * @param targetHeading the target angle in degrees
+ * @param radius the radius of the arc
+ */
+
 void MotionAlgorithms::move_to_reference_pose(const double targetX, const double targetY, const double targetHeading, const double radius){
   MotionAlgorithms Auton_Framework;
   FinalizeAuton data;
@@ -108,6 +123,14 @@ void MotionAlgorithms::move_to_reference_pose(const double targetX, const double
   }
 }
 
+/**
+ * @brief Swing to a specific coordinate position. Used for Pure Pursuit, and other motion algorithms
+ * 
+ * @param targetX the target x coordinate
+ * @param targetY the target y coordinate
+ * @param swingDamper the amount the arc is dampered by
+ */
+
 // Swing to desired point
 void MotionAlgorithms::swing_to_point(const double tx, const double ty, const double swingDamper){
   mtp.reset_swing_alterables();
@@ -124,6 +147,13 @@ void curve_to_point(const double tx, const double ty, const double curveDamper){
   utility::leftvoltagereq(100 * (12000.0 / 127));
   utility::rightvoltagereq(100 * (12000.0 / 127));
 }
+
+/**
+ * @brief Turn to a specific coordinate position. ONLY IN QUADRANT 1
+ * 
+ * @param targetX the target x coordinate
+ * @param targetY the target y coordinate
+ */
 
 // Turn to target coordinate position
 void MotionAlgorithms::TurnToPoint(const int targetX, const int targetY){

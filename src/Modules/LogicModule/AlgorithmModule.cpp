@@ -1,8 +1,26 @@
-#include "main.h"
+/**
+ * @file AlgorithmModule.cpp
+ * @author Zechariah Wang
+ * @brief Pure Pursuit logic, as well as helper functions for other algorithms 
+ * @version 0.1
+ * @date 2023-02-13
+ */
 
+#include "main.h"
 const double SpeedCompensator = 0.3; // Adjusts speed 
 
-// Assigns values to the constructor
+/**
+ * @brief Assign curve point values
+ * 
+ * @param x
+ * @param y
+ * @param moveSpeed
+ * @param turnSpeed
+ * @param followDistance
+ * @param slowDownTurnRadians
+ * @param slowDownTurnAmount
+ */
+
 CurvePoint::CurvePoint(double x, double y, double moveSpeed, double turnSpeed, double followDistance, double slowDownTurnRadians, double slowDownTurnAmount){
     this->x = x;
     this->y = y;
@@ -12,6 +30,11 @@ CurvePoint::CurvePoint(double x, double y, double moveSpeed, double turnSpeed, d
     this->slowDownTurnRadians = slowDownTurnRadians;
     this->slowDownTurnAmount = slowDownTurnAmount;
 }
+
+/**
+ * @brief Assign curve point values to class
+ * @param thisPoint current point
+ */
 
 CurvePoint::CurvePoint(const CurvePoint &thisPoint){ // Assigns values to the class
     x = thisPoint.x;
@@ -23,6 +46,11 @@ CurvePoint::CurvePoint(const CurvePoint &thisPoint){ // Assigns values to the cl
     slowDownTurnAmount = thisPoint.slowDownTurnAmount;
 }
 
+/**
+ * @brief Creates a new point, and sets values to the current x and y value
+ * @return the new point
+ */
+
 Point CurvePoint::toPoint(){ // Sets a new point to the current x and y val
     Point newPoint;
     newPoint.setX(x);
@@ -30,11 +58,26 @@ Point CurvePoint::toPoint(){ // Sets a new point to the current x and y val
     return newPoint;
 }
 
+/**
+ * @brief Wraps angle to 2 PI, or 360 degrees
+ * @param angle Angle to be wrapped
+ * @return the angle to be returned
+ */
+
 int AngleWrap_C::AngleWrap(double angle){ // Wrap angle to 2 PI
     while (angle < -M_PI){ angle += 2 * M_PI; }
     while (angle > M_PI){ angle -= 2 * M_PI; }
     return angle;
 }
+
+/**
+ * @brief Takes in two points, and finds the intersection status between two points. From this data, it will determine the most optimal path to follow
+ * @param circleCenter the center of the circle around the robot
+ * @param radius aka the LOOK AHEAD DISTANCE (L). This value can be tuned depending on the robot
+ * @param linePoint1 the coordinate vector of the first point
+ * @param linePoint2 the coordinate vector of the second point
+ * @return all points points found in intersection
+ */
 
 // Function takes in 2 points, and checks the intersection status between both points
 std::vector<Point> LineCircleIntersection(Point circleCenter, double radius, Point linePoint1, Point linePoint2){
@@ -82,10 +125,22 @@ std::vector<Point> LineCircleIntersection(Point circleCenter, double radius, Poi
     return allPoints;
 }
 
+/**
+ * @brief Class getters and setters. 
+ */
+
 void CurvePoint::setPoint(Point point){ x = point.getX(); y = point.getY(); }
 double CurvePoint::getFollowDistance(){ return followDistance; }
 double CurvePoint::getX(){ return x; }
 double CurvePoint::getY(){ return y; }
+
+/**
+ * @brief Gets the path, and decides which is the most optimal point to follow
+ * @param pathPoints the vector of all points in the path
+ * @param robotLocation the position of the robot
+ * @param followRadius the look ahead distance to be used
+ * @return the point to follow
+ */
 
 CurvePoint getFollowPointPath(std::vector<CurvePoint> pathPoints, Point robotLocation, double followRadius){
     CurvePoint followMe(pathPoints.at(0));
@@ -108,66 +163,12 @@ CurvePoint getFollowPointPath(std::vector<CurvePoint> pathPoints, Point robotLoc
     return followMe;
 }
 
-void ArcMovement(double targetX, double targetY){
-    TranslationPID t;
-    double startError = sqrt(pow(targetX - gx, 2) + pow(targetY - gy, 2));
+/**
+ * @brief Driver function. The logic that calls other components of Pure Pursuit
+ * @param allPoints All key points in the path
+ * @param followAngle The angle to follow the path in. Only for mecanum
+ */
 
-    const double a_kP              = 0.8;
-    const double a_driveMultiplier = 95;
-
-    double a_previousTurnAngle = 0;
-    double a_distanceError = startError;
-    double a_previousError = startError;
-    double a_failsafeCheck = 0;
-
-    int a_failsafeCounter = 0;
-    int a_breakCounter = 0;
-
-    bool a_turnFixToggle = false;
-    bool a_rightTurn = false;
-    bool a_switched = false;
-    
-    a_distanceError = sqrt(pow(targetX - gx, 2) + pow(targetY - gy, 2));
-    double speed = a_kP * a_distanceError * a_driveMultiplier;
-    double modifier = 0.48;
-
-    // double targetTheta = atan2f(targetX - gx, targetY - gy);
-    // targetTheta = (targetTheta - ImuMon() * M_PI / 180);
-    // targetTheta = atan2f(sinf(targetTheta), cosf(targetTheta)) * 180 / M_PI;
-
-    double abstargetAngle = atan2f(targetX - gx, targetY - gy) * 180 / M_PI;
-    if (abstargetAngle < 0){
-      abstargetAngle += 360;
-    }
-    double targetTheta = t.find_min_angle(abstargetAngle, ImuMon());
-
-
-    if (targetTheta >= 0 && targetTheta <= 180){
-      a_rightTurn = true; // turn right
-    }
-    else{
-      a_rightTurn = false; // turn left
-    }
-
-    if (fabs(targetTheta) < 1.5) // Close enough to theta just drive lmao
-    { 
-      utility::leftvoltagereq(speed);
-      utility::rightvoltagereq(speed);
-    }
-    else if (a_rightTurn) // Turning right
-    {
-      utility::leftvoltagereq(speed);
-      utility::rightvoltagereq(speed * modifier);
-    }
-    else // Turning left
-    {
-      utility::leftvoltagereq(speed * modifier);
-      utility::rightvoltagereq(speed);
-    }
-    pros::delay(10);
-}
-
-// Follows Pure Pursuit path
 void FollowCurve(std::vector<CurvePoint> allPoints, double followAngle){
     Point robotPosition;
     MotionAlgorithms CurveHandler;

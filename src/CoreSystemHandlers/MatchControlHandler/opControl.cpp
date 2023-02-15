@@ -1,11 +1,20 @@
+/**
+ * @file opControl.cpp
+ * @author Zechariah Wang
+ * @brief OP Control logic (dt control, external mechanics, etc)
+ * @version 0.1
+ * @date 2023-02-13
+ * 
+ */
+
 #include "main.h"
 #include "pros/misc.h"
 #include "pros/motors.h"
 #include "cmath"
 #include "fstream"
 
-match_mov mov; // Op Control class init
-MotionAlgorithms t;
+match_mov         mov; 
+MotionAlgorithms  t;
 match_mov::match_mov(){ mov.p_set = 0.8; mov.it_ps = 1; } // Class Constructor
 
 const u_int16_t forwardCurve       = 10;
@@ -27,6 +36,14 @@ u_int16_t expansionCounter         = 0; // Expansion power
 u_int16_t speed_bang               = 127; // Flywheel acceleration
 u_int16_t shot_iteration_counter   = 0;
 
+/**
+ * @brief Set exponential joystick accelerator curve type. Allows for more control of small movements, while maintaining max speed for large movements
+ * 
+ * @param red Red curve enabled. If not enabled, will use blue graph
+ * @param t Joystick damper. Tune value as desired by driver
+ * @return the value of the joystick accelerator
+ */
+
 int32_t joystick_accelerator(bool red, int8_t input, const double t){
     int16_t value = 0;
     if (red) { value = (std::exp(-t / 10) + std::exp((std::abs(input) - 100) / 10) * (1 - std::exp(-t / 10))) * input; }
@@ -34,7 +51,11 @@ int32_t joystick_accelerator(bool red, int8_t input, const double t){
     return value;
 }
 
-// The og code, standard h-drive control
+/**
+ * @brief Raw H-Drive DT Control
+ * 
+ */
+
 void match_mov::dt_Control(){
     int32_t rightXjoystick = (controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X)); // Axis 1
     int32_t rightYjoystick = (controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y)); // Axis 2
@@ -49,7 +70,11 @@ void match_mov::dt_Control(){
     utility::rightvoltagereq(right);
 }
 
-// Exponential joystick h-drive controller
+/**
+ * @brief Exponential Joystick curve accelerator
+ * 
+ */
+
 void match_mov::exponential_curve_accelerator(){
     int32_t rightXjoystick = (controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X)); // Axis 1
     int32_t rightYjoystick = (controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y)); // Axis 2
@@ -67,6 +92,11 @@ void match_mov::exponential_curve_accelerator(){
     utility::leftvoltagereq(left);
     utility::rightvoltagereq(right);
 }
+
+/**
+ * @brief Bang Bang Controller. For flywheel to recover to target speed faster
+ * 
+ */
 
 void match_mov::on_off_controller(){
     if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){
@@ -93,6 +123,11 @@ void match_mov::on_off_v2(){
 
 }
 
+/**
+ * @brief Raw flywheel control
+ * 
+ */
+
 void match_mov::power_shooter(){ // Power shooter function 
     if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){
         OuterShooter.move_voltage(12000 * mov.p_set);
@@ -101,20 +136,22 @@ void match_mov::power_shooter(){ // Power shooter function
     else{ OuterShooter.move_voltage(0); InnerShooter.move_voltage(0);}
 }
 
+/**
+ * @brief Raw intake control
+ * 
+ */
+
 void match_mov::power_intake(){ // Power intake function
-    if ((controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2))){
-        DiskIntakeTop.move_voltage(12000);
-    }
-    else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){
-        DiskIntakeTop.move_voltage(-12000);
-    }
-    else if (anglerStatus){
-        DiskIntakeTop.move_voltage(-8000);
-     }
-    else{
-        DiskIntakeTop.move_voltage(0);
-     }
+    if ((controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2))){ DiskIntakeTop.move_voltage(12000); }
+    else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){ DiskIntakeTop.move_voltage(-12000); }
+    else if (anglerStatus){ DiskIntakeTop.move_voltage(-8000); }
+    else{ DiskIntakeTop.move_voltage(0); }
 }
+
+/**
+ * @brief Disk launcher control
+ * 
+ */
 
 void match_mov::launch_disk(){ // Launch disk/piston control function
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1)){ 
@@ -134,6 +171,11 @@ void match_mov::launch_disk(){ // Launch disk/piston control function
     }
 }
 
+/**
+ * @brief Change power amount of flywheel
+ * 
+ */
+
 void match_mov::set_power_amount(){ // Function for changing power of flywheel
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP)){
         mov.p_set += 0.05;
@@ -148,22 +190,27 @@ void match_mov::set_power_amount(){ // Function for changing power of flywheel
     controller.print(1, 0, "FW: %.2f SD: %f", mov.p_set, mov.it_ps);
 }
 
+/**
+ * @brief All other misc controls
+ * 
+ */
+
 void match_mov::misc_control(){
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) {
         arcLaunchToggle = !arcLaunchToggle;
         YaoMing.set_value(arcLaunchToggle);
     }
-    // if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) { 
-    //     toggleRedCurve = !toggleRedCurve; 
-    //     turningRed = !turningRed;
-    //     forwardRed = !forwardRed;
-    // }
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN)) {
         if (anglerStatus) return;
         mov.l_stat = !mov.l_stat;
         Angler.set_value(mov.l_stat);
     }
 }
+
+/**
+ * @brief Change drivetrain motor type
+ * 
+ */
 
 void match_mov::set_motor_type(){
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)){ mov.robotBrakeType = !mov.robotBrakeType; }
@@ -189,26 +236,26 @@ void match_mov::set_motor_type(){
     }
 }
 
+/**
+ * @brief Expnansion initiation with failsafe
+ * 
+ */
+
 void match_mov::init_expansion(){
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT)){ PHASE_ONE = true; }
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y)){ PHASE_TWO = true; }
     if (PHASE_ONE && PHASE_TWO) Expansion.set_value(false);
 }
 
+/**
+ * @brief Force rest coordinate position of robot
+ * 
+ */
+
 void ForceReset(){
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT)){ gx = 0; gy = 0; }
 }
 
-    //     mov.l_stat = !mov.l_stat;
-    //     Angler.set_value(mov.l_stat); 
-    // }
-    // if (mov.l_stat == false){ mov.launch_iterator++; shot_iteration_counter++; }
-    // if (shot_iteration_counter > 20){ DiskIntakeTop.move_voltage((-127 * (12000.0 / 127)) * mov.it_ps); } // wait for piston to fully extend before moving motors
-    // if (mov.launch_iterator > 150){ // Reset after a moment
-    //     mov.l_stat = !mov.l_stat;
-    //     DiskIntakeTop.move_voltage(0); Angler.set_value(mov.l_stat); 
-    //     mov.launch_iterator = 0;
-    //     shot_iteration_counter = 0;
 
 
 

@@ -1,3 +1,12 @@
+/**
+ * @file Vision.cpp
+ * @author Zechariah Wang
+ * @brief NO IMPLEMENTATION
+ * @version 0.1
+ * @date 2023-02-13
+ * 
+ */
+
 #include "main.h"
 
 // vision control concept. No actual implementation yet

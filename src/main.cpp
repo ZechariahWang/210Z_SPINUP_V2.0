@@ -1,3 +1,11 @@
+/**
+ * @file main.cpp
+ * @author Zechariah Wang
+ * @brief Main logic file. Runs pre-init, init, auton, and op-control logic
+ * @version 0.1
+ * @date 2023-02-13
+ */
+
 #include "main.h"
 #include "display/lv_objx/lv_label.h"
 #include "pros/motors.h"

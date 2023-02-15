@@ -1,8 +1,9 @@
 #include "main.h"
 
-//////////////////////
-// MAIN ROBOT GLOBALS
-//////////////////////
+/**
+ * @brief Primary Robot globals
+ * 
+ */
 
 pros::Motor DriveFrontLeft(14, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_COUNTS);
 pros::Motor DriveFrontRight(16, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS);
@@ -39,9 +40,10 @@ pros::Vision vision_sensor(3);
 pros::ADIDigitalIn AutonSwitchForward('t');
 pros::ADIDigitalIn AutonSwitchBackward('z');
 
-////////////////////////////
-// PROGRAMMING ROBOT GLOBALS
-////////////////////////////
+/**
+ * @brief Programming robot globals
+ * 
+ */
 
 // // Motors
 // pros::Motor DriveFrontLeft(69, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS);

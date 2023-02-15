@@ -1,3 +1,11 @@
+/**
+ * @file InitializeModule.cpp
+ * @author Zechariah Wang
+ * @brief Auton selector, and pre-match initialization
+ * @version 0.1
+ * @date 2023-02-13
+ */
+
 #include "main.h"
 #include "map"
 #include "string"
@@ -23,6 +31,11 @@ std::map<int, std::string> auton_Legend_secondary = {
     { 3, "Solo WP" }
 };
 
+/**
+ * @brief iterate through the secondary legend
+ * 
+ */
+
 void iterate_legend(){
     pros::Mutex mutex;
     u_int16_t iterator = 1;
@@ -38,6 +51,12 @@ void iterate_legend(){
         mutex.give();
     }
 }
+
+/**
+ * @brief Allows for user to select desired auton path in scripts
+ * 
+ * @param time time before selection phase expires
+ */
 
 // This funcion receieves input from lvgl auton selector. Calls the external path connector to run desired auton path.
 void Init_AutonSwitchMain::ReceiveInput(u_int32_t time){
@@ -60,6 +79,11 @@ void Init_AutonSwitchMain::ReceiveInput(u_int32_t time){
         pros::delay(10);
     }
 }
+
+/**
+ * @brief Recieve auton selector input but with no time limit (dont ask why theres a time parameter i was being autistic)
+ * 
+ */
 
 // This function is for the auton selector, however with no time limit on choosing the desired auton. Will only break out once middle button is pressed.
 void Init_AutonSwitchMain::ReceiveInput_noLimit(int32_t time){
@@ -84,6 +108,11 @@ void Init_AutonSwitchMain::ReceiveInput_noLimit(int32_t time){
     }
 }
 
+/**
+ * @brief Select auton script
+ * 
+ */
+
 // Finalize auton choices
 void FinalizeAuton::SelectAuton(){
     int16_t chosenAuton = SelectedAuton;
@@ -103,6 +132,11 @@ void FinalizeAuton::SelectAuton(){
     }
 }
 
+/**
+ * @brief resets all vital sensors to default values
+ * 
+ */
+
 // Reset all sensors used in autonomous routines
 void ResetSensors::ResetAllPrimarySensors(){
     imu_sensor.tare_rotation();
@@ -115,6 +149,10 @@ void ResetSensors::ResetAllPrimarySensors(){
     gy = 0;
     Launcher.set_value(true);
 }
+/**
+ * @brief Display robot metrics such as position, motor status, etc
+ * 
+ */
 
 // Display chosen auton
 void FinalizeAuton::DisplayCurrentAuton(){
