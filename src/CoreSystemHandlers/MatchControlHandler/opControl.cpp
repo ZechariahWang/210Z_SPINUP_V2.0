@@ -142,8 +142,8 @@ void match_mov::power_shooter(){ // Power shooter function
  */
 
 void match_mov::power_intake(){ // Power intake function
-    if ((controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2))){ DiskIntakeTop.move_voltage(12000); }
-    else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){ DiskIntakeTop.move_voltage(-12000); }
+    if ((controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2))){ DiskIntakeTop.move_voltage(11000); }
+    else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){ DiskIntakeTop.move_voltage(-11000); }
     else if (anglerStatus){ DiskIntakeTop.move_voltage(-8000); }
     else{ DiskIntakeTop.move_voltage(0); }
 }

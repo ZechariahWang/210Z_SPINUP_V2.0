@@ -563,6 +563,7 @@ void autonomous(){  // Autonomous function control
 	// Init_Process.ReceiveInput(time); // Enabled Auton Selector (STEP 1) ONLY FOR PROTOTYPE USE
 	// Init_Process.SelectAuton(); // Enable Auton Selector (STEP 2) 
 
+
     DiskIntakeTop.move_voltage(9500);
     OuterShooter.move_voltage(11000);
 	YaoMing.set_value(false);
@@ -594,6 +595,10 @@ void autonomous(){  // Autonomous function control
 	mov.set_translation_pid(40, 70);
 
 	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(0, 90);
+	imu_sensor.set_rotation(0);
+
+	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(-3, 90);
 
 	shoot_skills(8200);
@@ -614,8 +619,8 @@ void autonomous(){  // Autonomous function control
 	pros::delay(200);
     Angler.set_value(false); 
 
-	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(-45, 90);
+	rot.set_r_constants(5, 0, 45);
+	rot.set_rotation_pid(-45, 70);
 
 	shoot_skills(8200);
 
@@ -623,7 +628,7 @@ void autonomous(){  // Autonomous function control
 	mov.set_translation_pid(-18, 70);
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(45, 90);
+	rot.set_rotation_pid(45, 70);
 
     DiskIntakeTop.move_voltage(12000);
     mov.set_t_constants(0.45, 0, 5, 50);
@@ -648,7 +653,7 @@ void autonomous(){  // Autonomous function control
 	rot.set_rotation_pid(180, 90);
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(-15, 70);
+	mov.set_translation_pid(-13, 70);
 
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(15, 70);
@@ -658,7 +663,7 @@ void autonomous(){  // Autonomous function control
 
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(-15, 70);
+	mov.set_translation_pid(-16, 70);
 
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(15, 70);
@@ -671,16 +676,80 @@ void autonomous(){  // Autonomous function control
 	mov.set_translation_pid(40, 70);
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(176, 90);
+	rot.set_rotation_pid(178, 90);
 
 	shoot_skills(8500);
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(-28, 70);
+	mov.set_translation_pid(-13, 70);
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(235, 90);
+	rot.set_rotation_pid(235, 70);
 
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(50, 70);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(135, 70);
+
+	shoot_skills(8500);
+
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(-8, 70);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(235, 70);
+
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(40, 70);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(315, 70);
+
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(35, 70);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(360, 70);
+
+	shoot_skills(8500);
+
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(135, 70);
+
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(40, 70);
+
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(30, 40);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(90, 70);
+
+	shoot_skills(8500);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(12, 70);
+
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(80, 70);
+
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(20, 40);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(-90, 70);
+
+	shoot_skills(8500);
+
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(-33, 80);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(-135, 70);
+
+	// expand
 
 }
 
