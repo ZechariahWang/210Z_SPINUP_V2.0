@@ -439,7 +439,6 @@ void CurvePID::set_curve_pid(double t_theta, double maxSpeed, double curveDamper
     else if (cur_c.c_rightTurn == false && backwards == true){
       utility::leftvoltagereq(vol * (12000.0 / 127));
       utility::rightvoltagereq(vol * (12000.0 / 127) * curveDamper);
-      std::cout << "running" << std::endl;
     }
     if (fabs(cur_c.c_error) < cur_c.c_error_thresh) { cur_c.c_iterator++; } else { cur_c.c_iterator = 0;}
     if (fabs(cur_c.c_iterator) >= cur_c.c_tol){
@@ -503,65 +502,86 @@ void ArcPID::set_arc_pid(double t_x, double t_y, double maxSpeed, double arcDamp
 /**
  * @brief Driver simultaneous PID function. CURRENTLY WIP, not in use
  * 
- * @param curveStartEnabled the target theta angle
+ * @param curveStartEnabled     the target theta angle
  * @param curvetargetThetaStart the maxspeed the robot may make the turn in 
- * @param curveDamperStart
- * @param curveMaxSpeedStart
- * @param backwardsStart
- * @param translationEnabled
- * @param translationTarget
- * @param translationMaxSpeed
- * @param curveEndEnabled
- * @param curvetargetThetaEnd
- * @param curveDamperEnd
- * @param curveMaxSpeedEnd
- * @param backwardsEnd
+ * @param curveDamperStart      Damper of initial curve
+ * @param curveMaxSpeedStart    Speed of initial curve
+ * @param backwardsStart        Curve backwards or forwards?
+ * @param translationEnabled    Movement enabled
+ * @param translationTarget     Movement target
+ * @param translationMaxSpeed   Movement maxspeed
+ * @param curveEndEnabled       Curve end enabled?
+ * @param curvetargetThetaEnd   Target angle for curve
+ * @param curveDamperEnd        Damper of final curve
+ * @param curveMaxSpeedEnd      Speed of final curve
+ * @param backwardsEnd          Backwards curve?
  */
 
+// ima actually shoot myself fr
 void SimultaneousPID::set_sim_pid(bool curveStartEnabled, double curvetargetThetaStart, double curveDamperStart, double curveMaxSpeedStart, bool backwardsStart, bool translationEnabled, double translationTarget, double translationMaxSpeed, bool curveEndEnabled, double curvetargetThetaEnd, double curveDamperEnd, double curveMaxSpeedEnd, bool backwardsEnd){
   utility::fullreset(0, false);
   sim_s.reset_sim_alterables();
+  if (curveStartEnabled == false && translationEnabled == false && curveEndEnabled == false) { // ONLY ONE EVENT STATUS SHOULD BE SET TO TRUE AT ONCE
+    std::cout << "help" << std::endl;
+  }
+  // These are the two most likely parameters that will be used. gt make more cut edge conditions in the future in case i become monkey
+  if (curveStartEnabled && translationEnabled && curveEndEnabled) {sim_s.curvePhaseStart = true; sim_s.translationPhase = false; sim_s.curvePhaseEnd = false;}
+  if (curveStartEnabled == false && translationEnabled == true && curveEndEnabled == true){sim_s.curvePhaseStart = false; sim_s.translationPhase = true; sim_s.curvePhaseEnd = false;}
+  if (curveEndEnabled && translationEnabled == false && curveEndEnabled == false) {sim_s.curvePhaseStart = true; sim_s.translationPhase = false; sim_s.curvePhaseEnd = false;}
+  if (curveEndEnabled == false && translationEnabled == false && curveEndEnabled == true) {sim_s.curvePhaseStart = false; sim_s.translationPhase = false ; sim_s.curvePhaseEnd = true;}
 
-  if (curveStartEnabled && curvePhaseStart == true) {
+  // Initial cuvre phase
+  if (curveStartEnabled && sim_s.curvePhaseStart == true) {
     utility::fullreset(0, false);
-    sim_s.reset_sim_alterables();
+    cur_c.reset_c_alterables();
+    cur_c.c_maxSpeed = 30;
     while (sim_s.curvePhaseStart == true && sim_s.translationPhase == false && sim_s.curvePhaseEnd == false){
       data.DisplayData();
       double currentPos = imu_sensor.get_rotation();
-      double vol = sim_s.compute_sim_cur_pid(currentPos, curvetargetThetaEnd);
+      double vol = cur_c.compute_c(currentPos, curvetargetThetaStart);
+      vol =90;
 
-      if (sim_s.c_s_error > 0){ sim_s.c_s_rightTurn = true; } else { sim_s.c_s_rightTurn = false;}
-      if (sim_s.c_s_rightTurn == true && backwardsEnd == false){
+      if (cur_c.c_error > 0){ cur_c.c_rightTurn = true; } else { cur_c.c_rightTurn = false;}
+      if (cur_c.c_rightTurn == true && backwardsStart == false){
         utility::leftvoltagereq(vol * (12000.0 / 127));
-        utility::rightvoltagereq(vol * (12000.0 / 127) * curveDamperEnd);
+        utility::rightvoltagereq(vol * (12000.0 / 127) * curveDamperStart);
       }
-      else if (sim_s.c_s_rightTurn == false && backwardsEnd == false){
-        utility::leftvoltagereq(fabs(vol) * (12000.0 / 127) * curveDamperEnd);
+      else if (cur_c.c_rightTurn == false && backwardsStart == false){
+        utility::leftvoltagereq(fabs(vol) * (12000.0 / 127) * curveDamperStart);
         utility::rightvoltagereq(fabs(vol) * (12000.0 / 127));
       }
-      if (sim_s.c_s_rightTurn == true && backwardsEnd == true){
-        utility::leftvoltagereq(-vol * (12000.0 / 127) * curveDamperEnd);
+      if (cur_c.c_rightTurn == true && backwardsStart == true){
+        utility::leftvoltagereq(-vol * (12000.0 / 127) * curveDamperStart);
         utility::rightvoltagereq(-vol * (12000.0 / 127));
       }
-      else if (sim_s.c_s_rightTurn == false && backwardsEnd == true){
+      else if (cur_c.c_rightTurn == false && backwardsStart == true){
         utility::leftvoltagereq(vol * (12000.0 / 127));
-        utility::rightvoltagereq(vol * (12000.0 / 127) * curveDamperEnd);
-        std::cout << "running" << std::endl;
+        utility::rightvoltagereq(vol * (12000.0 / 127) * curveDamperStart);
       }
-      if (fabs(sim_s.c_s_error) < sim_s.c_s_error_thresh) { sim_s.c_s_iterator++; } else { sim_s.c_s_iterator = 0;}
-      if (fabs(sim_s.c_s_iterator) >= sim_s.c_s_tol){
-        curvePhaseEnd = false;
-        curvePhaseStart = false;
-        translationPhase = true;
-        break;
+      if (fabs(cur_c.c_error) < 3) { cur_c.c_iterator++; } else { cur_c.c_iterator = 0;}
+      if (fabs(cur_c.c_iterator) >= 10){
+        if (translationEnabled == true && curveEndEnabled == true){
+          sim_s.curvePhaseEnd = false;
+          sim_s.curvePhaseStart = false;
+          sim_s.translationPhase = true;
+          break;
+        }
+        else{
+          sim_s.curvePhaseEnd = false;
+          sim_s.curvePhaseStart = false;
+          sim_s.translationPhase = false;
+          break;
+        }
       }
       pros::delay(10);
     }
   }
 
-  if (translationEnabled && translationPhase == true) {
+  // Translation movement phase
+  if (translationEnabled && sim_s.translationPhase == true) {
     utility::fullreset(0, false);
-    sim_s.reset_sim_alterables();
+    mov_t.reset_t_alterables();
+    mov_t.t_maxSpeed = 70;
     double TARGET_THETA = ImuMon();
     double POSITION_TARGET = translationTarget;
     int8_t cd = 0;
@@ -574,50 +594,63 @@ void SimultaneousPID::set_sim_pid(bool curveStartEnabled, double curvetargetThet
       data.DisplayData();
       double avgPos = (DriveFrontLeft.get_position() + DriveFrontRight.get_position()) / 2;
       double avg_voltage_req = mov_t.compute_t(avgPos, translationTarget);
-      double headingAssist = mov_t.find_min_angle(TARGET_THETA, ImuMon()) * sim_s.t_s_r_kp;
+      double headingAssist = mov_t.find_min_angle(TARGET_THETA, ImuMon()) * mov_t.t_h_kp;
       cd++; if (cd <= 10){ utility::leftvoltagereq(0); utility::rightvoltagereq(0); continue;}
 
       utility::leftvoltagereq(avg_voltage_req * (12000.0 / 127) + headingAssist);
       utility::rightvoltagereq(avg_voltage_req * (12000.0 / 127) - headingAssist);
-      if (fabs(sim_s.t_s_error) < sim_s.t_s_error_thresh){ sim_s.t_s_iterator++; } else { sim_s.t_s_iterator = 0;}
-      if (fabs(sim_s.t_s_iterator) > sim_s.t_s_tol){
-        curvePhaseEnd = true;
-        curvePhaseStart = false;
-        translationPhase = false;
-        break;
+      if (fabs(mov_t.t_error) < 10){ mov_t.t_iterator++; } else { mov_t.t_iterator = 0;}
+      if (fabs(mov_t.t_iterator) > 20){
+        if (curveEndEnabled == true){
+          sim_s.curvePhaseEnd = true;
+          sim_s.curvePhaseStart = false;
+          sim_s.translationPhase = false;
+          break;
+        }
+        else{
+          sim_s.curvePhaseEnd = false;
+          sim_s.curvePhaseStart = false;
+          sim_s.translationPhase = false;
+          break;
+        }
       }
       pros::delay(10);
     }
   }
 
-  if (curveEndEnabled && curvePhaseEnd == true) {
+  // End curve phase
+  if (curveEndEnabled && sim_s.curvePhaseEnd == true) {
     utility::fullreset(0, false);
     sim_s.reset_sim_alterables();
     while (sim_s.curvePhaseStart == false && sim_s.translationPhase == false && sim_s.curvePhaseEnd == true){
       data.DisplayData();
       double currentPos = imu_sensor.get_rotation();
-      double vol = sim_s.compute_sim_cur_pid(currentPos, curvetargetThetaEnd);
+      double vol = cur_c.compute_c(currentPos, curvetargetThetaEnd);
+      vol = 60;
+      std::cout << "boltage" << vol << std::endl;
 
-      if (sim_s.c_s_error > 0){ sim_s.c_s_rightTurn = true; } else { sim_s.c_s_rightTurn = false;}
-      if (sim_s.c_s_rightTurn == true && backwardsEnd == false){
+      if (cur_c.c_error > 0){ cur_c.c_rightTurn = true; } else { cur_c.c_rightTurn = false;}
+      if (cur_c.c_rightTurn == true && backwardsEnd == false){
         utility::leftvoltagereq(vol * (12000.0 / 127));
         utility::rightvoltagereq(vol * (12000.0 / 127) * curveDamperEnd);
       }
-      else if (sim_s.c_s_rightTurn == false && backwardsEnd == false){
+      else if (cur_c.c_rightTurn == false && backwardsEnd == false){
         utility::leftvoltagereq(fabs(vol) * (12000.0 / 127) * curveDamperEnd);
         utility::rightvoltagereq(fabs(vol) * (12000.0 / 127));
       }
-      if (sim_s.c_s_rightTurn == true && backwardsEnd == true){
+      if (cur_c.c_rightTurn == true && backwardsEnd == true){
         utility::leftvoltagereq(-vol * (12000.0 / 127) * curveDamperEnd);
         utility::rightvoltagereq(-vol * (12000.0 / 127));
       }
-      else if (sim_s.c_s_rightTurn == false && backwardsEnd == true){
+      else if (cur_c.c_rightTurn == false && backwardsEnd == true){
         utility::leftvoltagereq(vol * (12000.0 / 127));
         utility::rightvoltagereq(vol * (12000.0 / 127) * curveDamperEnd);
-        std::cout << "running" << std::endl;
       }
-      if (fabs(sim_s.c_s_error) < sim_s.c_s_error_thresh) { sim_s.c_s_iterator++; } else { sim_s.c_s_iterator = 0;}
-      if (fabs(sim_s.c_s_iterator) >= sim_s.c_s_tol){
+      if (fabs(cur_c.c_error) < cur_c.c_error_thresh) { cur_c.c_iterator++; } else { cur_c.c_iterator = 0;}
+      if (fabs(cur_c.c_iterator) >= cur_c.c_tol){
+        sim_s.curvePhaseEnd = false;
+        sim_s.curvePhaseStart = false;
+        sim_s.translationPhase = false;
         utility::stop();
         break;
       }
