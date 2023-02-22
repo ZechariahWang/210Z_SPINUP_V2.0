@@ -571,7 +571,7 @@ void autonomous(){  // Autonomous function control
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(-3, 30);
 
-	pros::delay(200);//l
+	pros::delay(200);//lee
 
     DiskIntakeTop.move_voltage(11000);
 
