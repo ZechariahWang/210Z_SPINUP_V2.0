@@ -185,6 +185,8 @@ void initialize() { // Init function control
 
     nextbuttonText = lv_label_create(nextAutonButton, NULL);
     lv_label_set_text(nextbuttonText, SYMBOL_NEXT " NEXT");
+
+	GPS_ENABLED = false; // DETERMINES WHETHER OR NOT USING GPS SENSOR
  
 	//-- Reset sensors and auton selector init //--
 	pros::delay(3000);
@@ -536,6 +538,9 @@ void autonskills(){
 
 	Expansion.set_value(false);
 	YaoMing.set_value(true);
+
+	Expansion.set_value(false);
+	YaoMing.set_value(true);
 }
 
 void shoot_skills(int voltage){
@@ -547,7 +552,7 @@ void shoot_skills(int voltage){
 
 // 90 DEGREE CONSTANTS: 6, 0, 45
 // 45 DEGREE CONSTANTS: 6, 0.003, 35
-
+// this one
 // PID UNITS ARE IN INCHES
 void autonomous(){  // Autonomous function control
 	MotionAlgorithms Auton_Framework; // Auton framework class
@@ -571,28 +576,28 @@ void autonomous(){  // Autonomous function control
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(-3, 30);
 
-	pros::delay(200);//lee
+	pros::delay(200);
 
-    DiskIntakeTop.move_voltage(11000);
+    DiskIntakeTop.move_voltage(10000);
 
 	cur.set_c_constants(6, 0, 45);
 	cur.set_curve_pid(-70, 70, 0.2, false);
 
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(15, 70);
-    Angler.set_value(false); 
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(90, 90);
+	rot.set_rotation_pid(90, 90); 
 
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(-11, 70);
+	Angler.set_value(false); 
 
 	cur.set_c_constants(6, 0, 45);
 	cur.set_curve_pid(0, 70, 0.2, false);
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(40, 70);
+	mov.set_translation_pid(38, 70);
 
 	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(0, 90);
@@ -600,10 +605,8 @@ void autonomous(){  // Autonomous function control
 
 	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(-3, 90);
-
-	shoot_skills(8200);
-
-	pros::delay(500);
+	
+	shoot_skills(9550);
 
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(-30, 70);
@@ -612,48 +615,50 @@ void autonomous(){  // Autonomous function control
 	rot.set_rotation_pid(45, 90);
 
     DiskIntakeTop.move_voltage(12000);
-    OuterShooter.move_voltage(12000);
+    OuterShooter.move_voltage(11000);
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(56, 70);
-	pros::delay(200);
-    Angler.set_value(false); 
+	mov.set_translation_pid(55, 70);
 
 	rot.set_r_constants(5, 0, 45);
 	rot.set_rotation_pid(-45, 70);
-
-	shoot_skills(8200);
+	
+	mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(2, 70);
+	Angler.set_value(false);
+	
+	pros::delay(200);
+	shoot_skills(8800);
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(-18, 70);
+	mov.set_translation_pid(-19, 70);
 
 	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(45, 70);
 
     DiskIntakeTop.move_voltage(12000);
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(35, 70);
+	mov.set_translation_pid(37, 50);
 
 	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(0, 90);
 
     DiskIntakeTop.move_voltage(12000);
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(27, 70);
+	mov.set_translation_pid(28, 70);
 
 	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(90, 90);
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(25, 70);
-	pros::delay(400);
-    Angler.set_value(false); 
+	mov.set_translation_pid(26, 70);
 
 	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(180, 90);
+    Angler.set_value(false); 
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(-13, 70);
+	mov.set_translation_pid(-14, 70);
 
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(15, 70);
@@ -663,25 +668,29 @@ void autonomous(){  // Autonomous function control
 
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(-16, 70);
+	mov.set_translation_pid(-14, 70);
 
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(15, 70);
+
+    OuterShooter.move_voltage(10400);
 
 
 	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(180, 90);
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(40, 70);
+	mov.set_translation_pid(51, 70);
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(178, 90);
+	rot.set_rotation_pid(176, 90);
 
-	shoot_skills(8500);
+	shoot_skills(8800);
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(-13, 70);
+	mov.set_translation_pid(-23, 70);
+
+    DiskIntakeTop.move_voltage(9500);
 
 	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(235, 70);
@@ -691,11 +700,17 @@ void autonomous(){  // Autonomous function control
 
 	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(135, 70);
+	
+	mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(5, 70);
 
-	shoot_skills(8500);
+	pros::delay(500);
+	shoot_skills(8800);
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(-8, 70);
+	mov.set_translation_pid(-15, 70);
+
+    DiskIntakeTop.move_voltage(9500);
 
 	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(235, 70);
@@ -707,44 +722,57 @@ void autonomous(){  // Autonomous function control
 	rot.set_rotation_pid(315, 70);
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(35, 70);
+	mov.set_translation_pid(36, 70);
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(360, 70);
+	rot.set_rotation_pid(357, 70);
 
-	shoot_skills(8500);
-
+	shoot_skills(8800);
 
 	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(135, 70);
 
+    DiskIntakeTop.move_voltage(9500);
+
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(40, 70);
+	mov.set_translation_pid(42, 70);
 
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(30, 40);
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(90, 70);
+	rot.set_rotation_pid(91, 70);
 
-	shoot_skills(8500);
+	pros::delay(500);
+
+	shoot_skills(8800);
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(12, 70);
+	rot.set_rotation_pid(11.5, 70);
+
+    DiskIntakeTop.move_voltage(9500);
+	OuterShooter.move_voltage(10000);
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(80, 70);
+	mov.set_translation_pid(80, 90);
 
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(20, 40);
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(-90, 70);
-
-	shoot_skills(8500);
+	rot.set_rotation_pid(-88, 70);
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(-33, 80);
+	mov.set_translation_pid(20, 127);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(-88.5, 70);
+
+	pros::delay(500);
+	shoot_skills(8800);
+
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(-57, 127);
 
 	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(-135, 70);

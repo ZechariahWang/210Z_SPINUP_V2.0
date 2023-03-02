@@ -5,6 +5,8 @@
  * 
  */
 
+ bool GPS_ENABLED;
+
 pros::Motor DriveFrontLeft(14, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_COUNTS);
 pros::Motor DriveFrontRight(16, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS);
 pros::Motor DriveBackLeft(12, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_COUNTS);
@@ -35,6 +37,8 @@ pros::Rotation RotationSensor(13);
 pros::Imu imu_sensor(19);
 pros::Imu imu_sensor_secondary(10);
 pros::Vision vision_sensor(3);
+pros::Gps gps_sensor(9);
+pros::c::gps_status_s_t gpsData;
 
 // Switches
 pros::ADIDigitalIn AutonSwitchForward('t');

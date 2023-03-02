@@ -142,9 +142,9 @@ void match_mov::power_shooter(){ // Power shooter function
  */
 
 void match_mov::power_intake(){ // Power intake function
-    if ((controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2))){ DiskIntakeTop.move_voltage(11000); }
-    else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){ DiskIntakeTop.move_voltage(-11000); }
-    else if (anglerStatus){ DiskIntakeTop.move_voltage(-8000); }
+    if ((controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2))){ DiskIntakeTop.move_voltage(12000); }
+    else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){ DiskIntakeTop.move_voltage(-12000); }
+    else if (anglerStatus){ DiskIntakeTop.move_voltage(-12000); }
     else{ DiskIntakeTop.move_voltage(0); }
 }
 
@@ -159,7 +159,7 @@ void match_mov::launch_disk(){ // Launch disk/piston control function
      }
     if (anglerStatus) { mov.launch_iterator++; shot_iteration_counter++; }
     if (shot_iteration_counter > 5) {
-        DiskIntakeTop.move_voltage(-8000); 
+        DiskIntakeTop.move_voltage(-12000); 
         mov.l_stat = true;
         if (mov.launch_iterator > 150){
             DiskIntakeTop.move_voltage(0); 

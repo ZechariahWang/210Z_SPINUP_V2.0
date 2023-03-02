@@ -38,6 +38,7 @@ class MotionAlgorithms{
         void move_to_reference_pose(double tx, double ty, double targetHeading, double radius);
         void swing_to_point(double tx, double ty, double swingDamper);
         void overRideCoordinatePos(double new_gx, double new_gy);
+        void simultaneous_mov_executor(double targetX, double targetY, double targetTheta, double translationSpeed, double rotationSpeed);
 };
 
 class AngleWrap_C{

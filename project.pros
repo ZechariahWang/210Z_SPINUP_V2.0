@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "Spinup",
+    "project_name": "210Z Provs",
     "target": "v5",
     "templates": {
       "kernel": {
@@ -303,7 +303,8 @@
       }
     },
     "upload_options": {
-      "icon": "X"
+      "icon": "X",
+      "description": "210Z Code kartik likes boys"
     }
   }
 }

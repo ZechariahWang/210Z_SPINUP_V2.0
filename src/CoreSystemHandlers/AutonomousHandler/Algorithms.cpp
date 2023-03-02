@@ -13,6 +13,24 @@
 #include "iostream"
 #include "algorithm"
 
+double previousDriveError    = 0;
+double previousTurnError     = 0;
+
+const double t_kp            = 3;
+const double t_ki            = 0.001;
+const double t_kd            = 1.9;
+
+double t_derivative          = 0;
+double t_integral            = 0;
+double t_tolerance           = 3;
+double t_error               = 0;
+double t_previouserror       = 0;
+double t_multiplier          = 3000;
+double t_averageposition     = 0;
+double t_averageHeading      = 0;
+double t_FailSafeCounter     = 0;
+int t_threshholdcounter      = 0;
+
 /**
  * @brief Find min angle to reach a target angle when wrapped to 360 degrees
  * 
@@ -57,6 +75,66 @@ void MotionAlgorithms::reset_mtp_constants(){ // Reset values
 void MotionAlgorithms::reset_swing_alterables(){ // Reset mtp values
   mtp.a_error = 0;
   mtp.a_rightTurn = false;
+}
+
+float Turn_PID(double t_theta){
+  utility::fullreset(0, false);
+  t_error = 0;
+  t_previouserror = 0;
+  t_integral = 0;
+  t_derivative = 0;
+  t_FailSafeCounter = 0;
+  t_averageHeading = imu_sensor.get_rotation(); 
+  t_error = t_theta - t_averageHeading; 
+  t_integral += t_error; 
+  if (t_error == 0 || t_error > t_theta) { t_integral = 0; }
+  t_derivative = t_error - t_previouserror; 
+  t_previouserror = t_error;
+  double voltage = (t_error * t_kp * 0.01) * 94; 
+  if(fabs(t_error) < t_tolerance){ t_threshholdcounter++; }
+  else{ t_threshholdcounter = 0; }
+  if (fabs(t_error - t_previouserror) < 0.3) { t_FailSafeCounter++; }
+  else { t_FailSafeCounter = 0; }
+  return voltage;
+}
+
+void MotionAlgorithms::simultaneous_mov_executor(double targetX, double targetY, double targetTheta, double translationSpeed, double rotationSpeed){
+	odom Odom; FinalizeAuton data;
+  while (true){
+    Odom.Odometry(); data.DisplayData();
+    
+    double theta = ImuMon() * M_PI / 180;
+    double driveError = sqrt(pow(targetX - gx, 2) + pow(targetY - gy, 2));
+    double positionHypo = sqrt(pow(gx, 2) + pow(gy, 2));
+    double driveOutput = (driveError * 13) + ((driveError - previousDriveError) * 1.3);
+
+    double turnError = (-theta - targetTheta);
+    turnError = atan2f(sinf(turnError), cosf(turnError));
+    double turnOutput = Turn_PID(targetTheta);
+
+    double angleDesired = atan2f(targetX - gx, targetY - gy);
+    double angleDrive = (angleDesired - theta);
+    angleDrive = atan2f(sinf(angleDrive), cosf(angleDrive));
+
+    double velDrive = driveOutput * cos(angleDrive); 
+    double velStrafe = driveOutput * sin(angleDrive);
+
+    double speedFL; double speedBL;
+    double speedFR; double speedBR;
+
+    if(fabs(driveError) < 5 && fabs(turnError) < 3){ utility::leftvelreq(0); utility::rightvelreq(0); break; }
+    else{
+      speedFL = velDrive + velStrafe + turnOutput; speedBL = velDrive - velStrafe + turnOutput;
+      speedFR = velDrive - velStrafe - turnOutput; speedBR = velDrive + velStrafe - turnOutput;
+    }
+
+    DriveFrontLeft.move_velocity((speedFL)); DriveBackLeft.move_velocity((speedBL));
+    DriveFrontRight.move_velocity((speedFR)); DriveBackRight.move_velocity((speedBR));
+
+    previousTurnError = turnError; 
+    previousDriveError = driveError;
+    pros::delay(10);
+  }
 }
 
 /**

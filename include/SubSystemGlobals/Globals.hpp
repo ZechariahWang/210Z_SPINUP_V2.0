@@ -1,7 +1,7 @@
 // Motors lolllll
 
 #include "main.h"
-
+extern bool GPS_ENABLED;
 extern pros::Motor DriveFrontLeft;
 extern pros::Motor DriveFrontRight;
 extern pros::Motor DriveBackLeft;
@@ -14,6 +14,8 @@ extern pros::Imu imu_sensor;
 extern pros::Imu imu_sensor_secondary;
 extern pros::Vision vision_sensor;
 extern pros::Rotation RotationSensor;
+extern pros::Gps gps_sensor;
+extern pros::c::gps_status_s_t gpsData;
 
 extern pros::Motor OuterShooter;
 extern pros::Motor InnerShooter;
