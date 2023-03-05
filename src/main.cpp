@@ -229,7 +229,7 @@ void shoot_iterator(){
 void shoot_iterator_left(){
     Angler.set_value(false); 
 	DiskIntakeTop.move_voltage(-12000);
-	pros::delay(150);
+	pros::delay(180);
 	DiskIntakeTop.move_voltage(0);
 	for (int i = 0; i < 2; i++){
 		pros::delay(1000);
@@ -270,7 +270,14 @@ void shoot_iterator_auto_wp(){
 	Angler.set_value(true); 
 }
 
-void rightside(){
+void heil_hitler(){
+    Angler.set_value(false); 
+	DiskIntakeTop.move_voltage(-12000);
+	pros::delay(2000);
+	DiskIntakeTop.move_voltage(12000);
+}
+
+void rightside_scuffed(){
 	MotionAlgorithms Auton_Framework; // Auton framework class
 	FinalizeAuton Init_Process; // Init framework class
 	TranslationPID mov;
@@ -283,17 +290,35 @@ void rightside(){
 	YaoMing.set_value(false);
 
     DiskIntakeTop.move_voltage(12000);
-    OuterShooter.move_voltage(11600);
+    OuterShooter.move_voltage(12000);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(-90, 90);
+
+	pros::delay(1000);
+
+	heil_hitler();
+
+	pros::delay(500);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(0, 90);
+
+    DiskIntakeTop.move_voltage(12000);
 
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(25, 70);
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(25.8, 90);
-	pros::delay(2200);
+	rot.set_rotation_pid(-45, 90);
 
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(30, 70);
 
-	shoot_iterator_left();
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(-135, 90);
+
+	heil_hitler();
 
 	pros::delay(500);
 
@@ -301,7 +326,7 @@ void rightside(){
 	rot.set_rotation_pid(-45, 90);
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(-27, 70);
+	mov.set_translation_pid(-57, 70);
 
     DiskIntakeTop.move_voltage(-10000);
 
@@ -543,6 +568,67 @@ void autonskills(){
 	YaoMing.set_value(true);
 }
 
+void new_right_side(){
+	MotionAlgorithms Auton_Framework; // Auton framework class
+	FinalizeAuton Init_Process; // Init framework class
+	TranslationPID mov;
+	RotationPID rot;
+	CurvePID cur;
+	ArcPID arc;
+	Auton_Framework.overRideCoordinatePos(0, 0);
+	mov.set_dt_constants(3.125, 1.6, 600); // Parameters are : Wheel diameter, gear ratio, motor cartridge type
+	imu_sensor.set_rotation(0);
+	YaoMing.set_value(false);
+
+    DiskIntakeTop.move_voltage(12000);
+    OuterShooter.move_voltage(11800);
+
+    mov.set_t_constants(0.45, 0, 5, 80);
+	mov.set_translation_pid(25, 50);
+
+	rot.set_r_constants(5, 0, 45);
+	rot.set_rotation_pid(25.5, 90);
+
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(5, 50);
+	Angler.set_value(false);
+
+	pros::delay(3500);
+
+	shoot_iterator_left();
+
+	pros::delay(500);
+
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(-5, 70);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(-45, 90);
+
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(-28, 70);
+
+    DiskIntakeTop.move_voltage(-8000);
+
+	cur.set_c_constants(6, 0, 45);
+	cur.set_curve_pid(0, 60, 0.13, true);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(0, 90);
+
+	DiskIntakeTop.move_voltage(-8000);
+
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(-3.2, 70);
+
+	pros::delay(300);
+
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(8, 70);
+
+	DiskIntakeTop.move_voltage(10000);
+}
+
 void shoot_skills(int voltage){
     Angler.set_value(false); 
 	DiskIntakeTop.move_voltage(-voltage);
@@ -550,11 +636,7 @@ void shoot_skills(int voltage){
     Angler.set_value(true); 
 }
 
-// 90 DEGREE CONSTANTS: 6, 0, 45
-// 45 DEGREE CONSTANTS: 6, 0.003, 35
-// this one
-// PID UNITS ARE IN INCHES
-void autonomous(){  // Autonomous function control
+void provincial_skills(){
 	MotionAlgorithms Auton_Framework; // Auton framework class
 	FinalizeAuton Init_Process; // Init framework class
 	TranslationPID mov;
@@ -565,20 +647,17 @@ void autonomous(){  // Autonomous function control
 	Auton_Framework.overRideCoordinatePos(0, 0);
 	mov.set_dt_constants(3.125, 1.6, 600); // Parameters are : Wheel diameter, gear ratio, motor cartridge type
 	imu_sensor.set_rotation(0);
-	// Init_Process.ReceiveInput(time); // Enabled Auton Selector (STEP 1) ONLY FOR PROTOTYPE USE
-	// Init_Process.SelectAuton(); // Enable Auton Selector (STEP 2) 
-
 
     DiskIntakeTop.move_voltage(9500);
-    OuterShooter.move_voltage(11000);
+    OuterShooter.move_voltage(12000);
 	YaoMing.set_value(false);
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(-3, 30);
+	mov.set_translation_pid(-2.5, 30);
 
 	pros::delay(200);
 
-    DiskIntakeTop.move_voltage(10000);
+    DiskIntakeTop.move_voltage(12000);
 
 	cur.set_c_constants(6, 0, 45);
 	cur.set_curve_pid(-70, 70, 0.2, false);
@@ -593,6 +672,8 @@ void autonomous(){  // Autonomous function control
 	mov.set_translation_pid(-11, 70);
 	Angler.set_value(false); 
 
+	pros::delay(300);
+
 	cur.set_c_constants(6, 0, 45);
 	cur.set_curve_pid(0, 70, 0.2, false);
 
@@ -604,7 +685,7 @@ void autonomous(){  // Autonomous function control
 	imu_sensor.set_rotation(0);
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(-3, 90);
+	rot.set_rotation_pid(-2.5, 90);
 	
 	shoot_skills(9550);
 
@@ -615,10 +696,10 @@ void autonomous(){  // Autonomous function control
 	rot.set_rotation_pid(45, 90);
 
     DiskIntakeTop.move_voltage(12000);
-    OuterShooter.move_voltage(11000);
+    OuterShooter.move_voltage(12000);
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(55, 70);
+	mov.set_translation_pid(56, 70);
 
 	rot.set_r_constants(5, 0, 45);
 	rot.set_rotation_pid(-45, 70);
@@ -645,7 +726,7 @@ void autonomous(){  // Autonomous function control
 
     DiskIntakeTop.move_voltage(12000);
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(28, 70);
+	mov.set_translation_pid(26, 70);
 
 	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(90, 90);
@@ -658,7 +739,7 @@ void autonomous(){  // Autonomous function control
     Angler.set_value(false); 
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(-14, 70);
+	mov.set_translation_pid(-13, 70);
 
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(15, 70);
@@ -668,12 +749,12 @@ void autonomous(){  // Autonomous function control
 
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(-14, 70);
+	mov.set_translation_pid(-13, 70);
 
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(15, 70);
 
-    OuterShooter.move_voltage(10400);
+    OuterShooter.move_voltage(12000);
 
 
 	rot.set_r_constants(6, 0, 45);
@@ -683,12 +764,14 @@ void autonomous(){  // Autonomous function control
 	mov.set_translation_pid(51, 70);
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(176, 90);
+	rot.set_rotation_pid(179, 90);
 
 	shoot_skills(8800);
 
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(-23, 70);
+
+    OuterShooter.move_voltage(12000);
 
     DiskIntakeTop.move_voltage(9500);
 
@@ -699,7 +782,7 @@ void autonomous(){  // Autonomous function control
 	mov.set_translation_pid(50, 70);
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(135, 70);
+	rot.set_rotation_pid(135.5, 70);
 	
 	mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(5, 70);
@@ -711,6 +794,7 @@ void autonomous(){  // Autonomous function control
 	mov.set_translation_pid(-15, 70);
 
     DiskIntakeTop.move_voltage(9500);
+    OuterShooter.move_voltage(12000);
 
 	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(235, 70);
@@ -725,23 +809,25 @@ void autonomous(){  // Autonomous function control
 	mov.set_translation_pid(36, 70);
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(357, 70);
+	rot.set_rotation_pid(358.5, 70);
 
 	shoot_skills(8800);
 
 	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(135, 70);
 
+    OuterShooter.move_voltage(12000);
+
     DiskIntakeTop.move_voltage(9500);
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(42, 70);
+	mov.set_translation_pid(46, 70);
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(30, 40);
+	mov.set_translation_pid(27, 70);
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(91, 70);
+	rot.set_rotation_pid(94, 70);
 
 	pros::delay(500);
 
@@ -751,7 +837,7 @@ void autonomous(){  // Autonomous function control
 	rot.set_rotation_pid(11.5, 70);
 
     DiskIntakeTop.move_voltage(9500);
-	OuterShooter.move_voltage(10000);
+	OuterShooter.move_voltage(12000);
 
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(80, 90);
@@ -760,27 +846,49 @@ void autonomous(){  // Autonomous function control
 	mov.set_translation_pid(20, 40);
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(-88, 70);
-
-    mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(20, 127);
+	rot.set_rotation_pid(-89.5, 70);
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(-88.5, 70);
+	rot.set_rotation_pid(-89.5, 70);
 
 	pros::delay(500);
 	shoot_skills(8800);
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(-57, 127);
+	mov.set_translation_pid(-37, 90);
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(-135, 70);
+	rot.set_rotation_pid(-136, 70);
 
 	// expand
 
+	Expansion.set_value(false);
 }
 
+// 90 DEGREE CONSTANTS: 6, 0, 45
+// 45 DEGREE CONSTANTS: 6, 0.003, 35
+// this one
+// PID UNITS ARE IN INCHES
+void autonomous(){  // Autonomous function control
+	MotionAlgorithms Auton_Framework; // Auton framework class
+	FinalizeAuton Init_Process; // Init framework class
+	TranslationPID mov;
+	RotationPID rot;
+	CurvePID cur;
+	ArcPID arc;
+	SimultaneousPID sim;
+	Auton_Framework.overRideCoordinatePos(0, 0);
+	mov.set_dt_constants(3.125, 1.6, 600); // Parameters are : Wheel diameter, gear ratio, motor cartridge type
+	imu_sensor.set_rotation(0);
+	// Init_Process.ReceiveInput(time); // Enabled Auton Selector (STEP 1) ONLY FOR PROTOTYPE USE
+	// Init_Process.SelectAuton(); // Enable Auton Selector (STEP 2) 
+
+	new_right_side();
+	//provincial_skills();
+
+}
+
+bool curve_enabled = true;
 void opcontrol(){ // Driver control function
 	match_mov mov; // OP control framework class
 	MotionAlgorithms Auton_Framework; // Auton framework class
@@ -789,7 +897,18 @@ void opcontrol(){ // Driver control function
 	char buffer[300]; // Display Buffer
 	YaoMing.set_value(true);
 	while (true){
-		// mov.dt_Control(); // Drivetrain control
+		// if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)){
+		// 	curve_enabled = !curve_enabled;
+		// }
+
+		// if (curve_enabled == true){
+		// 	mov.exponential_curve_accelerator();
+		// 	std::cout << "exponen thing" << std::endl;
+		// }
+		// else{
+		// 	mov.dt_Control(); // Drivetrain control
+		// 	std::cout << "normal boi" << std::endl;
+		// }
 		mov.exponential_curve_accelerator();
 		mov.power_intake(); // Intake control
 		mov.launch_disk(); // Disk control

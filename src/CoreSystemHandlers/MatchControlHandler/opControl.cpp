@@ -7,6 +7,8 @@
  * 
  */
 
+//ghg
+
 #include "main.h"
 #include "pros/misc.h"
 #include "pros/motors.h"
@@ -15,10 +17,10 @@
 
 match_mov         mov; 
 MotionAlgorithms  t;
-match_mov::match_mov(){ mov.p_set = 0.8; mov.it_ps = 1; } // Class Constructor
+match_mov::match_mov(){ mov.p_set = 0.85; mov.it_ps = 1; } // Class Constructor
 
 const u_int16_t forwardCurve       = 10;
-const u_int16_t turnCurve          = 5;
+const u_int16_t turnCurve          = 3;
 const double euler                 = 2.71828;
 
 static bool anglerStatus           = false; // False = set for priority intake
@@ -144,7 +146,7 @@ void match_mov::power_shooter(){ // Power shooter function
 void match_mov::power_intake(){ // Power intake function
     if ((controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2))){ DiskIntakeTop.move_voltage(12000); }
     else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){ DiskIntakeTop.move_voltage(-12000); }
-    else if (anglerStatus){ DiskIntakeTop.move_voltage(-12000); }
+    else if (anglerStatus){ DiskIntakeTop.move_voltage(-9000); }
     else{ DiskIntakeTop.move_voltage(0); }
 }
 
@@ -159,7 +161,7 @@ void match_mov::launch_disk(){ // Launch disk/piston control function
      }
     if (anglerStatus) { mov.launch_iterator++; shot_iteration_counter++; }
     if (shot_iteration_counter > 5) {
-        DiskIntakeTop.move_voltage(-12000); 
+        DiskIntakeTop.move_voltage(-9000); 
         mov.l_stat = true;
         if (mov.launch_iterator > 150){
             DiskIntakeTop.move_voltage(0); 
@@ -248,7 +250,7 @@ void match_mov::init_expansion(){
 }
 
 /**
- * @brief Force rest coordinate position of robot
+ * @brief Force reset coordinate position of robot
  * 
  */
 
