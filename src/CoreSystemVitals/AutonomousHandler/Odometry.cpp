@@ -17,14 +17,14 @@ new_odom  pt;       // odom position tracking init
 double    gx;       // global X
 double    gy;       // global Y
 
-static bool XDRIVE_ENABLED = true;
+double globalTheta           = 0;
+static bool XDRIVE_ENABLED   = true;
 
 /**
  * @brief The current theta of the robot wrapped to 360 degrees
  * @return angle wrapped to 360 degrees from raw IMU sensor data
  */
 
-double globalTheta = 0;
 double ImuMon() {
   globalTheta = fmod(imu_sensor.get_rotation(), 360);
   while (globalTheta < 0) {
@@ -51,7 +51,7 @@ void new_odom::set_pt_constants(const double vertical_wheel_distance, const doub
 /**
  * @brief Conversion functions
  * 
- * @param angle Eithercurrent radian or degrees of robot
+ * @param angle Either current radian or degrees of robot
  * @return angle converted to desired unit
  */
 
@@ -81,6 +81,7 @@ void new_odom::compute_odometry(){
   if (delta_heading_rad == 0) { local_x = horizontal_delta; local_y = vertical_delta; }
   else { 
     // Formula from team 5225A for position vector
+    // i love funky math
     local_x = (2 * std::sin(delta_heading_rad / 2)) * ((horizontal_delta / delta_heading_rad + pt.horizontal_distance)); 
     local_y = (2 * std::sin(delta_heading_rad / 2)) * ((vertical_delta / delta_heading_rad + pt.vertical_distance));
   }

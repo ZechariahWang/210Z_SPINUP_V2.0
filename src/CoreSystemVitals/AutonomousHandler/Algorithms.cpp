@@ -55,6 +55,11 @@ double find_min_angle(const int16_t targetHeading, const int16_t currentrobotHea
 int16_t radian_to_degrees_converter(const double angle) { return angle * 180 / M_PI; } // convert radian to degrees
 int16_t degrees_to_radians_converter(const double angle){ return angle * M_PI / 180; } // Convert degrees to radian
 
+/**
+ * @brief Motion Algorithm Class Helper Functions
+ * 
+ */
+
 MotionAlgorithms mtp; // move to point class material theme ocean
 
 void MotionAlgorithms::set_constants(const double t_kp, const double r_kp, const double f_tt, const double t){ // Set constants
@@ -77,6 +82,13 @@ void MotionAlgorithms::reset_swing_alterables(){ // Reset mtp values
   mtp.a_rightTurn = false;
 }
 
+/**
+ * @brief Returns a value for a simple PID controller to be used within the MTP algorithm
+ * 
+ * @param t_theta target theta
+ * @return PID value for a simple turn
+ */
+
 float Turn_PID(double t_theta){
   utility::fullreset(0, false);
   t_error = 0;
@@ -97,6 +109,16 @@ float Turn_PID(double t_theta){
   else { t_FailSafeCounter = 0; }
   return voltage;
 }
+
+/**
+ * @brief MTP Algorithm. Move to a desired coordinate position while facing a desired angle. Can only be used with mecanum drives
+ * 
+ * @param targetX the target x coordinate
+ * @param targetY the target y coordinate
+ * @param targetTheta the target angle in degrees
+ * @param translationSpeed max movement speed
+ * @param rotationSpeed max rotation speed
+ */
 
 void MotionAlgorithms::simultaneous_mov_executor(double targetX, double targetY, double targetTheta, double translationSpeed, double rotationSpeed){
 	odom Odom; FinalizeAuton data;
@@ -178,7 +200,6 @@ void MotionAlgorithms::move_to_reference_pose(const double targetX, const double
       mtp.r_error = find_min_angle(targetHeading, ImuMon());
       turnVel = mtp.r_kp * atan(tan(mtp.r_error * M_PI / 180)) * 180 / M_PI;
     }
-    // if (fabs(linearVel) > (90 * (12000.0 / 127))) { linearVel = 90 * (12000.0 / 127); }
 
     int16_t left_volage = linearVel + turnVel;
     int16_t right_voltage = linearVel - turnVel;
@@ -209,7 +230,6 @@ void MotionAlgorithms::move_to_reference_pose(const double targetX, const double
  * @param swingDamper the amount the arc is dampered by
  */
 
-// Swing to desired point
 void MotionAlgorithms::swing_to_point(const double tx, const double ty, const double swingDamper){
   mtp.reset_swing_alterables();
   double defaultVoltage = 40;

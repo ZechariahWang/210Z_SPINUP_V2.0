@@ -20,6 +20,8 @@ CurvePID         cur_c;
 ArcPID           arc_a;
 SimultaneousPID  sim_s;
 
+// i got chlamydia from this
+
 /**
  * @brief Set drivetrain specs
  * 
@@ -183,7 +185,7 @@ void SimultaneousPID::set_sim_c_constants(const double kp, const double ki, cons
 
 double TranslationPID::find_min_angle(int16_t targetHeading, int16_t currentrobotHeading){
   double turnAngle = targetHeading - currentrobotHeading;
-  if (turnAngle > 180 || turnAngle < -180){ turnAngle = turnAngle - (utility::sgn(turnAngle) * 360); }
+  if (turnAngle > 180 || turnAngle < -180) { turnAngle = turnAngle - (utility::sgn(turnAngle) * 360); }
   return turnAngle;
 }
 

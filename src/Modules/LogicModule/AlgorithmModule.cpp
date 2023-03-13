@@ -1,7 +1,7 @@
 /**
  * @file AlgorithmModule.cpp
  * @author Zechariah Wang
- * @brief Pure Pursuit logic, as well as helper functions for other algorithms 
+ * @brief Helper functions for algorithms found within Algorithms.cpp and PurePursuit.cpp
  * @version 0.1
  * @date 2023-02-13
  */

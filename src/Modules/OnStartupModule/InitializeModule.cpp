@@ -113,7 +113,6 @@ void Init_AutonSwitchMain::ReceiveInput_noLimit(int32_t time){
  * 
  */
 
-// Finalize auton choices
 void FinalizeAuton::SelectAuton(){
     int16_t chosenAuton = SelectedAuton;
     switch (chosenAuton) {
@@ -137,7 +136,6 @@ void FinalizeAuton::SelectAuton(){
  * 
  */
 
-// Reset all sensors used in autonomous routines
 void ResetSensors::ResetAllPrimarySensors(){
     imu_sensor.tare_rotation();
     RotationSensor.reset_position();
@@ -145,10 +143,10 @@ void ResetSensors::ResetAllPrimarySensors(){
     DriveFrontRight.set_zero_position(0);
     DriveBackLeft.set_zero_position(0);
     DriveBackRight.set_zero_position(0);
-    gx = 0;
-    gy = 0;
+    gx = 0; gy = 0;
     Launcher.set_value(true);
 }
+
 /**
  * @brief Display robot metrics such as position, motor status, etc
  * 
