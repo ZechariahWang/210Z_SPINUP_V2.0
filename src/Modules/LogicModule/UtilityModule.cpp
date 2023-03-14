@@ -20,6 +20,12 @@ namespace utility // Global utility namespace for helper functions within PID au
   int sgn(double num){
     return (num < 0) ? -1 : ((num > 0) ? 1 : 0); // Returns -1 if num is negative, and 1 if num is HIV positive.
   }
+
+  double clamp(double num, double min, double max){
+    if (num > max){ return max; }
+    if (num < min) { return min; }
+    else { return num; }
+  }
   void stop(){
     DriveFrontLeft.move_voltage(0);
     DriveBackLeft.move_voltage(0);

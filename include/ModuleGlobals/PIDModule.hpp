@@ -1,5 +1,28 @@
 #include "main.h"
 
+class Slew{
+    private:
+        bool init;
+    public:
+        double enabled;
+        double error;
+        double x_intercept;
+        double y_intercept;
+        double sign;
+        double slope;
+        double max_speed;
+        double slew_ticks_per_inch;
+
+        std::vector<double> min_power;
+        std::vector<double> max_distance;
+
+
+        void initialize_slew(bool slew_enabled, const double max_speed, const double target_pos, const double current_pos, const double start, bool backwards_enabled, double tpi);
+        void set_slew_min_power(std::vector<double> min_power);
+        void set_slew_distance(std::vector<double> distance);
+        double calculate_slew(const double current);
+};
+
 class TranslationPID{
     private:
         bool init;

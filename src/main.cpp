@@ -224,13 +224,21 @@ void competition_initialize() {}
  */
 
 void autonomous(){  // Autonomous function control
-	MotionAlgorithms Auton_Framework; FinalizeAuton Init_Process; 
+	MotionAlgorithms Auton_Framework; FinalizeAuton Init_Process; Slew slew;
 	TranslationPID mov; RotationPID rot; CurvePID cur; ArcPID arc; SimultaneousPID sim;
+	slew.set_slew_distance({7, 7});
+	slew.set_slew_min_power({70, 70});
 	Auton_Framework.overRideCoordinatePos(0, 0);
 	mov.set_dt_constants(3.125, 1.6, 600); // Parameters are : Wheel diameter, gear ratio, motor cartridge type
 	imu_sensor.set_rotation(0);
 	// Init_Process.ReceiveInput(time); // Enabled Auton Selector (STEP 1) ONLY FOR PROTOTYPE USE
 	// Init_Process.SelectAuton(); // Enable Auton Selector (STEP 2) 
+
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(25, 70);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(90, 90);
 }
 
 /**

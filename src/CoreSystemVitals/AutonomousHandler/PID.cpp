@@ -13,6 +13,7 @@
 #include "array"
 
 // Class init
+Slew             slew;
 FinalizeAuton    data;
 TranslationPID   mov_t;
 RotationPID      rot_r;
@@ -35,6 +36,29 @@ void TranslationPID::set_dt_constants(const double n_wheelDiameter, const double
   mov_t.wheelDiameter = n_wheelDiameter;
   mov_t.ratio = n_gearRatio;
   mov_t.cartridge = n_motorCartridge;
+}
+
+double get_ticks_per_inch(){
+  double c = mov_t.wheelDiameter * M_PI; double tpr = (50.0 * (3600.0 / mov_t.cartridge) * mov_t.ratio);
+  return (tpr / c);
+}
+
+void Slew::set_slew_min_power(std::vector<double> min_power){
+  slew.min_power = min_power;
+}
+
+void Slew::set_slew_distance(std::vector<double> distance){
+  slew.max_distance = distance;
+}
+
+void Slew::initialize_slew(bool slew_enabled, const double max_speed, const double target_pos, const double current_pos, const double start, bool backwards_enabled, double tpi){
+  slew.enabled = slew_enabled;
+  slew.max_speed = max_speed;
+  slew.slew_ticks_per_inch = tpi;
+  slew.sign = utility::sgn(target_pos - current_pos);
+  slew.x_intercept = start + (slew.sign * slew.max_distance[backwards_enabled]) * slew.slew_ticks_per_inch; // gt fix
+  slew.y_intercept = max_speed * slew.sign;
+  slew.slope = (slew.sign * slew.min_power[backwards_enabled] - slew.y_intercept) / (slew.x_intercept - start);
 }
 
 /**
@@ -189,6 +213,19 @@ double TranslationPID::find_min_angle(int16_t targetHeading, int16_t currentrobo
   return turnAngle;
 }
 
+double Slew::calculate_slew(const double current){
+  if (slew.enabled){
+    slew.error = slew.x_intercept - current;
+    if (utility::sgn(slew.error) != slew.sign){
+      slew.enabled = false;
+    }
+    else if (utility::sgn(slew.error) == slew.sign){
+      return ((slew.slope * slew.error) + slew.y_intercept) * slew.sign;
+    }
+  }
+  return slew.max_speed;
+}
+
 /**
  * @brief compute translation PID movement logic
  * 
@@ -341,25 +378,31 @@ double SimultaneousPID::compute_sim_cur_pid(double curvetargetTheta, double curv
  */
 
 void TranslationPID::set_translation_pid(double target, double maxSpeed){
-  utility::fullreset(0, false);
-  mov_t.reset_t_alterables();
-  double TARGET_THETA = ImuMon();
-  double POSITION_TARGET = target;
-  int8_t cd = 0;
+  utility::fullreset(0, false); mov_t.reset_t_alterables();
+  double TARGET_THETA = ImuMon(); double POSITION_TARGET = target; bool is_backwards = false; int8_t cd = 0;
   mov_t.t_maxSpeed = maxSpeed;
   mov_t.circumfrance = mov_t.wheelDiameter * M_PI;
   mov_t.ticks_per_rev = (50.0 * (3600.0 / mov_t.cartridge) * mov_t.ratio);
   mov_t.ticks_per_inches = (mov_t.ticks_per_rev / mov_t.circumfrance);
   target *= mov_t.ticks_per_inches;
+  double init_left_pos = DriveFrontLeft.get_position(); double init_right_pos = DriveFrontRight.get_position();
   while (true){
     data.DisplayData();
     double avgPos = (DriveFrontLeft.get_position() + DriveFrontRight.get_position()) / 2;
     double avg_voltage_req = mov_t.compute_t(avgPos, target);
     double headingAssist = mov_t.find_min_angle(TARGET_THETA, ImuMon()) * mov_t.t_h_kp;
     cd++; if (cd <= 10){ utility::leftvoltagereq(0); utility::rightvoltagereq(0); continue;}
+    if (target < 0) { is_backwards = true; } else { is_backwards = false; }
+    slew.initialize_slew(true, maxSpeed, target, ((DriveFrontLeft.get_position() + DriveFrontRight.get_position()) / 2), ((init_left_pos + init_right_pos) / 2), is_backwards, get_ticks_per_inch());
 
-    utility::leftvoltagereq(avg_voltage_req * (12000.0 / 127) + headingAssist);
-    utility::rightvoltagereq(avg_voltage_req * (12000.0 / 127) - headingAssist);
+    double slew_output = slew.calculate_slew(avgPos);
+    double l_output = utility::clamp(avg_voltage_req, -slew_output, slew_output);
+    double r_output = utility::clamp(avg_voltage_req, -slew_output, slew_output);
+
+    utility::leftvoltagereq((l_output * (12000.0 / 127)) + headingAssist);
+    utility::rightvoltagereq((r_output * (12000.0 / 127)) - headingAssist);
+    // utility::leftvoltagereq((avg_voltage_req * (12000.0 / 127)) + headingAssist);
+    // utility::rightvoltagereq((avg_voltage_req * (12000.0 / 127)) - headingAssist);
     if (fabs(mov_t.t_error) < mov_t.t_error_thresh){ mov_t.t_iterator++; } else { mov_t.t_iterator = 0;}
     if (fabs(mov_t.t_iterator) > mov_t.t_tol){
       utility::stop();

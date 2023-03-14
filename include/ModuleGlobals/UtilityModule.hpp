@@ -4,6 +4,7 @@
 namespace utility
 {
     int sgn(double num);
+    double clamp(double num, double min, double max);
     void stop();
     void stop_v();
     void leftvreq(int voltage);
