@@ -33,6 +33,9 @@ extern pros::ADIDigitalIn AutonSwitchForward;
 extern pros::ADIDigitalIn AutonSwitchBackward;
 extern pros::Controller controller;
 
+extern pros::Motor CataPrimer;
+extern pros::ADIDigitalIn CataLimitMonitor;
+
 class Global {
     private:
         int init;

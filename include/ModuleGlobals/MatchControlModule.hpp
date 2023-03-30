@@ -31,4 +31,5 @@ class match_mov{
         void init_expansion();
         void misc_control();
         void on_off_v2();
+        void prime_catapult();
 };

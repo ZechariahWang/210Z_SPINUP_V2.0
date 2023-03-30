@@ -29,4 +29,8 @@ class FinalizeAuton : public ResetSensors{
         void SelectAuton();
         void DisplayData();
         void DisplayCurrentAuton();
+        void output_sensor_data();
+        void output_auton_selector();
+        void output_game_data();
+        void output_misc_data();
 };

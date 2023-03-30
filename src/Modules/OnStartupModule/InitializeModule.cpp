@@ -8,6 +8,7 @@
 
 #include "main.h"
 #include "map"
+#include "pros/misc.h"
 #include "string"
 
 constexpr u_int16_t MaxLimit              = 11; // The max limit switches can go up to
@@ -69,10 +70,10 @@ void Init_AutonSwitchMain::ReceiveInput(u_int32_t time){
     	data.DisplayData();
         if (AutonFinalized == 1){
         	sprintf(buffer2, "Chosen Auton: %d", SelectedAuton);
-	        lv_label_set_text(displayDataL1, buffer2);
+	        lv_label_set_text(current_auton_display_selector, buffer2);
 		    pros::delay(2000);
         	sprintf(buffer2, "Entering game phase...");
-	        lv_label_set_text(displayDataL1, buffer2);
+	        lv_label_set_text(current_auton_display_selector, buffer2);
             pros::delay(3000);
             break;
         }
@@ -162,14 +163,80 @@ void FinalizeAuton::DisplayCurrentAuton(){
 void FinalizeAuton::DisplayData(){
 	char buffer[300];
 	sprintf(buffer, SYMBOL_GPS " X: %.2f Y: %.2f Theta: %f", gx, gy, ImuMon());
-	lv_label_set_text(displayDataL5, buffer);
+	lv_label_set_text(odom_readings_sensor, buffer);
     
 	sprintf(buffer, SYMBOL_WARNING " FL: %.2f BL: %.2f", DriveFrontLeft.get_temperature(), DriveBackLeft.get_temperature());
-	lv_label_set_text(displayDataL4, buffer);
+	lv_label_set_text(dt_readings_sensor, buffer);
 
-	sprintf(buffer, SYMBOL_WARNING " FR: %.2f BR: %.2f", DriveFrontRight.get_temperature(), DriveBackRight.get_temperature());
-	lv_label_set_text(displayDataL3, buffer);
+	sprintf(buffer, SYMBOL_DRIVE " Ultrasonic Value: %d", SelectedAuton);
+	lv_label_set_text(ultrasonic_readings_sensor, buffer);
 
-	sprintf(buffer, SYMBOL_DRIVE " Current Selected Auton Type: %d", SelectedAuton);
-	lv_label_set_text(displayDataL2, buffer);
+	sprintf(buffer, SYMBOL_DRIVE " Cata Limit Value: %d", SelectedAuton);
+	lv_label_set_text(cata_readings_sensor, buffer);
+
+	sprintf(buffer, SYMBOL_DRIVE " Intake Readings: %d", SelectedAuton);
+	lv_label_set_text(intake_readings_sensor, buffer);
+}
+
+void FinalizeAuton::output_sensor_data(){
+    char buffer[300];
+	sprintf(buffer, SYMBOL_GPS " X: %.2f Y: %.2f Theta: %f", gx, gy, ImuMon());
+	lv_label_set_text(odom_readings_sensor, buffer);
+    
+	sprintf(buffer, SYMBOL_WARNING " FL: %.2f BL: %.2f", DriveFrontLeft.get_temperature(), DriveBackLeft.get_temperature());
+	lv_label_set_text(dt_readings_sensor, buffer);
+
+	sprintf(buffer, SYMBOL_DRIVE " Ultrasonic Value: %d", SelectedAuton);
+	lv_label_set_text(ultrasonic_readings_sensor, buffer);
+
+	sprintf(buffer, SYMBOL_DRIVE " Cata Limit Value: %d", SelectedAuton);
+	lv_label_set_text(cata_readings_sensor, buffer);
+
+	sprintf(buffer, SYMBOL_DRIVE " Intake Readings: %d", SelectedAuton);
+	lv_label_set_text(intake_readings_sensor, buffer);
+}
+
+void FinalizeAuton::output_auton_selector(){
+    char buffer[300];
+	sprintf(buffer, SYMBOL_DRIVE " Current Autonomous Route: %d", SelectedAuton);
+	lv_label_set_text(current_auton_display_selector, buffer);
+}
+
+void FinalizeAuton::output_game_data(){
+    char buffer[300];
+	sprintf(buffer, SYMBOL_GPS " Controller Status %d", controller.is_connected());
+	lv_label_set_text(controller_status_game, buffer);
+    
+	sprintf(buffer, SYMBOL_WARNING " Battery Capacity: %d", controller.get_battery_level());
+	lv_label_set_text(battery_percent_game, buffer);
+
+	sprintf(buffer, SYMBOL_DRIVE " Battery Temperature: %d", controller.get_battery_capacity());
+	lv_label_set_text(battery_temp_game, buffer);
+
+	sprintf(buffer, SYMBOL_DRIVE " Time since startup: %d", pros::millis());
+	lv_label_set_text(time_since_startup_game, buffer);
+
+	sprintf(buffer, SYMBOL_DRIVE " Competition Status: %d", pros::c::competition_get_status());
+	lv_label_set_text(competition_stat_game, buffer);
+}
+
+void FinalizeAuton::output_misc_data(){
+    char buffer[300];
+	sprintf(buffer, SYMBOL_GPS " Debug Line 1 %f", gx);
+	lv_label_set_text(debug_line1_misc, buffer);
+    
+	sprintf(buffer, SYMBOL_WARNING " Debug Line 2 %f", gx);
+	lv_label_set_text(debug_line2_misc, buffer);
+
+	sprintf(buffer, SYMBOL_DRIVE " Debug Line 3 %f", gx);
+	lv_label_set_text(debug_line3_misc, buffer);
+
+	sprintf(buffer, SYMBOL_DRIVE " Debug Line 4: %f", gx);
+	lv_label_set_text(debug_line4_misc, buffer);
+
+	sprintf(buffer, SYMBOL_DRIVE " Debug Line 5: %f", gx);
+	lv_label_set_text(debug_line5_misc, buffer);
+
+	sprintf(buffer, SYMBOL_DRIVE " Debug Line 6: %f", gx);
+	lv_label_set_text(debug_line6_misc, buffer);
 }

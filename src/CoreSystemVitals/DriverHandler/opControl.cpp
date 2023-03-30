@@ -150,27 +150,50 @@ void match_mov::power_intake(){ // Power intake function
     else{ DiskIntakeTop.move_voltage(0); }
 }
 
+static bool cata_initiated = false;
+void match_mov::prime_catapult(){
+    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)){
+        cata_initiated = !cata_initiated;
+    }
+    if (!CataLimitMonitor.get_value() && cata_initiated == true){
+        CataPrimer.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+        CataPrimer.move_voltage(-12000); 
+    }
+    else if (CataLimitMonitor.get_value() && cata_initiated == true) { 
+        CataPrimer.move_voltage(0); 
+        CataPrimer.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+        cata_initiated = false;
+    }
+}
+
 /**
  * @brief Disk launcher control
  * 
  */
 
+uint8_t cataDelay = 100;
 void match_mov::launch_disk(){ // Launch disk/piston control function
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1)){ 
-        if (mov.l_stat == false) { anglerStatus = true; }
-     }
-    if (anglerStatus) { mov.launch_iterator++; shot_iteration_counter++; }
-    if (shot_iteration_counter > 5) {
-        DiskIntakeTop.move_voltage(-9000); 
-        mov.l_stat = true;
-        if (mov.launch_iterator > 150){
-            DiskIntakeTop.move_voltage(0); 
-            Angler.set_value(mov.l_stat); 
-            mov.launch_iterator = 0;
-            shot_iteration_counter = 0;
-            anglerStatus = false;
-        }
+    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1) && !CataLimitMonitor.get_value()){ 
+        CataPrimer.move_voltage(12000); 
+        pros::delay(cataDelay);
+        CataPrimer.move_voltage(0);
+        cata_initiated = false;
     }
+    // if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1)){ 
+    //     if (mov.l_stat == false) { anglerStatus = true; }
+    //  }
+    // if (anglerStatus) { mov.launch_iterator++; shot_iteration_counter++; }
+    // if (shot_iteration_counter > 5) {
+    //     DiskIntakeTop.move_voltage(-9000); 
+    //     mov.l_stat = true;
+    //     if (mov.launch_iterator > 150){
+    //         DiskIntakeTop.move_voltage(0); 
+    //         Angler.set_value(mov.l_stat); 
+    //         mov.launch_iterator = 0;
+    //         shot_iteration_counter = 0;
+    //         anglerStatus = false;
+    //     }
+    // }
 }
 
 /**
