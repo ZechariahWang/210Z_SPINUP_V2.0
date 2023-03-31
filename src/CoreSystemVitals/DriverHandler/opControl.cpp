@@ -138,18 +138,6 @@ void match_mov::power_shooter(){ // Power shooter function
     else{ OuterShooter.move_voltage(0); InnerShooter.move_voltage(0);}
 }
 
-/**
- * @brief Raw intake control
- * 
- */
-
-void match_mov::power_intake(){ // Power intake function
-    if ((controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2))){ DiskIntakeTop.move_voltage(12000); }
-    else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){ DiskIntakeTop.move_voltage(-12000); }
-    else if (anglerStatus){ DiskIntakeTop.move_voltage(-9000); }
-    else{ DiskIntakeTop.move_voltage(0); }
-}
-
 static bool cata_initiated = false;
 void match_mov::prime_catapult(){
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)){
@@ -194,6 +182,19 @@ void match_mov::launch_disk(){ // Launch disk/piston control function
     //         anglerStatus = false;
     //     }
     // }
+}
+
+/**
+ * @brief Raw intake control
+ * 
+ */
+
+void match_mov::power_intake(){ // Power intake function
+    if (!CataLimitMonitor.get_value()) { return; }
+    if ((controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2))){ DiskIntakeTop.move_voltage(12000); }
+    else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){ DiskIntakeTop.move_voltage(-12000); }
+    else if (anglerStatus){ DiskIntakeTop.move_voltage(-9000); }
+    else{ DiskIntakeTop.move_voltage(0); }
 }
 
 /**
