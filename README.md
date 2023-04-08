@@ -14,10 +14,17 @@ Code Framework for 210Z during the 2022-2023 Vex Robotics Competition.
 
 
 
-## Usage
+## Project Structure
+The project is seperated into 3 primary sections: Core System Assets, Scripts, and Modules. The Core System Assets are the driver functions of the robot, and control primary components of the game logic, including driver control, autonomous, etc. The Scripts are the paths the robot may use in autonomous portions of the competition. This may include skills, in game autons, etc. The module section holds useful hlper functions that may be called on by logic within the Core System Assets.
 
-here are some basic project paths:
+## Prerequisites
+In order for the project to work, you must have:
+- PROS (Purdue University)
+- A physical robot with VEX V5 hardware/firmware
+- A Text editor 
 
+
+## Project Usage
 1: Install the package from this repository. 
 
 2: To set up the components of the robot, navigate to
@@ -39,7 +46,6 @@ here are some basic project paths:
 
  - Kevin Zhao
  - Andrew Li
-
 
 
 Simulations: https://github.com/ZechariahWang/Motion-Profiling-Algorithm_Simulations
