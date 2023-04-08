@@ -6,6 +6,8 @@
  * @date 2023-02-13
  */
 
+// wheres my dad ඞ
+
 #include "main.h"
 #include "display/lv_objx/lv_label.h"
 #include "pros/motors.h"
@@ -15,9 +17,57 @@
 #include "map"
 #include "string"
 
-constexpr u_int64_t time           = 100000; // Time until initialize phase ends. Effectively infinite.
-constexpr u_int16_t delayAmount    = 10; // Dont overload the CPU during OP control
-char buffer[100];
+constexpr     u_int64_t time           = 100000; // Time until initialize phase ends. Effectively infinite.
+constexpr     u_int16_t delayAmount    = 10; // Dont overload the CPU during OP control
+char          buffer[100];
+lv_obj_t      *sensor_button_home;
+lv_obj_t      *auton_button_home;
+lv_obj_t      *misc_button_home;
+lv_obj_t      *game_button_home;
+lv_obj_t      *welcomeDisplay;
+lv_obj_t      *home_welcome_text;
+lv_obj_t      *home_page = lv_page_create(lv_scr_act(), NULL);
+
+lv_obj_t      *odom_readings_sensor;
+lv_obj_t      *dt_readings_sensor;
+lv_obj_t      *ultrasonic_readings_sensor;
+lv_obj_t      *limit_readings_sensor;
+lv_obj_t      *cata_readings_sensor;
+lv_obj_t      *intake_readings_sensor;
+lv_obj_t      *return_button_sensor;
+
+lv_obj_t      *current_auton_display_selector;
+lv_obj_t      *prev_auton_button_selector;
+lv_obj_t      *next_auton_button_selector;
+lv_obj_t      *select_auton_button_selector;
+lv_obj_t      *return_auton_button_selector;
+
+lv_obj_t      *controller_status_game;
+lv_obj_t      *battery_percent_game;
+lv_obj_t      *battery_temp_game;
+lv_obj_t      *time_since_startup_game;
+lv_obj_t      *competition_stat_game;
+lv_obj_t      *return_button_game;
+
+lv_obj_t      *debug_line1_misc;
+lv_obj_t      *debug_line2_misc;
+lv_obj_t      *debug_line3_misc;
+lv_obj_t      *debug_line4_misc;
+lv_obj_t      *debug_line5_misc;
+lv_obj_t      *debug_line6_misc;
+lv_obj_t      *debug_line7_misc;
+lv_obj_t      *debug_line8_misc;
+lv_obj_t      *debug_line9_misc;
+lv_obj_t      *debug_line10_misc;
+lv_obj_t      *return_button_misc;
+
+lv_obj_t      *displayDataL1;
+lv_obj_t      *displayDataL2;
+lv_obj_t      *displayDataL3;
+lv_obj_t      *displayDataL4;
+lv_obj_t      *displayDataL5;
+lv_obj_t      *debugLine1;
+lv_obj_t      *debugLine2;
 
 std::map<int, std::string> auton_Legend = {
     { 1, "Solo Win Point" },
@@ -31,55 +81,6 @@ std::map<int, std::string> auton_Legend = {
     { 9, "Empty Slot" },
     { 10,"Empty Slot" }
 };
-
-lv_obj_t *sensor_button_home;
-lv_obj_t *auton_button_home;
-lv_obj_t *misc_button_home;
-lv_obj_t *game_button_home;
-lv_obj_t *welcomeDisplay;
-lv_obj_t *home_welcome_text;
-lv_obj_t *home_page = lv_page_create(lv_scr_act(), NULL);
-
-lv_obj_t *odom_readings_sensor;
-lv_obj_t *dt_readings_sensor;
-lv_obj_t *ultrasonic_readings_sensor;
-lv_obj_t *limit_readings_sensor;
-lv_obj_t *cata_readings_sensor;
-lv_obj_t *intake_readings_sensor;
-lv_obj_t *return_button_sensor;
-
-lv_obj_t *current_auton_display_selector;
-lv_obj_t *prev_auton_button_selector;
-lv_obj_t *next_auton_button_selector;
-lv_obj_t *select_auton_button_selector;
-lv_obj_t *return_auton_button_selector;
-
-lv_obj_t *controller_status_game;
-lv_obj_t *battery_percent_game;
-lv_obj_t *battery_temp_game;
-lv_obj_t *time_since_startup_game;
-lv_obj_t *competition_stat_game;
-lv_obj_t *return_button_game;
-
-lv_obj_t *debug_line1_misc;
-lv_obj_t *debug_line2_misc;
-lv_obj_t *debug_line3_misc;
-lv_obj_t *debug_line4_misc;
-lv_obj_t *debug_line5_misc;
-lv_obj_t *debug_line6_misc;
-lv_obj_t *debug_line7_misc;
-lv_obj_t *debug_line8_misc;
-lv_obj_t *debug_line9_misc;
-lv_obj_t *debug_line10_misc;
-lv_obj_t *return_button_misc;
-
-lv_obj_t *displayDataL1;
-lv_obj_t *displayDataL2;
-lv_obj_t *displayDataL3;
-lv_obj_t *displayDataL4;
-lv_obj_t *displayDataL5;
-lv_obj_t *debugLine1;
-lv_obj_t *debugLine2;
 
 void display_homePage()
 {
@@ -266,8 +267,6 @@ static lv_res_t game_on_click(lv_obj_t *btn){
 	return 0;
 }
 
-// wheres my dad ඞ
-
 //-- LVGL on input functions //--
 static lv_res_t selectAuton(lv_obj_t *btn){
 	static bool pressed = true;
@@ -349,8 +348,6 @@ void initialize() { // Init function control
 	lv_obj_set_size(home_page, 500, 300);
 	lv_obj_set_style(home_page, &style_home_page);
 
-	// -100
-
 	sensor_button_home = lv_btn_create(lv_scr_act(), NULL);
 	lv_btn_set_style(sensor_button_home, LV_BTN_STYLE_REL, &sensor_button_style);
 	lv_btn_set_style(sensor_button_home, LV_BTN_STYLE_PR, &sensor_button_style);
@@ -364,8 +361,7 @@ void initialize() { // Init function control
     lv_obj_set_x(sensor_buttonText, 50); 
     sensor_buttonText = lv_label_create(sensor_button_home, NULL);
     lv_label_set_text(sensor_buttonText, SYMBOL_GPS " SENSOR");
-
-	//70
+	
 	auton_button_home = lv_btn_create(lv_scr_act(), NULL);
 	lv_btn_set_style(auton_button_home, LV_BTN_STYLE_REL, &sensor_button_style);
 	lv_btn_set_style(auton_button_home, LV_BTN_STYLE_PR, &sensor_button_style);
@@ -394,7 +390,6 @@ void initialize() { // Init function control
     misc_buttonText = lv_label_create(misc_button_home, NULL);
     lv_label_set_text(misc_buttonText, SYMBOL_COPY " MISC");
 
-	// -100
 	game_button_home = lv_btn_create(lv_scr_act(), NULL);
 	lv_btn_set_style(game_button_home, LV_BTN_STYLE_REL, &sensor_button_style);
 	lv_btn_set_style(game_button_home, LV_BTN_STYLE_PR, &sensor_button_style);
@@ -414,7 +409,6 @@ void initialize() { // Init function control
     lv_obj_align(home_welcome_text, NULL, LV_ALIGN_IN_LEFT_MID, 85, -75);
 
 	// Sensor Page
-
     odom_readings_sensor =  lv_label_create(lv_scr_act(), NULL);
     lv_label_set_text(odom_readings_sensor, SYMBOL_GPS " X: 0.0 Y: 0.0 Theta: 0.0");
     lv_obj_align(odom_readings_sensor, NULL, LV_ALIGN_IN_LEFT_MID, 20, -75);
@@ -454,7 +448,6 @@ void initialize() { // Init function control
     lv_label_set_text(return_buttonText, SYMBOL_CLOSE " Return");
 
 	// Auton page
-
     current_auton_display_selector =  lv_label_create(lv_scr_act(), NULL);
     lv_label_set_text(current_auton_display_selector, " Current Selected Path: Solo Win Point");
     lv_obj_align(current_auton_display_selector, NULL, LV_ALIGN_CENTER, -5, -30);
@@ -501,7 +494,6 @@ void initialize() { // Init function control
     next_buttonText_auton = lv_label_create(next_auton_button_selector, NULL);
     lv_label_set_text(next_buttonText_auton, "NEXT " SYMBOL_NEXT);
 
-
 	return_auton_button_selector = lv_btn_create(lv_scr_act(), NULL);
 	lv_btn_set_style(return_auton_button_selector, LV_BTN_STYLE_REL, &sensor_button_style);
 	lv_btn_set_style(return_auton_button_selector, LV_BTN_STYLE_PR, &sensor_button_style);
@@ -517,7 +509,6 @@ void initialize() { // Init function control
     lv_label_set_text(return_buttonText_auton, SYMBOL_CLOSE" Return");
 
 	// game page
-
     controller_status_game =  lv_label_create(lv_scr_act(), NULL);
     lv_label_set_text(controller_status_game, "Controller Status: Adequate ");
     lv_obj_align(controller_status_game, NULL, LV_ALIGN_IN_LEFT_MID, 20, -75);
@@ -538,7 +529,6 @@ void initialize() { // Init function control
     lv_label_set_text(competition_stat_game, "Competition Status: ENABLED");
     lv_obj_align(competition_stat_game, NULL, LV_ALIGN_IN_LEFT_MID, 20, 5);
 
-
 	return_button_game = lv_btn_create(lv_scr_act(), NULL);
 	lv_btn_set_style(return_button_game, LV_BTN_STYLE_REL, &sensor_button_style);
 	lv_btn_set_style(return_button_game, LV_BTN_STYLE_PR, &sensor_button_style);
@@ -553,8 +543,7 @@ void initialize() { // Init function control
     return_buttonText_game = lv_label_create(return_button_game, NULL);
     lv_label_set_text(return_buttonText_game, SYMBOL_CLOSE " Return");
 
-	//misc page
-
+	// misc page
     debug_line1_misc =  lv_label_create(lv_scr_act(), NULL);
     lv_label_set_text(debug_line1_misc, "Debug Line  ");
     lv_obj_align(debug_line1_misc, NULL, LV_ALIGN_IN_LEFT_MID, 20, -75);
@@ -681,8 +670,5 @@ void opcontrol(){ // Driver control function
 
 }
 
-
-// mov.on_off_v2();
-//mov.on_off_controller(); // Bang bang controller
 //lol ඞ
 //background as black as kartik

@@ -20,6 +20,7 @@ class match_mov{
         match_mov();
         void dt_Control();
         void exponential_curve_accelerator();
+        void x_drive_dt_Control();
         void tbh_Controller();
         void p_flywheel();
         void on_off_controller();
