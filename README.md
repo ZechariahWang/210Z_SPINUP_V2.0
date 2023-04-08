@@ -1,5 +1,6 @@
 
-![210_Logo_New](https://user-images.githubusercontent.com/97078224/230697661-43d051cc-cb6c-4582-92b0-01a9eff34b9d.png)
+![RecoloredLogo](https://user-images.githubusercontent.com/97078224/230698177-5690229d-7d7e-4f90-89dc-b33ee27bca9b.png)
+
 
 
 # Team 210Z 2022-2023 Code
