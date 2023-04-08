@@ -1,11 +1,17 @@
-
 ![RecoloredLogo](https://user-images.githubusercontent.com/97078224/230698177-5690229d-7d7e-4f90-89dc-b33ee27bca9b.png)
 
 
-
-# Team 210Z 2022-2023 Code
+# Team 210Z 2022-2023 Framework
 
 Code Framework for 210Z during the 2022-2023 Vex Robotics Competition.
+
+- 6x World Championship Qualifiers
+- 15x Honours Received
+- 2022-2023 Alberta Provincial Champions
+- 2022-2023 Mecha Mayhem Signature Event Champions
+- Peak 6th in Canada, 57th in the world.
+
+
 
 
 ## Usage
@@ -21,7 +27,7 @@ here are some basic project paths:
 
 4: For autonomous control, there are three main components: PID Controller, Odometry Logic, and Algorithm Logic. These are all divided into their own seperate components within the project. Note that certain pieces of logic may require external module and utility functions, which can be found in the ```Modules``` and ```Utility``` folders.
 
-5: For LVGL Embedded System Graphics, all logic will be found in ```main.cpp``` in the ```initialize``` function. Note that declaration for specific components may be found in other paths in the project.
+5: For LVGL Embedded System Graphics, all logic will be found in ```main.cpp``` in the ```initialize``` function. Note that declaration for specific components may be found in other paths of the project. The current setup of the interface is in 4 components: Game, Sensor, Auton, Misc. Each section displays data about it's corresponding section, but may connect to other parts of the project. The biggest notable example of this is the autonomous selector. To edit or change logic within the selector, navigate to ```InitializeModule.cpp``` in the ```OnStartupModule``` folder.
 
 
 ## Authors
