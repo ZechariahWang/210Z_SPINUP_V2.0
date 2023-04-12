@@ -57,7 +57,6 @@ void match_mov::on_off_controller(){
 
 void match_mov::on_off_v2(){
     if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){
-        std::cout << OuterShooter.get_voltage() << std::endl;
         if (abs(OuterShooter.get_voltage()) > (12000 * 0.9)){ OuterShooter.move_voltage(12000 * 0.9); }
         else if (abs(OuterShooter.get_voltage()) < (12000 * 0.9)){ OuterShooter.move_voltage(12000); }
     }
@@ -79,19 +78,15 @@ void match_mov::power_shooter(){ // Power shooter function
     else{ OuterShooter.move_voltage(0); InnerShooter.move_voltage(0);}
 }
 
-static bool cata_initiated = false;
+static bool cata_initiated = 1;
+static bool cata_need_to_reset_ima_kms = true;
 void match_mov::prime_catapult(){
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)){
-        cata_initiated = !cata_initiated;
-    }
-    if (!CataLimitMonitor.get_value() && cata_initiated == true){
-        CataPrimer.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-        CataPrimer.move_voltage(-12000); 
-    }
-    else if (CataLimitMonitor.get_value() && cata_initiated == true) { 
+    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)){ cata_initiated = !cata_initiated; }
+    if (CataLimitMonitor.get_value() == 0 && cata_initiated == 1 && cata_need_to_reset_ima_kms == true){  CataPrimer.move_voltage(12000); }
+    else if (CataLimitMonitor.get_value() == 1) { 
         CataPrimer.move_voltage(0); 
-        CataPrimer.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-        cata_initiated = false;
+        cata_initiated = 0;
+        cata_need_to_reset_ima_kms = false;
     }
 }
 
@@ -100,29 +95,14 @@ void match_mov::prime_catapult(){
  * 
  */
 
-uint8_t cataDelay = 100;
+uint16_t cataDelay = 300;
 void match_mov::launch_disk(){ // Launch disk/piston control function
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1) && !CataLimitMonitor.get_value()){ 
+    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1) && CataLimitMonitor.get_value() == 1){ 
         CataPrimer.move_voltage(12000); 
         pros::delay(cataDelay);
-        CataPrimer.move_voltage(0);
-        cata_initiated = false;
+        cata_need_to_reset_ima_kms = true;
+        cata_initiated = 1;
     }
-    // if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1)){ 
-    //     if (mov.l_stat == false) { anglerStatus = true; }
-    //  }
-    // if (anglerStatus) { mov.launch_iterator++; shot_iteration_counter++; }
-    // if (shot_iteration_counter > 5) {
-    //     DiskIntakeTop.move_voltage(-9000); 
-    //     mov.l_stat = true;
-    //     if (mov.launch_iterator > 150){
-    //         DiskIntakeTop.move_voltage(0); 
-    //         Angler.set_value(mov.l_stat); 
-    //         mov.launch_iterator = 0;
-    //         shot_iteration_counter = 0;
-    //         anglerStatus = false;
-    //     }
-    // }
 }
 
 /**
@@ -131,10 +111,9 @@ void match_mov::launch_disk(){ // Launch disk/piston control function
  */
 
 void match_mov::power_intake(){ // Power intake function
-    if (!CataLimitMonitor.get_value()) { return; }
+    if (CataLimitMonitor.get_value() == 0) { DiskIntakeTop.move_voltage(0); return; }
     if ((controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2))){ DiskIntakeTop.move_voltage(12000); }
     else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){ DiskIntakeTop.move_voltage(-12000); }
-    else if (anglerStatus){ DiskIntakeTop.move_voltage(-9000); }
     else{ DiskIntakeTop.move_voltage(0); }
 }
 
@@ -180,7 +159,7 @@ void match_mov::misc_control(){
  */
 
 void match_mov::set_motor_type(){
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)){ mov.robotBrakeType = !mov.robotBrakeType; }
+    // if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)){ mov.robotBrakeType = !mov.robotBrakeType; }
     if (mov.robotBrakeType == false){
         DriveFrontLeft.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
         DriveBackLeft.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);

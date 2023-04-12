@@ -636,10 +636,25 @@ void autonomous(){  // Autonomous function control
 	// Init_Process.SelectAuton(); // Enable Auton Selector (STEP 2) 
 
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(25, 70);
+	mov.set_translation_pid_with_location_params(50, 90, 1000);
 
-	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(90, 90);
+	// cur.set_c_constants(6, 0, 45);
+	// cur.set_curve_pid(90, 60, 0.20, true);
+
+	// rot.set_r_constants(6, 0, 45);
+	// rot.set_rotation_pid(90, 90);
+
+    // mov.set_t_constants(0.45, 0, 5, 50);
+	// mov.set_translation_pid(50, 70);
+
+	// rot.set_r_constants(6, 0.003, 35);
+	// rot.set_rotation_pid(180, 90);
+
+	// cur.set_c_constants(6, 0, 45);
+	// cur.set_curve_pid(0, 60, 0.20, false);
+
+    // mov.set_t_constants(0.45, 0, 5, 50);
+	// mov.set_translation_pid(30, 90);
 }
 
 /**

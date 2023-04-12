@@ -168,13 +168,13 @@ void FinalizeAuton::DisplayData(){
 	sprintf(buffer, SYMBOL_WARNING " FL: %.2f BL: %.2f", DriveFrontLeft.get_temperature(), DriveBackLeft.get_temperature());
 	lv_label_set_text(dt_readings_sensor, buffer);
 
-	sprintf(buffer, SYMBOL_DRIVE " Ultrasonic Value: %d", SelectedAuton);
+	sprintf(buffer, SYMBOL_DRIVE " Ultrasonic Value: %d", distance_sensor.get());
 	lv_label_set_text(ultrasonic_readings_sensor, buffer);
 
-	sprintf(buffer, SYMBOL_DRIVE " Cata Limit Value: %d", SelectedAuton);
+	sprintf(buffer, SYMBOL_DRIVE " Cata Limit Value: %d", CataLimitMonitor.get_value());
 	lv_label_set_text(cata_readings_sensor, buffer);
 
-	sprintf(buffer, SYMBOL_DRIVE " Intake Readings: %d", SelectedAuton);
+	sprintf(buffer, SYMBOL_DRIVE " Intake Readings: %d", DiskIntakeTop.get_voltage());
 	lv_label_set_text(intake_readings_sensor, buffer);
 }
 

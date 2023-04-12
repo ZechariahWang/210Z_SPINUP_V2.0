@@ -16,6 +16,7 @@ extern pros::Vision vision_sensor;
 extern pros::Rotation RotationSensor;
 extern pros::Gps gps_sensor;
 extern pros::c::gps_status_s_t gpsData;
+extern pros::Distance distance_sensor;
 
 extern pros::Motor OuterShooter;
 extern pros::Motor InnerShooter;
