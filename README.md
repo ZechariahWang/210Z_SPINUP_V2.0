@@ -21,7 +21,6 @@ The project is divided into three major sections: Core System Assets, Scripts, a
 In order for the project to work, you must have:
 - PROS (Purdue University)
 - A physical robot with VEX V5 hardware/firmware
-- A Text editor 
 
 
 ## Project Usage
