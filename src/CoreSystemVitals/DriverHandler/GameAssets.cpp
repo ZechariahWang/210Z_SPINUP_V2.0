@@ -81,7 +81,9 @@ void match_mov::power_shooter(){ // Power shooter function
 static bool cata_initiated = 1;
 static bool cata_need_to_reset_ima_kms = true;
 void match_mov::prime_catapult(){
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)){ cata_initiated = !cata_initiated; }
+    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2)){
+         cata_initiated = !cata_initiated;
+    }
     if (CataLimitMonitor.get_value() == 0 && cata_initiated == 1 && cata_need_to_reset_ima_kms == true){  CataPrimer.move_voltage(12000); }
     else if (CataLimitMonitor.get_value() == 1) { 
         CataPrimer.move_voltage(0); 
@@ -95,13 +97,21 @@ void match_mov::prime_catapult(){
  * 
  */
 
-uint16_t cataDelay = 300;
+uint16_t cataDelay = 700;
 void match_mov::launch_disk(){ // Launch disk/piston control function
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1) && CataLimitMonitor.get_value() == 1){ 
         CataPrimer.move_voltage(12000); 
         pros::delay(cataDelay);
         cata_need_to_reset_ima_kms = true;
         cata_initiated = 1;
+    }
+    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B) && CataLimitMonitor.get_value() == 1){ 
+        CataPrimer.move_voltage(12000); 
+        pistonBooster.set_value(true);
+        pros::delay(cataDelay);
+        cata_need_to_reset_ima_kms = true;
+        cata_initiated = 1;
+        pistonBooster.set_value(false);
     }
 }
 
@@ -140,7 +150,7 @@ void match_mov::set_power_amount(){ // Function for changing power of flywheel
  * @brief All other misc controls
  * 
  */
-
+bool intakeLifted = false;
 void match_mov::misc_control(){
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) {
         arcLaunchToggle = !arcLaunchToggle;
@@ -150,6 +160,11 @@ void match_mov::misc_control(){
         if (anglerStatus) return;
         mov.l_stat = !mov.l_stat;
         Angler.set_value(mov.l_stat);
+    }
+    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)) {
+        intakeLifted = !intakeLifted;
+        intakeLift.set_value(intakeLifted);
+
     }
 }
 

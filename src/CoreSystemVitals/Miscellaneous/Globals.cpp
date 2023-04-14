@@ -31,6 +31,8 @@ pros::Motor CataPrimer(12, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODE
 pros::Motor DiskIntakeTop(11, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS);
 pros::ADIDigitalOut Expansion('d');
 pros::ADIDigitalIn CataLimitMonitor('a');
+pros::ADIDigitalOut pistonBooster('b');
+pros::ADIDigitalOut intakeLift('c');
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 pros::Imu imu_sensor(1);
 pros::Distance distance_sensor(3);

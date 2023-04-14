@@ -615,6 +615,25 @@ void disabled() {}
 void competition_initialize() {}
 //------------------------------\*
 
+void shoot_cata(){
+    CataPrimer.move_voltage(12000); 
+	pistonBooster.set_value(true);
+    pros::delay(500);
+    CataPrimer.move_voltage(0);
+	pistonBooster.set_value(false);
+	pros::delay(400);
+}
+
+void reset_cata(){
+	while (true){
+		CataPrimer.move_voltage(12000);
+		if (CataLimitMonitor.get_value() == 1){
+			CataPrimer.move_voltage(0);
+			break;
+		}
+	}
+}
+
 
 /**
  * @brief Main autonomous function. Some key points to remember:
@@ -632,29 +651,82 @@ void autonomous(){  // Autonomous function control
 	Auton_Framework.overRideCoordinatePos(0, 0);
 	mov.set_dt_constants(3.125, 1.6, 600); // Parameters are : Wheel diameter, gear ratio, motor cartridge type
 	imu_sensor.set_rotation(0);
+	DriveFrontLeft.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	DriveFrontRight.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	DriveBackLeft.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	DriveBackRight.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	DriveMidLeft.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	DriveMidRight.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	// Init_Process.ReceiveInput(time); // Enabled Auton Selector (STEP 1) ONLY FOR PROTOTYPE USE
 	// Init_Process.SelectAuton(); // Enable Auton Selector (STEP 2) 
-
-    mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid_with_location_params(50, 90, 1000);
 
 	// cur.set_c_constants(6, 0, 45);
 	// cur.set_curve_pid(90, 60, 0.20, true);
 
-	// rot.set_r_constants(6, 0, 45);
-	// rot.set_rotation_pid(90, 90);
+	reset_cata();
 
-    // mov.set_t_constants(0.45, 0, 5, 50);
-	// mov.set_translation_pid(50, 70);
+	rot.set_r_constants(6, 0.003, 35);
+	rot.set_rotation_pid(30, 90);
+	shoot_cata();
+	reset_cata();
 
-	// rot.set_r_constants(6, 0.003, 35);
-	// rot.set_rotation_pid(180, 90);
+	DiskIntakeTop.move_voltage(12000);
 
-	// cur.set_c_constants(6, 0, 45);
-	// cur.set_curve_pid(0, 60, 0.20, false);
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(150, 90);
 
-    // mov.set_t_constants(0.45, 0, 5, 50);
-	// mov.set_translation_pid(30, 90);
+	cur.set_c_constants(6, 0, 45);
+	cur.set_curve_pid(180, 90, 0.8, true);
+
+    mov.set_t_constants(0.45, 0, 5, 200);
+	mov.set_translation_pid(-25, 127);
+
+	DiskIntakeTop.move_voltage(0);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(45, 90);
+	shoot_cata();
+	reset_cata();
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(-53, 90);
+
+	DiskIntakeTop.move_voltage(12000);
+
+    mov.set_t_constants(0.45, 0, 5, 200);
+	mov.set_translation_pid(-63, 90);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(0, 90);
+
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(-12, 90);
+
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(12, 127);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(7, 90);
+
+	shoot_cata();
+	reset_cata();
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(180, 90);
+
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(-10, 127);
+
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(5, 127);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(7, 90);
+
+	shoot_cata();
+
+
+
 }
 
 /**
@@ -664,7 +736,7 @@ void autonomous(){  // Autonomous function control
 
 void opcontrol(){ // Driver control function
 	match_mov mov; MotionAlgorithms Auton_Framework; 
-	Init_AutonSwitchMain Init;  FinalizeAuton data; 
+	Init_AutonSwitchMain Init; FinalizeAuton data; 
 	char buffer[300]; // Display Buffer
 	YaoMing.set_value(true);
 	while (true){

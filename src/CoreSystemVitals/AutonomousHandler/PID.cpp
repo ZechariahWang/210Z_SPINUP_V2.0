@@ -393,11 +393,12 @@ void TranslationPID::set_translation_pid(double target, double maxSpeed){
     double headingAssist = mov_t.find_min_angle(TARGET_THETA, ImuMon()) * mov_t.t_h_kp;
     cd++; if (cd <= 10){ utility::leftvoltagereq(0); utility::rightvoltagereq(0); continue;}
     if (target < 0) { is_backwards = true; } else { is_backwards = false; }
-    slew.initialize_slew(true, maxSpeed, target, ((DriveFrontLeft.get_position() + DriveFrontRight.get_position()) / 2), ((init_left_pos + init_right_pos) / 2), is_backwards, get_ticks_per_inch());
-
-    double slew_output = slew.calculate_slew(avgPos);
-    double l_output = utility::clamp(avg_voltage_req, -slew_output, slew_output);
-    double r_output = utility::clamp(avg_voltage_req, -slew_output, slew_output);
+    // slew.initialize_slew(false, maxSpeed, target, ((DriveFrontLeft.get_position() + DriveFrontRight.get_position()) / 2), ((init_left_pos + init_right_pos) / 2), is_backwards, get_ticks_per_inch());
+    // double slew_output = slew.calculate_slew(avgPos);
+    // double l_output = utility::clamp(avg_voltage_req, -slew_output, slew_output);
+    // double r_output = utility::clamp(avg_voltage_req, -slew_output, slew_output);
+    double l_output = avg_voltage_req;
+    double r_output = avg_voltage_req;
 
     utility::leftvoltagereq((l_output * (12000.0 / 127)) + headingAssist);
     utility::rightvoltagereq((r_output * (12000.0 / 127)) - headingAssist);
@@ -418,10 +419,11 @@ void TranslationPID::set_translation_pid(double target, double maxSpeed){
 }
 
 /**
- * @brief Driver PID function. Main logic function, combining all translation PID components together
+ * @brief Driver PID function with distance sensor input enabled. Main logic function, combining all translation PID components together
  * 
  * @param target the target translation target position
  * @param maxSpeed the maxspeed the robot may travel at
+ * @param distanceVal the distance from an object for the robot to stop at
  */
 
 void TranslationPID::set_translation_pid_with_location_params(double target, double maxSpeed, double distanceVal){
@@ -457,6 +459,60 @@ void TranslationPID::set_translation_pid_with_location_params(double target, dou
     if (fabs(mov_t.t_error - mov_t.t_prev_error) < 0.3) mov_t.t_failsafe++;
     if (mov_t.t_failsafe > 10000){
       utility::stop();
+      break;
+    }
+    pros::delay(10);
+  }
+}
+
+/**
+ * @brief Driver PID function with simultaneous cata reset data. Main logic function, combining all translation PID components together
+ * 
+ * @param target the target translation target position
+ * @param maxSpeed the maxspeed the robot may travel at
+ */
+
+void TranslationPID::set_translation_pid_with_sim_reset(double target, double maxSpeed){
+  utility::fullreset(0, false); mov_t.reset_t_alterables();
+  double TARGET_THETA = ImuMon(); double POSITION_TARGET = target; bool is_backwards = false; int8_t cd = 0;
+  mov_t.t_maxSpeed = maxSpeed;
+  mov_t.circumfrance = mov_t.wheelDiameter * M_PI;
+  mov_t.ticks_per_rev = (50.0 * (3600.0 / mov_t.cartridge) * mov_t.ratio);
+  mov_t.ticks_per_inches = (mov_t.ticks_per_rev / mov_t.circumfrance);
+  target *= mov_t.ticks_per_inches;
+  double init_left_pos = DriveFrontLeft.get_position(); double init_right_pos = DriveFrontRight.get_position();
+  while (true){
+		CataPrimer.move_voltage(12000);
+		if (CataLimitMonitor.get_value() == 1){
+			CataPrimer.move_voltage(0);
+			break;
+		}
+    data.DisplayData();
+    double avgPos = (DriveFrontLeft.get_position() + DriveFrontRight.get_position()) / 2;
+    double avg_voltage_req = mov_t.compute_t(avgPos, target);
+    double headingAssist = mov_t.find_min_angle(TARGET_THETA, ImuMon()) * mov_t.t_h_kp;
+    cd++; if (cd <= 10){ utility::leftvoltagereq(0); utility::rightvoltagereq(0); continue;}
+    if (target < 0) { is_backwards = true; } else { is_backwards = false; }
+    // slew.initialize_slew(true, maxSpeed, target, ((DriveFrontLeft.get_position() + DriveFrontRight.get_position()) / 2), ((init_left_pos + init_right_pos) / 2), is_backwards, get_ticks_per_inch());
+
+    // double slew_output = slew.calculate_slew(avgPos);
+    // double l_output = utility::clamp(avg_voltage_req, -slew_output, slew_output);
+    // double r_output = utility::clamp(avg_voltage_req, -slew_output, slew_output);
+    double l_output = avg_voltage_req;
+    double r_output = avg_voltage_req;
+
+    utility::leftvoltagereq((l_output * (12000.0 / 127)) + headingAssist);
+    utility::rightvoltagereq((r_output * (12000.0 / 127)) - headingAssist);
+    if (fabs(mov_t.t_error) < mov_t.t_error_thresh){ mov_t.t_iterator++; } else { mov_t.t_iterator = 0;}
+    if (fabs(mov_t.t_iterator) > mov_t.t_tol){
+      utility::stop();
+      CataPrimer.move_voltage(0);
+      break;
+    }
+    if (fabs(mov_t.t_error - mov_t.t_prev_error) < 0.3) mov_t.t_failsafe++;
+    if (mov_t.t_failsafe > 10000){
+      utility::stop();
+      CataPrimer.move_voltage(0);
       break;
     }
     pros::delay(10);
