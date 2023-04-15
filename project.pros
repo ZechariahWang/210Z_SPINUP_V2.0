@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "210Z Provs",
+    "project_name": "210Z",
     "target": "v5",
     "templates": {
       "kernel": {
@@ -304,7 +304,7 @@
     },
     "upload_options": {
       "icon": "X",
-      "description": "210Z Code kartik likes boys"
+      "description": "210Z Worlds Code"
     }
   }
 }

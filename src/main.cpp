@@ -313,29 +313,29 @@ static lv_res_t onNextPress(lv_obj_t *btn){
 void initialize() { // Init function control
     static lv_style_t sensor_button_style;                         
     lv_style_copy(&sensor_button_style, &lv_style_pretty);                    
-    sensor_button_style.body.main_color = LV_COLOR_MAKE(17, 47, 99);         
-    sensor_button_style.body.grad_color = LV_COLOR_MAKE(17, 47, 99);
+    sensor_button_style.body.main_color = LV_COLOR_MAKE(47, 144, 212);         
+    sensor_button_style.body.grad_color = LV_COLOR_MAKE(47, 144, 212);
 	sensor_button_style.body.radius = 8;                       
     sensor_button_style.text.color = LV_COLOR_WHITE;     
 
     static lv_style_t auton_button_style;                         
     lv_style_copy(&sensor_button_style, &lv_style_pretty);                    
-    sensor_button_style.body.main_color = LV_COLOR_MAKE(17, 47, 99);         
-    sensor_button_style.body.grad_color = LV_COLOR_MAKE(17, 47, 99);
+    sensor_button_style.body.main_color = LV_COLOR_MAKE(47, 144, 212);         
+    sensor_button_style.body.grad_color = LV_COLOR_MAKE(47, 144, 212);
 	sensor_button_style.body.radius = 8;                       
     sensor_button_style.text.color = LV_COLOR_WHITE;  
 
     static lv_style_t misc_button_style;                         
     lv_style_copy(&sensor_button_style, &lv_style_pretty);                    
-    sensor_button_style.body.main_color = LV_COLOR_MAKE(17, 47, 99);         
-    sensor_button_style.body.grad_color = LV_COLOR_MAKE(17, 47, 99);
+    sensor_button_style.body.main_color = LV_COLOR_MAKE(47, 144, 212);         
+    sensor_button_style.body.grad_color = LV_COLOR_MAKE(47, 144, 212);
 	sensor_button_style.body.radius = 8;                       
     sensor_button_style.text.color = LV_COLOR_WHITE;  
 
     static lv_style_t game_button_style;                         
     lv_style_copy(&sensor_button_style, &lv_style_pretty);                    
-    sensor_button_style.body.main_color = LV_COLOR_MAKE(17, 47, 99);         
-    sensor_button_style.body.grad_color = LV_COLOR_MAKE(17, 47, 99);
+    sensor_button_style.body.main_color = LV_COLOR_MAKE(47, 144, 212);         
+    sensor_button_style.body.grad_color = LV_COLOR_MAKE(47, 144, 212);
 	sensor_button_style.body.radius = 8;                       
     sensor_button_style.text.color = LV_COLOR_WHITE;           
 
@@ -406,7 +406,7 @@ void initialize() { // Init function control
 
     home_welcome_text =  lv_label_create(lv_scr_act(), NULL);
     lv_label_set_text(home_welcome_text, "Welcome 210Z, ");
-    lv_obj_align(home_welcome_text, NULL, LV_ALIGN_IN_LEFT_MID, 85, -75);
+    lv_obj_align(home_welcome_text, NULL, LV_ALIGN_IN_LEFT_MID, 85, -80);
 
 	// Sensor Page
     odom_readings_sensor =  lv_label_create(lv_scr_act(), NULL);
@@ -450,7 +450,7 @@ void initialize() { // Init function control
 	// Auton page
     current_auton_display_selector =  lv_label_create(lv_scr_act(), NULL);
     lv_label_set_text(current_auton_display_selector, " Current Selected Path: Solo Win Point");
-    lv_obj_align(current_auton_display_selector, NULL, LV_ALIGN_CENTER, -5, -30);
+    lv_obj_align(current_auton_display_selector, NULL, LV_ALIGN_CENTER, -30, -30);
 
 	prev_auton_button_selector = lv_btn_create(lv_scr_act(), NULL);
 	lv_btn_set_style(prev_auton_button_selector, LV_BTN_STYLE_REL, &sensor_button_style);
@@ -749,9 +749,9 @@ void opcontrol(){ // Driver control function
 		mov.misc_control();
 
 		data.output_sensor_data(); // Display robot stats and info
-		data.output_auton_selector(); // Display robot stats and info
 		data.output_game_data(); // Display robot stats and info
 		data.output_misc_data(); // Display robot stats and info
+		data.DisplayData();
 		pros::delay(delayAmount); // Dont hog CPU ;)
 	}
 

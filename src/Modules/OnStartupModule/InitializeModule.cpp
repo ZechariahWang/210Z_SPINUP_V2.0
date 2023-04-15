@@ -165,7 +165,7 @@ void FinalizeAuton::DisplayData(){
 	sprintf(buffer, SYMBOL_GPS " X: %.2f Y: %.2f Theta: %f", gx, gy, ImuMon());
 	lv_label_set_text(odom_readings_sensor, buffer);
     
-	sprintf(buffer, SYMBOL_WARNING " FL: %.2f BL: %.2f", DriveFrontLeft.get_temperature(), DriveBackLeft.get_temperature());
+	sprintf(buffer, SYMBOL_WARNING " FL: %.2f BL: %.2f FR: %.2f BR: %.2f", DriveFrontLeft.get_temperature(), DriveBackLeft.get_temperature(), DriveFrontRight.get_temperature(), DriveBackRight.get_temperature());
 	lv_label_set_text(dt_readings_sensor, buffer);
 
 	sprintf(buffer, SYMBOL_DRIVE " Ultrasonic Value: %d", distance_sensor.get());
@@ -176,6 +176,9 @@ void FinalizeAuton::DisplayData(){
 
 	sprintf(buffer, SYMBOL_DRIVE " Intake Readings: %d", DiskIntakeTop.get_voltage());
 	lv_label_set_text(intake_readings_sensor, buffer);
+
+	sprintf(buffer, SYMBOL_DRIVE " Limit Status: %d", CataLimitMonitor.get_value());
+	lv_label_set_text(limit_readings_sensor, buffer);
 }
 
 void FinalizeAuton::output_sensor_data(){
@@ -183,7 +186,7 @@ void FinalizeAuton::output_sensor_data(){
 	sprintf(buffer, SYMBOL_GPS " X: %.2f Y: %.2f Theta: %f", gx, gy, ImuMon());
 	lv_label_set_text(odom_readings_sensor, buffer);
     
-	sprintf(buffer, SYMBOL_WARNING " FL: %.2f BL: %.2f", DriveFrontLeft.get_temperature(), DriveBackLeft.get_temperature());
+	sprintf(buffer, SYMBOL_WARNING " FL: %.2f BL: %.2f FR: %.2f BR: %.2f", DriveFrontLeft.get_temperature(), DriveBackLeft.get_temperature(), DriveFrontRight.get_temperature(), DriveBackRight.get_temperature());
 	lv_label_set_text(dt_readings_sensor, buffer);
 
 	sprintf(buffer, SYMBOL_DRIVE " Ultrasonic Value: %d", SelectedAuton);
@@ -194,11 +197,14 @@ void FinalizeAuton::output_sensor_data(){
 
 	sprintf(buffer, SYMBOL_DRIVE " Intake Readings: %d", SelectedAuton);
 	lv_label_set_text(intake_readings_sensor, buffer);
+
+	sprintf(buffer, SYMBOL_DRIVE " Limit Status: %d", SelectedAuton);
+	lv_label_set_text(intake_readings_sensor, buffer);
 }
 
 void FinalizeAuton::output_auton_selector(){
     char buffer[300];
-	sprintf(buffer, SYMBOL_DRIVE " Current Autonomous Route: %d", SelectedAuton);
+	sprintf(buffer, SYMBOL_DRIVE " Selected Path: %d", SelectedAuton);
 	lv_label_set_text(current_auton_display_selector, buffer);
 }
 
@@ -207,10 +213,10 @@ void FinalizeAuton::output_game_data(){
 	sprintf(buffer, SYMBOL_GPS " Controller Status %d", controller.is_connected());
 	lv_label_set_text(controller_status_game, buffer);
     
-	sprintf(buffer, SYMBOL_WARNING " Battery Capacity: %d", controller.get_battery_level());
+	sprintf(buffer, SYMBOL_WARNING " Battery Capacity: %f", pros::battery::get_capacity());
 	lv_label_set_text(battery_percent_game, buffer);
 
-	sprintf(buffer, SYMBOL_DRIVE " Battery Temperature: %d", controller.get_battery_capacity());
+	sprintf(buffer, SYMBOL_DRIVE " Battery Temperature: %d", pros::battery::get_current());
 	lv_label_set_text(battery_temp_game, buffer);
 
 	sprintf(buffer, SYMBOL_DRIVE " Time since startup: %d", pros::millis());
@@ -222,10 +228,10 @@ void FinalizeAuton::output_game_data(){
 
 void FinalizeAuton::output_misc_data(){
     char buffer[300];
-	sprintf(buffer, SYMBOL_GPS " Debug Line 1 %f", gx);
+	sprintf(buffer, SYMBOL_DRIVE " Debug Line 1 %f", gx);
 	lv_label_set_text(debug_line1_misc, buffer);
     
-	sprintf(buffer, SYMBOL_WARNING " Debug Line 2 %f", gx);
+	sprintf(buffer, SYMBOL_DRIVE " Debug Line 2 %f", gx);
 	lv_label_set_text(debug_line2_misc, buffer);
 
 	sprintf(buffer, SYMBOL_DRIVE " Debug Line 3 %f", gx);
