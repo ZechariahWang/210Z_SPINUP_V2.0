@@ -17,7 +17,7 @@
 
 match_mov         mov; 
 MotionAlgorithms  t;
-match_mov::match_mov(){ mov.p_set = 0.85; mov.it_ps = 1; } // Class Constructor
+match_mov::match_mov(){ mov.p_set = 1; mov.it_ps = 1; } // Class Constructor
 
 const u_int16_t forwardCurve       = 10;
 const u_int16_t turnCurve          = 3;
@@ -33,6 +33,14 @@ static bool arcLaunchToggle        = false; // toggle yao ming
 static bool toggleRedCurve         = false; // toggle red curve
 static bool turningRed             = false;
 static bool forwardRed             = false;
+
+uint16_t cataDelay = 700;
+uint16_t c_delay_counter = 0;
+uint16_t c_piston_counter = 0;
+static bool shot_enabled = false;
+uint16_t c_delay_counter_piston = 0;
+uint16_t c_piston_counter_piston = 0;
+static bool piston_shot_enabled = false;
 
 u_int16_t expansionCounter         = 0; // Expansion power
 u_int16_t speed_bang               = 127; // Flywheel acceleration
@@ -80,12 +88,13 @@ void match_mov::power_shooter(){ // Power shooter function
 
 static bool cata_initiated = 1;
 static bool cata_need_to_reset_ima_kms = true;
+static bool cata_movement_enabled = false;
 void match_mov::prime_catapult(){
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2)){
          cata_initiated = !cata_initiated;
     }
     if (CataLimitMonitor.get_value() == 0 && cata_initiated == 1 && cata_need_to_reset_ima_kms == true){  CataPrimer.move_voltage(12000); }
-    else if (CataLimitMonitor.get_value() == 1) { 
+    else if (CataLimitMonitor.get_value() == 1 && cata_movement_enabled == false) { 
         CataPrimer.move_voltage(0); 
         cata_initiated = 0;
         cata_need_to_reset_ima_kms = false;
@@ -97,21 +106,43 @@ void match_mov::prime_catapult(){
  * 
  */
 
-uint16_t cataDelay = 700;
 void match_mov::launch_disk(){ // Launch disk/piston control function
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1) && CataLimitMonitor.get_value() == 1){ 
-        CataPrimer.move_voltage(12000); 
-        pros::delay(cataDelay);
-        cata_need_to_reset_ima_kms = true;
+        shot_enabled = true;
+        cata_need_to_reset_ima_kms =    true;
         cata_initiated = 1;
+        cata_movement_enabled = true;
     }
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B) && CataLimitMonitor.get_value() == 1){ 
-        CataPrimer.move_voltage(12000); 
-        pistonBooster.set_value(true);
-        pros::delay(cataDelay);
+        piston_shot_enabled = true;
         cata_need_to_reset_ima_kms = true;
         cata_initiated = 1;
-        pistonBooster.set_value(false);
+        cata_movement_enabled = true;
+    }
+    if (shot_enabled) {
+        CataPrimer.move_voltage(12000); 
+        c_delay_counter++;
+        if (c_delay_counter > 70){
+            cata_need_to_reset_ima_kms = true;
+            cata_initiated = 1;
+            c_delay_counter = 0;
+            shot_enabled = false;
+            cata_movement_enabled = false;
+        }
+    }
+    if (piston_shot_enabled){
+        CataPrimer.move_voltage(12000); 
+        c_delay_counter_piston++;
+        c_piston_counter_piston++;
+        if (c_piston_counter_piston > mov.p_set) { pistonBooster.set_value(true); c_piston_counter_piston = 0; }
+        if (c_delay_counter_piston > 30){
+            cata_need_to_reset_ima_kms = true;
+            cata_initiated = 1;
+            pistonBooster.set_value(false);
+            c_delay_counter_piston = 0;
+            piston_shot_enabled = false;
+            cata_movement_enabled = false;
+        }
     }
 }
 
@@ -134,14 +165,10 @@ void match_mov::power_intake(){ // Power intake function
 
 void match_mov::set_power_amount(){ // Function for changing power of flywheel
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP)){
-        mov.p_set += 0.05;
-        if (mov.p_set > 1) mov.p_set = 0;
-        else if (mov.p_set < 0) mov.p_set = 1;
+        mov.p_set += 1;
     }
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT)){
-        mov.p_set -= 0.05;
-        if (mov.p_set> 1) mov.p_set = 0;
-        else if (mov.p_set < 0) mov.p_set = 1;
+        mov.p_set -= 1;
     }
     controller.print(1, 0, "FW: %.2f SD: %f", mov.p_set, mov.it_ps);
 }

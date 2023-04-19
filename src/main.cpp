@@ -747,6 +747,7 @@ void opcontrol(){ // Driver control function
 		mov.init_expansion(); // Initiate expansion
 		mov.prime_catapult();
 		mov.misc_control();
+		mov.set_power_amount();
 
 		data.output_sensor_data(); // Display robot stats and info
 		data.output_game_data(); // Display robot stats and info
