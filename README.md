@@ -15,7 +15,7 @@ Code Framework for 210Z during the 2022-2023 Vex Robotics Competition.
 
 
 ## Project Structure
-The project is divided into three major sections: Core System Assets, Scripts, and Modules. The Core System Assets are the driving functions of the robot that control the fundamental components of the game logic, such as driver control, autonomous, and so on. The Scripts are the courses that the robot can take throughout the autonomous phases of the competition. These may include abilities, in-game autons, and so forth. The module section contains helpful helper functions that can be called on the logic within the Core System Assets.
+The project is divided into three major sections: Core System Assets, Scripts, and Modules. The Core System Assets are the driving functions of the robot that control the fundamental components of the game logic, such as driver control, autonomous, and so on. The Scripts are the courses that the robot can take throughout the autonomous phases of the competition. These may include abilities, in-game autons, etc. The module section contains helper functions that can be called on the logic within the Core System Assets.
 
 ## Prerequisites
 In order for the project to work, you must have:
@@ -24,7 +24,7 @@ In order for the project to work, you must have:
 
 
 ## Project Usage
-1: Install the package from this repository. 
+1: Install the package from this repository by using ```git clone https://github.com/ZechariahWang/210Z_SPINUP_V2.0.git```
 
 2: To set up the components of the robot, navigate to
 ``` Globals.cpp ```. It will be found within the ``` Miscellaneous ``` folder under ```CoreSystemVitals```. From there, manipulate the ports of your robot accordingly to the corresponding parts within the code.
