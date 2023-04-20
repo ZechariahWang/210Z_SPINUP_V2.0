@@ -53,8 +53,8 @@ class TranslationPID{
         void set_t_constants(const double kp, const double ki, const double kd, const double r_kp);
         void set_dt_constants(const double n_wheelDiameter, const double n_gearRatio, const double n_motorCartridge);
         void set_translation_pid(double target, double maxSpeed);
-        void set_translation_pid_with_location_params(double target, double maxSpeed, double distanceVal);
-        void set_translation_pid_with_sim_reset(double target, double maxSpeed);
+        void set_translation_pid_with_location_params(double target, double maxSpeed, double distanceVal, double slewEnabled);
+        void set_translation_pid_with_sim_reset(double target, double maxSpeed, double slewEnabled);
         double find_min_angle(int16_t targetHeading, int16_t currentrobotHeading);
         double compute_t(double current, double target);
 };
