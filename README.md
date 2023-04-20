@@ -24,7 +24,7 @@ In order for the project to work, you must have:
 
 
 ## Project Usage
-1: Install the package from this repository by using ```git clone https://github.com/ZechariahWang/210Z_SPINUP_V2.0.git```
+1: Install the package from this repository using ```git clone https://github.com/ZechariahWang/210Z_SPINUP_V2.0.git```
 
 2: To set up the components of the robot, navigate to
 ``` Globals.cpp ```. It will be found within the ``` Miscellaneous ``` folder under ```CoreSystemVitals```. From there, manipulate the ports of your robot accordingly to the corresponding parts within the code.
