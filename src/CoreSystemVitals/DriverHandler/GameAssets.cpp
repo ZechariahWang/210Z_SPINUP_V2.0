@@ -17,7 +17,7 @@
 
 match_mov         mov; 
 MotionAlgorithms  t;
-match_mov::match_mov(){ mov.p_set = 1; mov.it_ps = 1; } // Class Constructor
+match_mov::match_mov(){ mov.p_set = 0.1; mov.it_ps = 1; } // Class Constructor
 
 const u_int16_t forwardCurve       = 10;
 const u_int16_t turnCurve          = 3;
@@ -131,10 +131,11 @@ void match_mov::launch_disk(){ // Launch disk/piston control function
         }
     }
     if (piston_shot_enabled){
+        std::cout << "Used" << std::endl;
         CataPrimer.move_voltage(12000); 
         c_delay_counter_piston++;
         c_piston_counter_piston++;
-        if (c_piston_counter_piston > mov.p_set) { pistonBooster.set_value(true); c_piston_counter_piston = 0; }
+        if (c_piston_counter_piston > 10) { pistonBooster.set_value(true); c_piston_counter_piston = 0; std::cout << "Used" << std::endl; }
         if (c_delay_counter_piston > 30){
             cata_need_to_reset_ima_kms = true;
             cata_initiated = 1;
@@ -164,12 +165,12 @@ void match_mov::power_intake(){ // Power intake function
  */
 
 void match_mov::set_power_amount(){ // Function for changing power of flywheel
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP)){
-        mov.p_set += 1;
-    }
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT)){
-        mov.p_set -= 1;
-    }
+    // if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP)){
+    //     mov.p_set += 0.1;
+    // }
+    // if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT)){
+    //     mov.p_set -= 0.1;
+    // }
     controller.print(1, 0, "FW: %.2f SD: %f", mov.p_set, mov.it_ps);
 }
 
@@ -201,7 +202,7 @@ void match_mov::misc_control(){
  */
 
 void match_mov::set_motor_type(){
-    // if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)){ mov.robotBrakeType = !mov.robotBrakeType; }
+    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT)){ mov.robotBrakeType = !mov.robotBrakeType; }
     if (mov.robotBrakeType == false){
         DriveFrontLeft.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
         DriveBackLeft.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);

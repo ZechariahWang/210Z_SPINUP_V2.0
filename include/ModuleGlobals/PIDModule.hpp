@@ -81,6 +81,7 @@ class RotationPID{
         void set_r_constants(const double kp, const double ki, const double kd);
         double compute_r(double current, double target);
         void set_rotation_pid(double t_theta, double maxSpeed);
+        void set_rotation_pid_with_sim_reset(double t_theta, double maxSpeed);
 };
 
 class CurvePID{

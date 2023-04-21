@@ -617,11 +617,11 @@ void competition_initialize() {}
 
 void shoot_cata(){
     CataPrimer.move_voltage(12000); 
+    pros::delay(100);
 	pistonBooster.set_value(true);
-    pros::delay(500);
+	pros::delay(400);
     CataPrimer.move_voltage(0);
 	pistonBooster.set_value(false);
-	pros::delay(400);
 }
 
 void reset_cata(){
@@ -657,62 +657,65 @@ void autonomous(){  // Autonomous function control
 	DriveBackRight.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	DriveMidLeft.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	DriveMidRight.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	intakeLift.set_value(true);
 	// Init_Process.ReceiveInput(time); // Enabled Auton Selector (STEP 1) ONLY FOR PROTOTYPE USE
 	// Init_Process.SelectAuton(); // Enable Auton Selector (STEP 2) 
 
 	// cur.set_c_constants(6, 0, 45);
 	// cur.set_curve_pid(90, 60, 0.20, true);
 
+
 	reset_cata();
+	shoot_cata();
 
 	rot.set_r_constants(6, 0.003, 35);
-	rot.set_rotation_pid(30, 90);
-	shoot_cata();
-	reset_cata();
+	rot.set_rotation_pid(-23, 90);
+	pros::delay(100);
+	imu_sensor.tare_rotation();
+	pros::delay(100);
 
 	DiskIntakeTop.move_voltage(12000);
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(150, 90);
+	rot.set_rotation_pid_with_sim_reset(150, 90);
 
 	cur.set_c_constants(6, 0, 45);
-	cur.set_curve_pid(180, 90, 0.8, true);
+	cur.set_curve_pid(180, 60, 0.8, true);
 
     mov.set_t_constants(0.45, 0, 5, 200);
-	mov.set_translation_pid(-25, 127);
+	mov.set_translation_pid(-26, 127);
 
-	DiskIntakeTop.move_voltage(0);
 
 	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(45, 90);
 	shoot_cata();
-	reset_cata();
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(-53, 90);
+	rot.set_rotation_pid_with_sim_reset(-53, 90);
 
 	DiskIntakeTop.move_voltage(12000);
 
     mov.set_t_constants(0.45, 0, 5, 200);
-	mov.set_translation_pid(-63, 90);
+	mov.set_translation_pid(-67, 127);
 
 	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(0, 90);
 
+	intakeLift.set_value(false);
+
     mov.set_t_constants(0.45, 0, 5, 50);
-	mov.set_translation_pid(-12, 90);
+	mov.set_translation_pid(-13, 90);
 
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(12, 127);
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(7, 90);
+	rot.set_rotation_pid(8, 90);
 
 	shoot_cata();
-	reset_cata();
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(180, 90);
+	rot.set_rotation_pid_with_sim_reset(180, 90);
 
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(-10, 127);
@@ -721,7 +724,7 @@ void autonomous(){  // Autonomous function control
 	mov.set_translation_pid(5, 127);
 
 	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(7, 90);
+	rot.set_rotation_pid(8, 90);
 
 	shoot_cata();
 
@@ -738,7 +741,6 @@ void opcontrol(){ // Driver control function
 	match_mov mov; MotionAlgorithms Auton_Framework; 
 	Init_AutonSwitchMain Init; FinalizeAuton data; 
 	char buffer[300]; // Display Buffer
-	YaoMing.set_value(true);
 	while (true){
 		mov.exponential_curve_accelerator();
 		mov.power_intake(); // Intake control

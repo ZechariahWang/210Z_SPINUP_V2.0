@@ -506,10 +506,10 @@ void TranslationPID::set_translation_pid_with_sim_reset(double target, double ma
   target *= mov_t.ticks_per_inches;
   double init_left_pos = DriveFrontLeft.get_position(); double init_right_pos = DriveFrontRight.get_position();
   while (true){
-		CataPrimer.move_voltage(12000);
-		if (CataLimitMonitor.get_value() == 1){
+    if (CataLimitMonitor.get_value() == 0){
+		  CataPrimer.move_voltage(12000);
+    } else if (CataLimitMonitor.get_value() == 1){
 			CataPrimer.move_voltage(0);
-			break;
 		}
     data.DisplayData();
     double avgPos = (DriveFrontLeft.get_position() + DriveFrontRight.get_position()) / 2;
@@ -518,20 +518,14 @@ void TranslationPID::set_translation_pid_with_sim_reset(double target, double ma
     double l_output = 0; double r_output = 0;
     cd++; if (cd <= 10){ utility::leftvoltagereq(0); utility::rightvoltagereq(0); continue;}
     if (target < 0) { is_backwards = true; } else { is_backwards = false; }
-    if (slewEnabled){
-      slew.initialize_slew(true, maxSpeed, target, ((DriveFrontLeft.get_position() + DriveFrontRight.get_position()) / 2), ((init_left_pos + init_right_pos) / 2), is_backwards, get_ticks_per_inch());
-      double slew_output = slew.calculate_slew(avgPos);
-      double l_output = utility::clamp(avg_voltage_req, -slew_output, slew_output);
-      double r_output = utility::clamp(avg_voltage_req, -slew_output, slew_output);
-    }
-    else{
-      l_output = avg_voltage_req;
-      r_output = avg_voltage_req;
-    }
+    l_output = avg_voltage_req;
+    r_output = avg_voltage_req;
+  
     utility::leftvoltagereq((l_output * (12000.0 / 127)) + headingAssist);
     utility::rightvoltagereq((r_output * (12000.0 / 127)) - headingAssist);
     if (fabs(mov_t.t_error) < mov_t.t_error_thresh){ mov_t.t_iterator++; } else { mov_t.t_iterator = 0;}
-    if (fabs(mov_t.t_iterator) > mov_t.t_tol){
+    if (fabs(mov_t.t_iterator) > mov_t.t_tol && CataLimitMonitor.get_value() == 1){
+      CataPrimer.move_voltage(0);
       utility::stop();
       CataPrimer.move_voltage(0);
       break;
@@ -566,6 +560,44 @@ void RotationPID::set_rotation_pid(double t_theta, double maxSpeed){
     utility::rightvoltagereq(-vol * (12000.0 / 127));
     if (fabs(rot_r.r_error) < 3) { rot_r.r_iterator++; } else { rot_r.r_iterator = 0;}
     if (fabs(rot_r.r_iterator) >= 10){
+      utility::stop();
+      break;
+    }
+    if (fabs(rot_r.r_error - rot_r.r_prev_error) < 0.3) {rot_r.r_failsafe++;}
+    if (rot_r.r_failsafe > 100000){
+      utility::stop();
+      break;
+    }
+    pros::delay(10);
+  }
+}
+
+/**
+ * @brief Driver Rotation PID function. Main logic function, combining all rotation PID components together
+ * 
+ * @param t_theta the target theta angle
+ * @param maxSpeed the maxspeed the robot may make the turn in 
+ */
+
+void RotationPID::set_rotation_pid_with_sim_reset(double t_theta, double maxSpeed){
+  utility::fullreset(0, false);
+  rot_r.reset_r_alterables();
+  rot_r.r_maxSpeed = maxSpeed;
+  while (true){
+    if (CataLimitMonitor.get_value() == 0){
+		  CataPrimer.move_voltage(12000);
+    } else if (CataLimitMonitor.get_value() == 1){
+			CataPrimer.move_voltage(0);
+		}
+    data.DisplayData();
+    double currentPos = imu_sensor.get_rotation();
+    double vol = rot_r.compute_r(currentPos, t_theta);
+
+    utility::leftvoltagereq(vol * (12000.0 / 127));
+    utility::rightvoltagereq(-vol * (12000.0 / 127));
+    if (fabs(rot_r.r_error) < 3) { rot_r.r_iterator++; } else { rot_r.r_iterator = 0;}
+    if (fabs(rot_r.r_iterator) >= 10 && CataLimitMonitor.get_value() == 1){
+      CataPrimer.move_voltage(0);
       utility::stop();
       break;
     }
