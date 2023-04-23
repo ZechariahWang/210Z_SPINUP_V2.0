@@ -89,11 +89,17 @@ void match_mov::power_shooter(){ // Power shooter function
 static bool cata_initiated = 1;
 static bool cata_need_to_reset_ima_kms = true;
 static bool cata_movement_enabled = false;
+static bool OVER_RIDE_ALL_CATA_CONTROLS = false;
+static bool elec_elastic_stat = false;
 void match_mov::prime_catapult(){
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2)){
-         cata_initiated = !cata_initiated;
+         OVER_RIDE_ALL_CATA_CONTROLS = !OVER_RIDE_ALL_CATA_CONTROLS;
     }
-    if (CataLimitMonitor.get_value() == 0 && cata_initiated == 1 && cata_need_to_reset_ima_kms == true){  CataPrimer.move_voltage(12000); }
+    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP)){
+        elec_elastic_stat = !elec_elastic_stat;
+        elasticEjection.set_value(elec_elastic_stat);
+    }
+    if (CataLimitMonitor.get_value() == 0){  CataPrimer.move_voltage(12000); }
     else if (CataLimitMonitor.get_value() == 1 && cata_movement_enabled == false) { 
         CataPrimer.move_voltage(0); 
         cata_initiated = 0;
@@ -109,7 +115,7 @@ void match_mov::prime_catapult(){
 void match_mov::launch_disk(){ // Launch disk/piston control function
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1) && CataLimitMonitor.get_value() == 1){ 
         shot_enabled = true;
-        cata_need_to_reset_ima_kms =    true;
+        cata_need_to_reset_ima_kms = true;
         cata_initiated = 1;
         cata_movement_enabled = true;
     }
@@ -165,12 +171,6 @@ void match_mov::power_intake(){ // Power intake function
  */
 
 void match_mov::set_power_amount(){ // Function for changing power of flywheel
-    // if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP)){
-    //     mov.p_set += 0.1;
-    // }
-    // if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT)){
-    //     mov.p_set -= 0.1;
-    // }
     controller.print(1, 0, "FW: %.2f SD: %f", mov.p_set, mov.it_ps);
 }
 
@@ -179,20 +179,15 @@ void match_mov::set_power_amount(){ // Function for changing power of flywheel
  * 
  */
 bool intakeLifted = false;
+bool expansion_blocker_enabled = false;
 void match_mov::misc_control(){
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) {
-        arcLaunchToggle = !arcLaunchToggle;
-        YaoMing.set_value(arcLaunchToggle);
-    }
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN)) {
-        if (anglerStatus) return;
-        mov.l_stat = !mov.l_stat;
-        Angler.set_value(mov.l_stat);
+        expansion_blocker_enabled = !expansion_blocker_enabled;
+        expansionBlocker.set_value(expansion_blocker_enabled);
     }
     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)) {
         intakeLifted = !intakeLifted;
         intakeLift.set_value(intakeLifted);
-
     }
 }
 

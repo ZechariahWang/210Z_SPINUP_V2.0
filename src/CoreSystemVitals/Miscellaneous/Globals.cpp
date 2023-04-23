@@ -33,6 +33,8 @@ pros::ADIDigitalOut Expansion('d');
 pros::ADIDigitalIn CataLimitMonitor('a');
 pros::ADIDigitalOut pistonBooster('b');
 pros::ADIDigitalOut intakeLift('c');
+pros::ADIDigitalOut expansionBlocker('e');
+pros::ADIDigitalOut elasticEjection('f');
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 pros::Imu imu_sensor(1);
 pros::Distance distance_sensor(3);

@@ -19,6 +19,8 @@ extern pros::c::gps_status_s_t gpsData;
 extern pros::Distance distance_sensor;
 extern pros::ADIDigitalOut pistonBooster;
 extern pros::ADIDigitalOut intakeLift;
+extern pros::ADIDigitalOut expansionBlocker;
+extern pros::ADIDigitalOut elasticEjection;
 
 extern pros::Motor OuterShooter;
 extern pros::Motor InnerShooter;

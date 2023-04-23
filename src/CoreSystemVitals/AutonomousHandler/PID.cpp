@@ -428,7 +428,7 @@ void TranslationPID::set_translation_pid(double target, double maxSpeed){
       break;
     }
     if (fabs(mov_t.t_error - mov_t.t_prev_error) < 0.3) mov_t.t_failsafe++;
-    if (mov_t.t_failsafe > 10000){
+    if (mov_t.t_failsafe > 30000){
       utility::stop();
       break;
     }
@@ -648,6 +648,61 @@ void CurvePID::set_curve_pid(double t_theta, double maxSpeed, double curveDamper
     }
     if (fabs(cur_c.c_error) < cur_c.c_error_thresh) { cur_c.c_iterator++; } else { cur_c.c_iterator = 0;}
     if (fabs(cur_c.c_iterator) >= cur_c.c_tol){
+      utility::stop();
+      break;
+    }
+    if (fabs(cur_c.c_error - cur_c.c_prev_error) < 0.3) {cur_c.c_failsafe++;}
+    if (cur_c.c_failsafe > 100000){
+      utility::stop();
+      break;
+    }
+    pros::delay(10);
+  }
+}
+
+/**
+ * @brief Driver Curve PID function. Main logic function, combining all curve PID components together
+ * 
+ * @param t_theta the target theta angle
+ * @param maxSpeed the maxspeed the robot may make the turn in 
+ * @param curveDamper The amount the swing will be dampered by
+ * @param backwards whether or not the robot will make the curve backwards or forwards
+ */
+
+void CurvePID::set_curve_pid_with_sim_reset(double t_theta, double maxSpeed, double curveDamper, bool backwards){
+  utility::fullreset(0, false);
+  cur_c.reset_c_alterables();
+  cur_c.c_maxSpeed = maxSpeed;
+  cur_c.c_rightTurn = false;
+  while (true){
+    if (CataLimitMonitor.get_value() == 0){
+		  CataPrimer.move_voltage(12000);
+    } else if (CataLimitMonitor.get_value() == 1){
+			CataPrimer.move_voltage(0);
+		}
+    data.DisplayData();
+    double currentPos = imu_sensor.get_rotation();
+    double vol = cur_c.compute_c(currentPos, t_theta);
+    if (cur_c.c_error > 0){ cur_c.c_rightTurn = true; } else { cur_c.c_rightTurn = false;}
+    if (cur_c.c_rightTurn == true && backwards == false){
+      utility::leftvoltagereq(vol * (12000.0 / 127));
+      utility::rightvoltagereq(vol * (12000.0 / 127) * curveDamper);
+    }
+    else if (cur_c.c_rightTurn == false && backwards == false){
+      utility::leftvoltagereq(fabs(vol) * (12000.0 / 127) * curveDamper);
+      utility::rightvoltagereq(fabs(vol) * (12000.0 / 127));
+    }
+    if (cur_c.c_rightTurn == true && backwards == true){
+      utility::leftvoltagereq(-vol * (12000.0 / 127) * curveDamper);
+      utility::rightvoltagereq(-vol * (12000.0 / 127));
+    }
+    else if (cur_c.c_rightTurn == false && backwards == true){
+      utility::leftvoltagereq(vol * (12000.0 / 127));
+      utility::rightvoltagereq(vol * (12000.0 / 127) * curveDamper);
+    }
+    if (fabs(cur_c.c_error) < cur_c.c_error_thresh) { cur_c.c_iterator++; } else { cur_c.c_iterator = 0;}
+    if (fabs(cur_c.c_iterator) >= cur_c.c_tol && CataLimitMonitor.get_value() == 1){
+      CataPrimer.move_voltage(0);
       utility::stop();
       break;
     }
