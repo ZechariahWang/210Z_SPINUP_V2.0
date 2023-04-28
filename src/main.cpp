@@ -6,8 +6,6 @@
  * @date 2023-02-13
  */
 
-// wheres my dad ඞ
-
 #include "main.h"
 #include "display/lv_objx/lv_label.h"
 #include "pros/motors.h"
@@ -20,6 +18,7 @@
 constexpr     u_int64_t time           = 100000; // Time until initialize phase ends. Effectively infinite.
 constexpr     u_int16_t delayAmount    = 10; // Dont overload the CPU during OP control
 char          buffer[100];
+
 lv_obj_t      *sensor_button_home;
 lv_obj_t      *auton_button_home;
 lv_obj_t      *misc_button_home;
@@ -593,7 +592,7 @@ void initialize() { // Init function control
 	pros::delay(3000);
 	FinalizeAuton Init_Process;
 	Init_Process.ResetAllPrimarySensors();
-    Expansion.set_value(true);
+    Expansion.set_value(false);
 	Launcher.set_value(true);
     Angler.set_value(true); 
 	OuterShooter.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
@@ -614,26 +613,6 @@ void initialize() { // Init function control
 void disabled() {}
 void competition_initialize() {}
 //------------------------------\*
-
-void shoot_cata(){
-    CataPrimer.move_voltage(12000); 
-    pros::delay(100);
-	pistonBooster.set_value(true);
-	pros::delay(300);
-    CataPrimer.move_voltage(0);
-	pistonBooster.set_value(false);
-}
-
-void reset_cata(){
-	while (true){
-		CataPrimer.move_voltage(12000);
-		if (CataLimitMonitor.get_value() == 1){
-			CataPrimer.move_voltage(0);
-			break;
-		}
-	}
-}
-
 
 /**
  * @brief Main autonomous function. Some key points to remember:
@@ -661,162 +640,6 @@ void autonomous(){  // Autonomous function control
 	elasticEjection.set_value(false);
 	// Init_Process.ReceiveInput(time); // Enabled Auton Selector (STEP 1) ONLY FOR PROTOTYPE USE
 	// Init_Process.SelectAuton(); // Enable Auton Selector (STEP 2) 
-
-	// cur.set_c_constants(6, 0, 45);
-	// cur.set_curve_pid(90, 60, 0.20, true);
-
-
-	reset_cata();
-
-	DiskIntakeTop.move_voltage(12000);
-
-    mov.set_t_constants(0.45, 0, 5, 200);
-	mov.set_translation_pid(-40, 127);
-
-	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(-135, 90);
-
-	shoot_cata();
-
-	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid_with_sim_reset(-230, 90);
-
-	DiskIntakeTop.move_voltage(12000);
-
-    mov.set_t_constants(0.45, 0, 5, 300);
-	mov.set_translation_pid(-35, 127);
-
-	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(35, 90);
-
-    mov.set_t_constants(0.45, 0, 5, 300);
-	mov.set_translation_pid(-15, 127);
-
-    mov.set_t_constants(0.45, 0, 5, 300);
-	mov.set_translation_pid(15, 127);
-
-	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(-154, 90);
-	shoot_cata();
-
-	imu_sensor.tare_rotation();
-	reset_cata();
-
-	cur.set_c_constants(6, 0, 45);
-	cur.set_curve_pid_with_sim_reset(-180, 90, 0.27, true);
-
-	intakeLift.set_value(false);
-
-    mov.set_t_constants(0.45, 0, 5, 300);
-	mov.set_translation_pid(-10, 127);
-
-	intakeLift.set_value(true);
-	pros::delay(2000);
-
-    mov.set_t_constants(0.45, 0, 5, 300);
-	mov.set_translation_pid(10, 127);
-
-	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(0, 90);
-
-	shoot_cata();
-
-	rot.set_r_constants(6, 0, 45);
-	rot.set_rotation_pid(-30, 90);
-
-    mov.set_t_constants(0.45, 0, 5, 300);
-	mov.set_translation_pid(-15, 127);
-
-
-
-
-    // mov.set_t_constants(0.45, 0, 5, 300);
-	// mov.set_translation_pid(-12, 90);
-
-	// rot.set_r_constants(6, 0, 45);
-	// rot.set_rotation_pid(-90, 90);
-
-    // mov.set_t_constants(0.45, 0, 5, 300);
-	// mov.set_translation_pid_with_sim_reset(28, 90, false);
-
-	// intakeLift.set_value(false);
-
-	// rot.set_r_constants(6, 0, 45);
-	// rot.set_rotation_pid(0, 90);
-
-    // mov.set_t_constants(0.45, 0, 5, 300);
-	// mov.set_translation_pid(-10, 90);
-
-	// intakeLift.set_value(true);
-	// pros::delay(2000);
-
-    // mov.set_t_constants(0.45, 0, 5, 300);
-	// mov.set_translation_pid(6, 90);
-
-	// rot.set_r_constants(6, 0, 45);
-	// rot.set_rotation_pid_with_sim_reset(-170, 90);
-
-	// shoot_cata();
-
-
-    // mov.set_t_constants(0.45, 0, 5, 300);
-	// mov.set_translation_pid(-8, 90);
-
-	// rot.set_r_constants(6, 0, 45);
-	// rot.set_rotation_pid(10, 90);
-
-	// intakeLift.set_value(false);
-
-    // mov.set_t_constants(0.45, 0, 5, 300);
-	// mov.set_translation_pid(-10, 90);
-
-	// intakeLift.set_value(true);
-	// pros::delay(500);
-
-	// rot.set_r_constants(6, 0, 45);
-	// rot.set_rotation_pid_with_sim_reset(-170, 90);
-
-	// shoot_cata();
-
-	// rot.set_r_constants(6, 0, 45);
-	// rot.set_rotation_pid(0, 90);
-
-	// intakeLift.set_value(false);
-
-    // mov.set_t_constants(0.45, 0, 5, 50);
-	// mov.set_translation_pid(-8, 90);
-
-
-    // mov.set_t_constants(0.45, 0, 5, 50);
-	// mov.set_translation_pid(8, 127);
-
-	// rot.set_r_constants(6, 0, 45);
-	// rot.set_rotation_pid(8, 90);
-
-	// shoot_cata();
-
-	// rot.set_r_constants(6, 0, 45);
-	// rot.set_rotation_pid_with_sim_reset(180, 90);
-	
-
-    // mov.set_t_constants(0.45, 0, 5, 50);
-	// mov.set_translation_pid(-13, 127);
-
-
-	// pros::delay(1000);
-
-	// intakeLift.set_value(true);
-
-    // mov.set_t_constants(0.45, 0, 5, 50);
-	// mov.set_translation_pid(5, 127);
-
-	// rot.set_r_constants(6, 0, 45);
-	// rot.set_rotation_pid(8, 90);
-
-	// shoot_cata();
-
-
-
 }
 
 /**
@@ -828,7 +651,9 @@ void opcontrol(){ // Driver control function
 	match_mov mov; MotionAlgorithms Auton_Framework; 
 	Init_AutonSwitchMain Init; FinalizeAuton data; 
 	char buffer[300]; // Display Buffer
-	elasticEjection.set_value(false);
+    elasticEjection.set_value(true);
+    pros::delay(100);
+    elasticEjection.set_value(false);
 	while (true){
 		mov.exponential_curve_accelerator();
 		mov.power_intake(); // Intake control
@@ -845,8 +670,4 @@ void opcontrol(){ // Driver control function
 		data.DisplayData();
 		pros::delay(delayAmount); // Dont hog CPU ;)
 	}
-
 }
-
-//lol ඞ
-//background as black as kartik

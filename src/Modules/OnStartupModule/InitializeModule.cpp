@@ -153,13 +153,11 @@ void ResetSensors::ResetAllPrimarySensors(){
  * 
  */
 
-// Display chosen auton
 void FinalizeAuton::DisplayCurrentAuton(){
 	sprintf(buffer2, SYMBOL_LIST " Selected Path %d: %s", SelectedAuton, auton_Legend_secondary[SelectedAuton].c_str());
     lv_label_set_text(debugLine1, buffer2);
 }
 
-// Display metrics/robot data
 void FinalizeAuton::DisplayData(){
 	char buffer[300];
 	sprintf(buffer, SYMBOL_GPS " X: %.2f Y: %.2f Theta: %f", gx, gy, ImuMon());

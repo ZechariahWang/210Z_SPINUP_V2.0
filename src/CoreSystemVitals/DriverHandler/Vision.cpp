@@ -18,8 +18,8 @@ void vision_main_red(){
     constexpr int defy          = 31488; // || 18688;
     constexpr int redSIGint     = 1;
 
-    int prevX               = 0;
-    int prevY               = 0;
+    int prevX                   = 0;
+    int prevY                   = 0;
     
     pros::vision_signature_s_t RED_SIG =
     pros::Vision::signature_from_utility(redSIGint, 7141, 8465, 7803, -1221, -669, -945, 3.000, 0);
@@ -35,7 +35,5 @@ void vision_main_red(){
     else if((xcoord < lockrange) && (xcoord > -lockrange)){} // Locked on
     else if ((xcoord > 0) && (xcoord > lockrange) && (xcoord != defx)) {} // Move turret right
     else if((xcoord < 0) && (xcoord < -lockrange) && (xcoord != defx)) {} // Move turret left
-    else{
-        // pros::lcd::print(3, "Action: Spin Idle");
-    }
+    else{}
 }

@@ -1,5 +1,3 @@
 #include "main.h"
-
-void SoloWinPoint(){
-
-}
+// ig nothing ever happened here huh
+void SoloWinPoint(){ }

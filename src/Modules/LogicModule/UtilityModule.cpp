@@ -18,7 +18,7 @@ MotionAlgorithms Auton_Framework;
 namespace utility // Global utility namespace for helper functions within PID autons
 {
   int sgn(double num){
-    return (num < 0) ? -1 : ((num > 0) ? 1 : 0); // Returns -1 if num is negative, and 1 if num is HIV positive.
+    return (num < 0) ? -1 : ((num > 0) ? 1 : 0); // Returns -1 if num is negative, and 1 if num is positive.
   }
 
   double clamp(double num, double min, double max){

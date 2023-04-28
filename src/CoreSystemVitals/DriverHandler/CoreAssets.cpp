@@ -15,6 +15,8 @@ static bool toggleRedCurve         = false; // toggle red curve
 static bool turningRed             = false;
 static bool forwardRed             = false;
 
+
+
 /**
  * @brief Set exponential joystick accelerator curve type. Allows for more control of small movements, while maintaining max speed for large movements
  * 
@@ -117,6 +119,4 @@ void match_mov::x_drive_dt_Control(){
  * 
  */
 
-void ForceReset(){
-    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT)){ gx = 0; gy = 0; }
-}
+void ForceReset(){ if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT)){ gx = 0; gy = 0; } }

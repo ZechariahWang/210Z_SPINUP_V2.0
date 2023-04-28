@@ -21,8 +21,6 @@ CurvePID         cur_c;
 ArcPID           arc_a;
 SimultaneousPID  sim_s;
 
-// i got chlamydia from this
-
 /**
  * @brief Set drivetrain specs
  * 

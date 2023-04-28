@@ -1,6 +1,5 @@
-// Motors lolllll
-
 #include "main.h"
+
 extern bool GPS_ENABLED;
 extern pros::Motor DriveFrontLeft;
 extern pros::Motor DriveFrontRight;
@@ -21,23 +20,19 @@ extern pros::ADIDigitalOut pistonBooster;
 extern pros::ADIDigitalOut intakeLift;
 extern pros::ADIDigitalOut expansionBlocker;
 extern pros::ADIDigitalOut elasticEjection;
-
 extern pros::Motor OuterShooter;
 extern pros::Motor InnerShooter;
 extern pros::Motor DiskIntakeBot;
 extern pros::Motor DiskIntakeTop;
-
 extern pros::ADIDigitalOut Launcher;
 extern pros::ADIDigitalOut Expansion;
 extern pros::ADIDigitalOut LeftBrake;
 extern pros::ADIDigitalOut RightBrake;
 extern pros::ADIDigitalOut Angler;
 extern pros::ADIDigitalOut YaoMing;
-
 extern pros::ADIDigitalIn AutonSwitchForward;
 extern pros::ADIDigitalIn AutonSwitchBackward;
 extern pros::Controller controller;
-
 extern pros::Motor CataPrimer;
 extern pros::ADIDigitalIn CataLimitMonitor;
 

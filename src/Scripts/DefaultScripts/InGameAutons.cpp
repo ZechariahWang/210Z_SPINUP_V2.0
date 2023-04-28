@@ -24,9 +24,8 @@ void a_rightSideDisk(){ // one during wp
 	rot.set_rotation_pid(90, 90);
 }
 
-void a_leftSideDisk(){ // one after wp
-
-}
+void a_leftSideDisk() // one after wp
+{}
 
 void shoot_iterator(){
     Angler.set_value(false); 
@@ -84,13 +83,6 @@ void shoot_iterator_auto_wp(){
 	Angler.set_value(true); 
 }
 
-void heil_hitler(){
-    Angler.set_value(false); 
-	DiskIntakeTop.move_voltage(-12000);
-	pros::delay(2000);
-	DiskIntakeTop.move_voltage(12000);
-}
-
 void rightside_scuffed(){
 	MotionAlgorithms Auton_Framework; // Auton framework class
 	FinalizeAuton Init_Process; // Init framework class
@@ -111,8 +103,6 @@ void rightside_scuffed(){
 
 	pros::delay(1000);
 
-	heil_hitler();
-
 	pros::delay(500);
 
 	rot.set_r_constants(6, 0, 45);
@@ -131,8 +121,6 @@ void rightside_scuffed(){
 
 	rot.set_r_constants(6, 0, 45);
 	rot.set_rotation_pid(-135, 90);
-
-	heil_hitler();
 
 	pros::delay(500);
 
@@ -166,18 +154,18 @@ void rightside_scuffed(){
 
 	// EVERYTHING ELSE IS EXTRA
 
-	// rot.set_r_constants(6, 0, 45);
-	// rot.set_rotation_pid(-45, 90);
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(-45, 90);
 	
-	// DiskIntakeTop.move_voltage(10000);
+	DiskIntakeTop.move_voltage(10000);
 
-    // mov.set_t_constants(0.45, 0, 5, 50);
-	// mov.set_translation_pid(65, 70);
+    mov.set_t_constants(0.45, 0, 5, 50);
+	mov.set_translation_pid(65, 70);
 
-    // DiskIntakeTop.move_voltage(10000);
+    DiskIntakeTop.move_voltage(10000);
 
-	// rot.set_r_constants(6, 0, 45);
-	// rot.set_rotation_pid(42, 90);
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(42, 90);
 }
 
 void winpoint(){
@@ -677,4 +665,157 @@ void provincial_skills(){
 	// expand
 
 	Expansion.set_value(false);
+}
+
+void shoot_cata(){
+    CataPrimer.move_voltage(12000); 
+    pros::delay(100);
+	pistonBooster.set_value(true);
+	pros::delay(300);
+    CataPrimer.move_voltage(0);
+	pistonBooster.set_value(false);
+}
+
+void reset_cata(){
+	while (true){
+		CataPrimer.move_voltage(12000);
+		if (CataLimitMonitor.get_value() == 1){
+			CataPrimer.move_voltage(0);
+			break;
+		}
+	}
+}
+
+void worlds_rightside_roller_only(){
+	MotionAlgorithms Auton_Framework; FinalizeAuton Init_Process; Slew slew;
+	TranslationPID mov; RotationPID rot; CurvePID cur; ArcPID arc; SimultaneousPID sim;
+
+	DiskIntakeTop.move_voltage(8000);
+
+    mov.set_t_constants(0.45, 0, 5, 700);
+	mov.set_translation_pid(-20, 127);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(90, 90);
+
+    mov.set_t_constants(0.45, 0, 5, 300);
+	mov.set_translation_pid(-8, 127);
+
+    mov.set_t_constants(0.45, 0, 5, 300);
+	mov.set_translation_pid(5, 127);
+}
+
+void worlds_leftside(){
+	MotionAlgorithms Auton_Framework; FinalizeAuton Init_Process; Slew slew;
+	TranslationPID mov; RotationPID rot; CurvePID cur; ArcPID arc; SimultaneousPID sim;
+
+	reset_cata();
+	DiskIntakeTop.move_voltage(12000);
+
+    mov.set_t_constants(0.45, 0, 5, 300);
+	mov.set_translation_pid(-2, 127);
+
+    mov.set_t_constants(0.45, 0, 5, 300);
+	mov.set_translation_pid(5, 127);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(-10, 90);
+
+	shoot_cata();
+	intakeLift.set_value(false);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid_with_sim_reset(-190, 90);
+
+    mov.set_t_constants(0.45, 0, 5, 300);
+	mov.set_translation_pid(-12, 127);
+
+	intakeLift.set_value(true);
+	pros::delay(1000);
+
+    mov.set_t_constants(0.45, 0, 5, 300);
+	mov.set_translation_pid(5, 127);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(-10, 90);
+
+	intakeLift.set_value(false);
+	shoot_cata();
+
+	cur.set_c_constants(6, 0, 45);
+	cur.set_curve_pid_with_sim_reset(-140, 127, 0.03, true);
+
+	intakeLift.set_value(false);
+
+    mov.set_t_constants(0.45, 0, 5, 300);
+	mov.set_translation_pid(-15, 127);
+
+	intakeLift.set_value(true);
+	pros::delay(1000);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(-30, 90);
+
+	shoot_cata();
+}
+
+void worlds_rightside(){
+	MotionAlgorithms Auton_Framework; FinalizeAuton Init_Process; Slew slew;
+	TranslationPID mov; RotationPID rot; CurvePID cur; ArcPID arc; SimultaneousPID sim;
+	reset_cata();
+
+	DiskIntakeTop.move_voltage(12000);
+
+    mov.set_t_constants(0.45, 0, 5, 700);
+	mov.set_translation_pid(-42, 90);
+
+	pros::delay(500);
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(-135, 90);
+
+	shoot_cata();
+
+    mov.set_t_constants(0.45, 0, 5, 200);
+	mov.set_translation_pid(-3, 90);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid_with_sim_reset(-228, 90);
+
+	DiskIntakeTop.move_voltage(12000);
+
+    mov.set_t_constants(0.45, 0, 5, 300);
+	mov.set_translation_pid(-35, 60);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(-320, 90);
+
+    mov.set_t_constants(0.45, 0, 5, 300);
+	mov.set_translation_pid(-12, 127);
+
+    mov.set_t_constants(0.45, 0, 5, 300);
+	mov.set_translation_pid(12, 127);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(-158, 90);
+	shoot_cata();
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(-233, 90);
+
+	reset_cata();
+
+    mov.set_t_constants(0.45, 0, 5, 300);
+	mov.set_translation_pid(-31, 127);
+
+	DiskIntakeTop.move_voltage(10000);
+
+	rot.set_r_constants(6, 0, 45);
+	rot.set_rotation_pid(-180, 90);
+
+
+    mov.set_t_constants(0.45, 0, 5, 300);
+	mov.set_translation_pid(-7, 60);
+
+    mov.set_t_constants(0.45, 0, 5, 300);
+	mov.set_translation_pid(3, 60);
 }

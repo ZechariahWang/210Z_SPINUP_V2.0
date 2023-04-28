@@ -25,9 +25,8 @@ pros::c::gps_status_s_t gpsData;
 pros::ADIDigitalIn AutonSwitchForward('t');
 pros::ADIDigitalIn AutonSwitchBackward('z');
 
-
 // kartik i beg pls just these ones
-pros::Motor CataPrimer(12, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS);
+pros::Motor CataPrimer(12, pros::E_MOTOR_GEARSET_36, false, pros::E_MOTOR_ENCODER_COUNTS);
 pros::Motor DiskIntakeTop(11, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS);
 pros::ADIDigitalOut Expansion('d');
 pros::ADIDigitalIn CataLimitMonitor('a');
