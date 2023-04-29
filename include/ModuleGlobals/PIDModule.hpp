@@ -100,7 +100,7 @@ class CurvePID{
         double c_tol = 10;
         double c_failsafe;
         double c_maxSpeed;
-        bool c_rightTurn;
+        bool c_rightTurn; 
 
         CurvePID();
         void reset_c_alterables();

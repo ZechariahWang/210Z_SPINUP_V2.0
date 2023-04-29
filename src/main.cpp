@@ -619,7 +619,7 @@ void competition_initialize() {}
  * @brief 90 DEGREES CONSTANTS: 6, 0, 45
  * @brief 45 DEGREE CONSTANTS: 6, 0.003, 35
  * @brief PID units are in inches
- * 
+ *  
  */
 
 void autonomous(){  // Autonomous function control

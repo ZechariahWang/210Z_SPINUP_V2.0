@@ -216,7 +216,7 @@ void match_mov::set_motor_type(){
         LeftBrake.set_value(false);
         RightBrake.set_value(false);
     }
-}
+} 
 
 /**
  * @brief Expnansion initiation with failsafe

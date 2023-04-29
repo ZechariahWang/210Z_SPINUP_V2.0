@@ -44,7 +44,7 @@ pros::Motor DriveBackRight(5, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENC
 pros::Motor DriveMidLeft(7, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_COUNTS);
 pros::Motor DriveMidRight(9, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_COUNTS);
 
-pros::Motor OuterShooter(13, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_COUNTS); // REAL ONE
+pros::Motor OuterShooter(13, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_COUNTS); // REAL ONE  
 
 /**
  * @brief Programming robot globals
