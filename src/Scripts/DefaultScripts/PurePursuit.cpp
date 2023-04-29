@@ -55,7 +55,7 @@ void PurePursuit2(){
     Path.push_back(newPoint2);
     Path.push_back(newPoint3);
     Path.push_back(newPoint4);
-
+ 
     while (true){
       data.DisplayData();
       odometry.Odometry();

@@ -118,7 +118,7 @@ float Turn_PID(double t_theta){
  * @param targetTheta the target angle in degrees
  * @param translationSpeed max movement speed
  * @param rotationSpeed max rotation speed
- */
+ */ 
 
 void MotionAlgorithms::simultaneous_mov_executor(double targetX, double targetY, double targetTheta, double translationSpeed, double rotationSpeed){
 	odom Odom; FinalizeAuton data;

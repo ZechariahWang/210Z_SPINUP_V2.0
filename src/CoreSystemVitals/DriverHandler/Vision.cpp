@@ -6,7 +6,7 @@
  * @date 2023-02-13
  * 
  */
-
+ 
 #include "main.h"
 
 // vision control concept. No actual implementation yet

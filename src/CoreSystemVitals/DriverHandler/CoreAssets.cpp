@@ -15,7 +15,7 @@ static bool toggleRedCurve         = false; // toggle red curve
 static bool turningRed             = false;
 static bool forwardRed             = false;
 
- 
+  
 
 /**
  * @brief Set exponential joystick accelerator curve type. Allows for more control of small movements, while maintaining max speed for large movements

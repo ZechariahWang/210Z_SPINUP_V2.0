@@ -19,7 +19,7 @@ u_int16_t globalAuton                     = 1;  // Different auton function depe
 u_int16_t counterForward1                 = 0;  // Forward counter
 u_int16_t counterBackward2                = 0;  // Reverse Counter
 u_int16_t simultaneousInputLimit          = 20; // Limit before simultaneous switch is reverted back
-
+ 
 static bool pressed1                      = true;  // Status of forward switch
 static bool pressed2                      = true;  // Status of backward switch
 static bool currentlyPressed1             = false; // Local switch status

@@ -25,7 +25,7 @@ void a_rightSideDisk(){ // one during wp
 }
 
 void a_leftSideDisk() // one after wp
-{}
+{} 
 
 void shoot_iterator(){
     Angler.set_value(false); 

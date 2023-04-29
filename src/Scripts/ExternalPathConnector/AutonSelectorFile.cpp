@@ -314,7 +314,7 @@ void __right_side_priority_roller__(){
 
     mov.set_t_constants(0.45, 0, 5, 50);
 	mov.set_translation_pid(6, 70);
-}
+} 
 
 void AutonSelectorPrimary(const u_int16_t autonType){
     switch (autonType){
