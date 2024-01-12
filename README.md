@@ -3,12 +3,10 @@
 
 # Team 210Z 2022-2023 Framework
 
-NOTE: The 2022-2023 season has ended. As a result, no more future updates will be provided for this version of the 210Z framework. Thank you to everyone for making this a great season!
-
 Code Framework for 210Z during the 2022-2023 Vex Robotics Competition.
 
 - 6x World Championship Qualifiers
-- 15x Honours Received
+- 15x Awards
 - 2022-2023 Alberta Provincial Champions
 - 2022-2023 Mecha Mayhem Signature Event Champions
 - Peak 6th in Canada, 57th in the world.
